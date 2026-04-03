@@ -1,4 +1,4 @@
-# Falcon
+# Falcon 🦅
 
 Created in Hamburg with ❤️, April 2026
 
