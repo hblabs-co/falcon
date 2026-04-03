@@ -1,0 +1,111 @@
+@startuml falcon-architecture
+!theme plain
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor #555555
+skinparam ArrowThickness 1.5
+skinparam linetype ortho
+skinparam nodesep 100
+skinparam ranksep 400
+
+skinparam component {
+  BackgroundColor #F5F5F5
+  BorderColor #AAAAAA
+}
+
+skinparam database {
+  BackgroundColor #E8F4FB
+  BorderColor #378ADD
+}
+
+skinparam queue {
+  BackgroundColor #FFF3E0
+  BorderColor #BA7517
+}
+
+skinparam node {
+  BackgroundColor #F0FFF4
+  BorderColor #1D9E75
+}
+
+title Falcon — Service Architecture
+
+' ─────────────────────────────
+' External Actors
+' ─────────────────────────────
+actor "Candidate" as candidate
+node "Freelance Platforms\n(freelance.de, gulp.de…)" as platforms
+
+' ─────────────────────────────
+' Services Layer
+' ─────────────────────────────
+package "Services" {
+
+  component "falcon-auth" as auth #EEF2FF
+  component "falcon-cv-ingest" as ingest #E8F4FB
+  component "falcon-scout" as scout #E8FFF4
+  component "falcon-dispatch" as dispatch #FFF8E8
+  component "falcon-match-engine" as matchengine #FFF0F8
+  component "falcon-signal" as signal #FFF0F0
+}
+
+
+' ─────────────────────────────
+' Infrastructure Layer
+' ─────────────────────────────
+package "Infrastructure" {
+
+  database "MongoDB" as mongo
+  database "Qdrant\n(vectors)" as qdrant
+  queue "NATS JetStream" as nats
+  node "MinIO\n(CV storage)" as minio
+  node "Ollama\n(bge-m3, on-premise)" as ollama #FFF9E8
+}
+
+' ─────────────────────────────
+' Flows
+' ─────────────────────────────
+
+' Candidate flow
+candidate --> auth      : register / login
+candidate --> ingest    : upload CV (JWT)
+
+ingest --> minio        : store file
+ingest --> ollama       : embed CV text
+ingest --> qdrant       : store vector
+ingest --> mongo        : save metadata
+ingest --> nats         : cv.indexed
+
+' Platform ingestion
+platforms --> scout     : scrape projects
+scout --> mongo         : save project
+scout --> nats          : project.created / updated
+
+' Matching pipeline
+nats --> dispatch       : project.created / updated
+dispatch --> qdrant     : similarity search
+dispatch --> nats       : match.pending
+
+nats --> matchengine    : match.pending
+matchengine --> mongo   : fetch CV + project
+matchengine --> nats    : match.result
+
+' Notification
+nats --> signal         : match.result
+signal --> candidate    : email / Telegram / push
+
+' ─────────────────────────────
+' Legend
+' ─────────────────────────────
+legend bottom left
+  |= Color |= Type |
+  |<#EEF2FF> Blue | Go microservice |
+  |<#FFF3E0> Orange | Message broker |
+  |<#E8F4FB> Light blue | Database |
+  |<#F0FFF4> Green | Storage / infra |
+  |<#FFF9E8> Yellow | Local AI |
+endlegend
+
+@enduml
