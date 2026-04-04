@@ -2,7 +2,7 @@
 
 Created in Hamburg with ❤️, April 2026
 
-![Architecture](falcon-architecture.png)
+![Architecture](docs/falcon-architecture.png)
 
 ## Microservices
 
@@ -14,7 +14,9 @@ Created in Hamburg with ❤️, April 2026
 
 **falcon-dispatch** — Consumes `project.created` and `project.updated` events from NATS. Performs a fast vector similarity search in Qdrant to find users whose CVs are semantically close to the new project description. For each user above the similarity threshold, publishes a `match.pending` message to the match queue in NATS.
 
-**falcon-match-engine** — Pool of workers that consume `match.pending` messages from NATS. Each worker fetches the full CV text and project description, calls the LLM (Claude Haiku or Gemini Flash) to produce a match score and a human-readable explanation, and publishes a `match.result` event if the score exceeds the configured threshold. Scales horizontally by adding more worker instances.
+**falcon-match-engine** — Consumes `match.pending` messages from NATS. Fetches the full CV text and project description from MongoDB, calls the LLM to produce a detailed match score across six dimensions, and publishes a `match.result` event if the score exceeds the configured threshold.
+
+> ⚠️ **This is the only service that needs horizontal scaling.** Each LLM call takes several seconds. A single project can generate up to N `match.pending` messages (one per candidate). Add replicas of this service to process them in parallel — all pods share the same NATS durable consumer so each message is processed exactly once.
 
 **falcon-signal** — Consumes `match.result` events from NATS and delivers real-time notifications to the matched user via their preferred channel — email, Telegram bot, push notification, or webhook.
 
@@ -30,6 +32,22 @@ Created in Hamburg with ❤️, April 2026
 
 **MinIO** — S3-compatible object storage deployed on-premises. Stores the original CV binary files (Word documents) uploaded by users. Services access files through the standard S3 API, making it straightforward to swap for AWS S3 or GCS in production without code changes.
 
+## LLM strategy and GDPR
+
+Falcon uses two AI models, with different roles and different GDPR implications:
+
+| Model | Used by | Purpose |
+|-------|---------|---------|
+| `bge-m3` | `falcon-cv-ingest`, `falcon-dispatch` | Text → vector embeddings |
+| `qwen2.5:7b` / `mistral-small-latest` | `falcon-match-engine` | CV/project scoring |
+
+CV and project text are **personal data** under GDPR. Two compliant options:
+
+- **Ollama (dev / on-premise)** — both models run locally via Ollama. Zero data egress. Recommended for development and for deployments where data must stay on-premise.
+- **Mistral AI (production)** — French company, EU servers, GDPR-compliant by design. Switch by changing `LLM_URL` + `LLM_MODEL` env vars in `falcon-match-engine`. No code changes needed.
+
+> ⚠️ Do not point `falcon-match-engine` at OpenAI, Anthropic, or any non-EU provider without a DPA review.
+
 ## Running Ollama natively on Apple Silicon
 
 Docker on macOS runs inside a Linux VM with no access to the Metal GPU, forcing
@@ -43,8 +61,9 @@ brew install ollama
 # Start the server (runs on http://localhost:11434)
 ollama serve
 
-# Pull the embedding model
-ollama pull bge-m3
+# Pull both models
+ollama pull bge-m3        # embeddings — used by cv-ingest and dispatch
+ollama pull qwen2.5:7b    # LLM scoring — used by match-engine
 ```
 
 Ollama will start automatically on login after installation. The rest of the
@@ -56,7 +75,7 @@ stack (`docker compose up`) connects to it at `http://host.docker.internal:11434
 
 ## Production Infrastructure (k3s / k8s)
 
-![Infrastructure](k3s-infrastructure.png)
+![Infrastructure](docs/k3s-infrastructure.png)
 
 All Falcon microservices and stateful components (MongoDB, Qdrant, NATS, MinIO)
 run as standard Kubernetes workloads and can be deployed to any k3s or k8s cluster.
@@ -82,7 +101,7 @@ Recommended setup with a Mac Mini (M-series) as a dedicated inference node:
    in the `falcon-cv-ingest` deployment.
 
 This gives full Metal GPU acceleration (<1s per embedding) with zero changes to
-the application code. See `k3s-infrastructure.puml` for the full topology.
+the application code. See `docs/k3s-infrastructure.puml` for the full topology.
 
 ## Local UIs
 

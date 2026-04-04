@@ -3,7 +3,7 @@
 Accepts CV uploads in Word format from anonymous users, extracts text, generates
 vector embeddings via Ollama, and stores everything needed for downstream matching.
 
-![Flow](cv-ingest-flow.png)
+![Flow](../docs/cv-ingest-flow.png)
 
 ## Flow
 

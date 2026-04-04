@@ -4,7 +4,7 @@ Consumes project events from NATS, embeds the project description via Ollama,
 searches Qdrant for matching CVs, and publishes a `match.pending` event for each
 candidate above the similarity threshold.
 
-![Flow](dispatch-flow.png)
+![Flow](../docs/dispatch-flow.png)
 
 ## Flow
 

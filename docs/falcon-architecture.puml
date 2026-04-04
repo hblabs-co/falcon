@@ -47,7 +47,7 @@ package "Services" {
   component "falcon-cv-ingest" as ingest #E8F4FB
   component "falcon-scout" as scout #E8FFF4
   component "falcon-dispatch" as dispatch #FFF8E8
-  component "falcon-match-engine" as matchengine #FFF0F8
+  component "falcon-match-engine\n[scale: N replicas]" as matchengine #FFF0F8
   component "falcon-signal" as signal #FFF0F0
 }
 
@@ -61,7 +61,8 @@ package "Infrastructure" {
   database "Qdrant\n(vectors)" as qdrant
   queue "NATS JetStream" as nats
   node "MinIO\n(CV storage)" as minio
-  node "Ollama\n(bge-m3, on-premise)" as ollama #FFF9E8
+  node "Ollama (on-premise)\nbge-m3 — embeddings\nqwen2.5:7b — LLM scoring" as ollama #FFF9E8
+  node "Mistral AI (production option)\nEU servers — GDPR compliant\nmistral-small-latest" as mistral #FFF0E8
 }
 
 ' ─────────────────────────────
@@ -90,6 +91,8 @@ dispatch --> nats       : match.pending
 
 nats --> matchengine    : match.pending
 matchengine --> mongo   : fetch CV + project
+matchengine --> ollama  : LLM scoring (dev)
+matchengine --> mistral : LLM scoring (prod)
 matchengine --> nats    : match.result
 
 ' Notification

@@ -49,14 +49,23 @@ node "k3s Cluster" #EEF2FF {
 
   node "Mac Mini  |  Apple M-series" #FFE0B2 {
     component "k3s agent" as k3s_agent
-    component "**Ollama** (native process)\nbge-m3  |  Metal GPU\n~1s / embedding" as ollama #FFCC80
+    component "**Ollama** (native process)\nbge-m3 — embeddings  |  ~1s\nqwen2.5:7b — LLM scoring  |  ~5-15s\nMetal GPU" as ollama #FFCC80
     note right of ollama
       Runs natively on macOS.
       No container — direct Metal access.
       Starts on boot via brew services.
+      GDPR: CV and project text never
+      leaves the infrastructure.
     end note
   }
 }
+
+note as gdpr_note #E8F5E9
+  **GDPR — LLM Strategy**
+  Dev / on-premise: Ollama (local, zero data egress)
+  Production option: Mistral AI (French company, EU servers, GDPR-compliant)
+  Switch via LLM_URL + LLM_MODEL env vars — no code changes.
+end note
 
 ' ── User traffic ──────────────────────────────────────────────────────────────
 user      --> ingest   : HTTPS\nPOST /cv/prepare\nPOST /cv/:id/index
@@ -81,6 +90,7 @@ dispatch  --> nats     : publish match.pending
 
 engine    --> nats     : consume match.pending
 engine    --> mongo    : fetch CV + project text
+engine    --> ollama_svc : POST /v1/chat/completions\n(or Mistral API in prod)
 engine    --> nats     : publish match.result
 
 signal    --> nats     : consume match.result
