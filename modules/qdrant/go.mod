@@ -1,4 +1,4 @@
-module hblabs.co/falcon/qdrant
+module hblabs.co/falcon/modules/qdrant
 
 replace hblabs.co/falcon/common => ../../common
 

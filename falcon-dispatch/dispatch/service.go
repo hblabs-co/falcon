@@ -10,8 +10,8 @@ import (
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/embeddings/embeddings"
-	"hblabs.co/falcon/qdrant/qdrant"
+	"hblabs.co/falcon/modules/embeddings"
+	"hblabs.co/falcon/modules/qdrant"
 )
 
 
