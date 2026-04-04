@@ -17,6 +17,20 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/falcon-cv-ingest"
+    },
+    {
+      "name": "Debug Dispatch",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-dispatch"
+    },
+    {
+      "name": "Debug Match Engine",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-match-engine"
     }
   ]
 }
