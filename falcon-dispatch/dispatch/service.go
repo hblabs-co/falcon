@@ -10,6 +10,7 @@ import (
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/embeddings/embeddings"
 	"hblabs.co/falcon/qdrant/qdrant"
 )
 
@@ -22,14 +23,14 @@ const (
 // Service consumes project events, searches for matching CVs in Qdrant,
 // and publishes a match.pending message for each candidate above the threshold.
 type Service struct {
-	embeddings *embeddingsClient
+	embeddings *embeddings.Client
 	qdrant     *qdrant.Client
 	topN       int
 	threshold  float32
 }
 
 func NewService() (*Service, error) {
-	emb, err := newEmbeddingsClient()
+	emb, err := embeddings.NewFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("embeddings client: %w", err)
 	}

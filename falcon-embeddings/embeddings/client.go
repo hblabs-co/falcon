@@ -1,4 +1,4 @@
-package cv
+package embeddings
 
 import (
 	"context"
@@ -10,28 +10,28 @@ import (
 	"hblabs.co/falcon/common/ownhttp"
 )
 
-type embeddingsClient struct {
+// Client calls an OpenAI-compatible embeddings API.
+type Client struct {
 	http  *ownhttp.Client
 	model string
 }
 
-func newEmbeddingsClient() (*embeddingsClient, error) {
+// NewFromEnv creates a Client from environment variables.
+// EMBEDDINGS_URL, EMBEDDINGS_API_KEY, and EMBEDDINGS_MODEL are required.
+func NewFromEnv() (*Client, error) {
 	values, err := helpers.ReadEnvs("EMBEDDINGS_URL", "EMBEDDINGS_API_KEY", "EMBEDDINGS_MODEL")
 	if err != nil {
 		return nil, err
 	}
-
 	url, key, model := values[0], values[1], values[2]
-	c := &embeddingsClient{
+	return &Client{
 		http:  ownhttp.New(url, map[string]string{"Authorization": "Bearer " + key}),
 		model: model,
-	}
-
-	return c, nil
+	}, nil
 }
 
 // Embed returns the embedding vector for the given text.
-func (c *embeddingsClient) Embed(ctx context.Context, text string) ([]float32, error) {
+func (c *Client) Embed(ctx context.Context, text string) ([]float32, error) {
 	start := time.Now()
 
 	var result struct {
@@ -40,13 +40,10 @@ func (c *embeddingsClient) Embed(ctx context.Context, text string) ([]float32, e
 		} `json:"data"`
 	}
 
-	req := ownhttp.Request{
+	if err := c.http.Post(ctx, "", ownhttp.Request{
 		Body:   map[string]string{"input": text, "model": c.model},
 		Result: &result,
-	}
-
-	err := c.http.Post(ctx, "", req)
-	if err != nil {
+	}); err != nil {
 		return nil, fmt.Errorf("embeddings request: %w", err)
 	}
 
@@ -55,6 +52,5 @@ func (c *embeddingsClient) Embed(ctx context.Context, text string) ([]float32, e
 	}
 
 	logrus.WithField("took", time.Since(start).String()).Info("Embed")
-
 	return result.Data[0].Embedding, nil
 }

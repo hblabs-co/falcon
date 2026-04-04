@@ -4,11 +4,14 @@ replace hblabs.co/falcon/common => ../common
 
 replace hblabs.co/falcon/qdrant => ../falcon-qdrant
 
+replace hblabs.co/falcon/embeddings => ../falcon-embeddings
+
 go 1.26.1
 
 require (
 	github.com/sirupsen/logrus v1.9.4
 	hblabs.co/falcon/common v0.0.0-00010101000000-000000000000
+	hblabs.co/falcon/embeddings v0.0.0-00010101000000-000000000000
 	hblabs.co/falcon/qdrant v0.0.0-00010101000000-000000000000
 )
 

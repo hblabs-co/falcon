@@ -16,6 +16,7 @@ import (
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/embeddings/embeddings"
 	"hblabs.co/falcon/qdrant/qdrant"
 )
 
@@ -32,7 +33,7 @@ type PrepareResult struct {
 type Service struct {
 	minio       *minio.Client
 	minioBucket string
-	embeddings  *embeddingsClient
+	embeddings  *embeddings.Client
 	qdrant      *qdrant.Client
 }
 
@@ -69,7 +70,7 @@ func NewService() (*Service, error) {
 		logrus.Infof("minio: created bucket %q", bucket)
 	}
 
-	emb, err := newEmbeddingsClient()
+	emb, err := embeddings.NewFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("embeddings client: %w", err)
 	}
