@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // ReadEnv returns the value of the environment variable key with whitespace trimmed.
@@ -44,4 +47,27 @@ func ReadEnvOptional(key string, defaultVal string) string {
 		return defaultVal
 	}
 	return val
+}
+
+func ParseInt(key string, def int) int {
+	v := ReadEnvOptional(key, "")
+	if v == "" {
+		return def
+	}
+	var n int
+	if _, err := fmt.Sscanf(v, "%d", &n); err != nil || n <= 0 {
+		logrus.Printf("invalid %s %q, using %d default", key, v, def)
+		return def
+	}
+	return n
+}
+
+func ParseDuration(key, def string) time.Duration {
+	v := ReadEnvOptional(key, def)
+	d, err := time.ParseDuration(v)
+	if err != nil {
+		logrus.Printf("invalid %s %q, using %s default", key, v, def)
+		d, _ = time.ParseDuration(def)
+	}
+	return d
 }
