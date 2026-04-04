@@ -1,6 +1,6 @@
 module hblabs.co/falcon/qdrant
 
-replace hblabs.co/falcon/common => ../common
+replace hblabs.co/falcon/common => ../../common
 
 go 1.26.1
 

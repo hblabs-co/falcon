@@ -2,9 +2,9 @@ module hblabs.co/falcon/cv-ingest
 
 replace hblabs.co/falcon/common => ../common
 
-replace hblabs.co/falcon/qdrant => ../falcon-qdrant
+replace hblabs.co/falcon/qdrant => ../modules/qdrant
 
-replace hblabs.co/falcon/embeddings => ../falcon-embeddings
+replace hblabs.co/falcon/embeddings => ../modules/embeddings
 
 go 1.26.1
 
