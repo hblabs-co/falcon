@@ -24,6 +24,8 @@ Scoring rules you must follow:
 - negative_points must be honest. If there are gaps, list them. An empty array means there are zero concerns — use it sparingly.
 - communication_clarity reflects only writing quality and structure, not technical strength. A score of 10 means flawless professional writing — rare.
 
+All text fields in the JSON response (positive_points, negative_points, improvement_tips, matched_skills, missing_skills) must be written in German.
+
 Always respond with valid JSON only. No markdown, no explanation outside the JSON.`
 
 const userPromptTemplate = `Evaluate the following CV against the project description. Be strict and calibrated.
