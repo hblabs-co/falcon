@@ -5,11 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Project Service",
+      "name": "Debug Scout",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/falcon-scout"
+    },
+    {
+      "name": "Debug CV Ingest",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-cv-ingest"
     }
   ]
 }

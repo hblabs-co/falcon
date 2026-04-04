@@ -63,9 +63,19 @@ func InitStorage(ctx context.Context) error {
 	return initErr
 }
 
+func (s *Storage) GetById(ctx context.Context, collection string, id string, result any) error {
+	filter := bson.M{"id": id}
+	return s.Get(ctx, collection, filter, result)
+}
+
 // Get finds a single document matching filter and decodes it into result.
 func (s *Storage) Get(ctx context.Context, collection string, filter bson.M, result any) error {
 	return s.db.Collection(collection).FindOne(ctx, filter).Decode(result)
+}
+
+func (s *Storage) SetById(ctx context.Context, collection string, id string, doc any) error {
+	filter := bson.M{"id": id}
+	return s.Set(ctx, collection, filter, doc)
 }
 
 // Set partially updates a document ($set): only the provided fields are written,

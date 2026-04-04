@@ -5,8 +5,19 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/helpers"
 )
+
+// MustEnv returns the value of the required environment variable key.
+// Calls logrus.Fatalf and exits if the variable is unset or empty.
+func MustEnv(key string) string {
+	v, err := helpers.ReadEnv(key)
+	if err != nil {
+		logrus.Fatalf("%v", err)
+	}
+	return v
+}
 
 func LoadEnvs() {
 	err := godotenv.Load()

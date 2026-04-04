@@ -1,0 +1,96 @@
+@startuml cv-ingest-flow
+title CV Ingest — Upload & Indexing Flow
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequenceGroupBorderThickness 1
+skinparam noteBorderColor #888
+skinparam noteBackgroundColor #FFFDE7
+skinparam sequenceLifeLineBorderColor #555
+
+actor       "Candidate"           as client
+participant "falcon-cv-ingest"    as ingest  #D0E8FF
+participant "MongoDB"             as mongo   #E8F5E9
+participant "MinIO"               as minio   #FFF3E0
+participant "Embeddings API"      as embed   #F3E5F5
+participant "Qdrant"              as qdrant  #E8EAF6
+participant "NATS JetStream"      as nats    #FCE4EC
+
+== 1 · Prepare Upload ==
+
+client  -> ingest   : POST /cv/prepare\n{ candidate_id, filename }
+note right of ingest
+  Requires Authorization: Bearer <jwt>
+end note
+
+ingest  -> mongo    : insert PersistedCV\n{ status: pending_upload }
+mongo  --> ingest   : ok
+
+ingest  -> minio    : PresignedPutObject(bucket, key, 15 min)
+minio  --> ingest   : presigned PUT URL
+
+ingest --> client   : 201 { cv_id, upload_url, expires_at }
+
+== 2 · Direct Upload to MinIO (client → MinIO, bypassing ingest) ==
+
+client  -> minio    : PUT <upload_url>\nbody: <cv.docx bytes>
+note right of minio
+  Client uploads directly.
+  falcon-cv-ingest never touches
+  the raw bytes in this step.
+end note
+minio  --> client   : 200 OK
+
+== 3 · Trigger Indexing ==
+
+client  -> ingest   : POST /cv/:id/index
+ingest  -> mongo    : get PersistedCV by id
+mongo  --> ingest   : PersistedCV{ status: pending_upload | uploaded }
+ingest  -> mongo    : update status → indexing
+ingest --> client   : 202 Accepted { status: "indexing" }
+
+note over ingest
+  Processing continues async
+  in a background goroutine.
+end note
+
+== 4 · Indexing Pipeline (async) ==
+
+group Extract
+  ingest  -> minio    : GetObject(bucket, key)
+  minio  --> ingest   : io.Reader (docx bytes)
+  ingest  -> ingest   : extractText()\nunzip word/document.xml\nstrip XML tags
+end group
+
+group Embed
+  ingest  -> embed    : POST /v1/embeddings\n{ input: text, model: text-embedding-3-small }
+  embed  --> ingest   : []float32 (1536 dims)
+end group
+
+group Index
+  ingest  -> qdrant   : PUT /collections/cvs/points\n{ id, vector, payload }
+  qdrant --> ingest   : ok
+end group
+
+group Persist & Notify
+  ingest  -> mongo    : update status → indexed\nqdrant_id, updated_at
+  ingest  -> nats     : publish "cv.indexed"\n{ cv_id, candidate_id, qdrant_id }
+end group
+
+== 5 · Downstream (falcon-dispatch) ==
+
+nats    -> "falcon-dispatch" : consume "cv.indexed"
+note right
+  Dispatch now knows a new CV
+  vector is available in Qdrant
+  for future project matching.
+end note
+
+== Error Path ==
+
+note over ingest
+  Any step can fail.
+  On failure: status → failed, error saved in MongoDB.
+  Client can retry POST /cv/:id/index at any time.
+end note
+
+@enduml
