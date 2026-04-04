@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
@@ -53,7 +54,7 @@ func (s *Service) Run() error {
 	ctx := system.Ctx()
 
 	for _, subject := range []string{constants.SubjectProjectCreated, constants.SubjectProjectUpdated} {
-		consumer := "dispatch-" + subject
+		consumer := "dispatch-" + strings.ReplaceAll(subject, ".", "-")
 		if err := system.Subscribe(ctx, constants.StreamProjects, consumer, subject, s.handleProjectEvent); err != nil {
 			return fmt.Errorf("subscribe %s: %w", subject, err)
 		}

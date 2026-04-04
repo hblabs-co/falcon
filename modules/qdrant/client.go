@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"hblabs.co/falcon/common/helpers"
+	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/ownhttp"
 )
 
@@ -22,6 +23,18 @@ type SearchResult struct {
 	ID      string            `json:"id"`
 	Score   float32           `json:"score"`
 	Payload map[string]string `json:"payload"`
+}
+
+// GetEvent builds a MatchPending event for the given project context.
+func (r SearchResult) GetEvent(projectID, platform string) models.MatchPendingEvent {
+	return models.MatchPendingEvent{
+		CVID:       r.Payload["cv_id"],
+		QdrantID:   r.ID,
+		UserID:     r.Payload["user_id"],
+		ProjectID:  projectID,
+		Platform:   platform,
+		Similarity: r.Score,
+	}
 }
 
 // NewFromEnv creates a Client from environment variables.

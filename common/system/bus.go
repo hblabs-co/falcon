@@ -73,6 +73,7 @@ func Subscribe(ctx context.Context, stream, consumer, subject string, handler fu
 		FilterSubject: subject,
 		AckPolicy:     jetstream.AckExplicitPolicy,
 		DeliverPolicy: jetstream.DeliverNewPolicy,
+		AckWait: 10 * time.Minute,
 	})
 	if err != nil {
 		return fmt.Errorf("create consumer %s: %w", consumer, err)

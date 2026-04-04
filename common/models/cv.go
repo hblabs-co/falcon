@@ -20,9 +20,10 @@ type PersistedCV struct {
 	Filename    string    `json:"filename"     bson:"filename"`
 	MinioBucket string    `json:"minio_bucket" bson:"minio_bucket"`
 	MinioKey    string    `json:"minio_key"    bson:"minio_key"`
-	Status      CVStatus  `json:"status"       bson:"status"`
-	ErrorMsg    string    `json:"error,omitempty" bson:"error,omitempty"`
-	QdrantID    string    `json:"qdrant_id,omitempty" bson:"qdrant_id,omitempty"`
+	Status        CVStatus  `json:"status"                  bson:"status"`
+	ErrorMsg      string    `json:"error,omitempty"         bson:"error,omitempty"`
+	QdrantID      string    `json:"qdrant_id,omitempty"     bson:"qdrant_id,omitempty"`
+	ExtractedText string    `json:"extracted_text,omitempty" bson:"extracted_text,omitempty"`
 	CreatedAt   time.Time `json:"created_at"   bson:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"   bson:"updated_at"`
 }

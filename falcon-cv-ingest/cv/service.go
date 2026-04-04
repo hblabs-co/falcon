@@ -147,7 +147,14 @@ func (s *Service) Index(cvID, email string) error {
 	}
 
 	cv.UserID = userID
-	s.setStatus(ctx, cvID, models.CVStatusIndexing, "")
+	if err := system.GetStorage().SetById(ctx, constants.MongoCVsCollection, cvID, bson.M{
+		"user_id":    userID,
+		"status":     models.CVStatusIndexing,
+		"error":      "",
+		"updated_at": time.Now(),
+	}); err != nil {
+		return fmt.Errorf("save user_id: %w", err)
+	}
 
 	go s.process(cv)
 	return nil
@@ -232,12 +239,14 @@ func (s *Service) process(cv models.PersistedCV) {
 
 	// 5. Update MongoDB.
 	now := time.Now()
-	if err := system.GetStorage().Set(ctx, constants.MongoCVsCollection, bson.M{"id": cv.ID}, bson.M{
-		"status":     models.CVStatusIndexed,
-		"qdrant_id":  qdrantID,
-		"error":      "",
-		"updated_at": now,
-	}); err != nil {
+	doc := bson.M{
+		"status":         models.CVStatusIndexed,
+		"qdrant_id":      qdrantID,
+		"extracted_text": text,
+		"error":          "",
+		"updated_at":     now,
+	}
+	if err := system.GetStorage().SetById(ctx, constants.MongoCVsCollection, cv.ID, doc); err != nil {
 		log.Errorf("update cv status to indexed: %v", err)
 	}
 
