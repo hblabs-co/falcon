@@ -96,14 +96,7 @@ func (s *Service) handleProjectEvent(data []byte) error {
 	log.Infof("qdrant returned %d candidates above threshold %.2f", len(results), s.threshold)
 
 	for _, r := range results {
-		msg := models.MatchPending{
-			CVID:       r.Payload["cv_id"],
-			QdrantID:   r.ID,
-			UserID:     r.Payload["user_id"],
-			ProjectID:  event.ProjectID,
-			Platform:   event.Platform,
-			Similarity: r.Score,
-		}
+		msg := r.GetEvent(event.ProjectID, event.Platform)
 		if err := system.Publish(ctx, constants.SubjectMatchPending, msg); err != nil {
 			log.Errorf("publish match.pending for user %s: %v", msg.UserID, err)
 		}

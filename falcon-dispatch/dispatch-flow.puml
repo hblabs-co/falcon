@@ -1,0 +1,30 @@
+@startuml dispatch-flow
+skinparam participantPadding 20
+skinparam sequenceArrowThickness 1.5
+skinparam roundcorner 8
+
+participant "falcon-scout\nor external" as Scout
+participant "NATS JetStream\nSTREAM: PROJECTS" as NATS
+participant "falcon-dispatch" as Dispatch
+participant "MongoDB" as Mongo
+participant "Ollama\n(bge-m3)" as Ollama
+participant "Qdrant" as Qdrant
+participant "NATS JetStream\nSTREAM: MATCHES" as Matches
+
+Scout -> NATS : project.created\nor project.updated
+NATS -> Dispatch : deliver message
+
+Dispatch -> Mongo : fetch PersistedProject by ID
+Mongo --> Dispatch : title + description
+
+Dispatch -> Ollama : embed(title + description)
+Ollama --> Dispatch : vector[1024]
+
+Dispatch -> Qdrant : search(vector, topN=20, threshold=0.75)
+Qdrant --> Dispatch : []SearchResult{cv_id, user_id, score}
+
+loop for each result above threshold
+  Dispatch -> Matches : publish match.pending\n{ cv_id, user_id, project_id, similarity }
+end
+
+@enduml
