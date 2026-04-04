@@ -2,6 +2,8 @@ module hblabs.co/falcon/cv-ingest
 
 replace hblabs.co/falcon/common => ../common
 
+replace hblabs.co/falcon/qdrant => ../falcon-qdrant
+
 go 1.26.1
 
 require (
@@ -13,6 +15,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	go.mongodb.org/mongo-driver/v2 v2.5.0
 	hblabs.co/falcon/common v0.0.0-00010101000000-000000000000
+	hblabs.co/falcon/qdrant v0.0.0-00010101000000-000000000000
 )
 
 require (

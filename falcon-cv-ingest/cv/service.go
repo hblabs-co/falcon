@@ -16,6 +16,7 @@ import (
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/qdrant/qdrant"
 )
 
 const presignedURLExpiry = 15 * time.Minute
@@ -32,7 +33,7 @@ type Service struct {
 	minio       *minio.Client
 	minioBucket string
 	embeddings  *embeddingsClient
-	qdrant      *qdrantClient
+	qdrant      *qdrant.Client
 }
 
 // NewService initialises all clients and ensures the MinIO bucket and Qdrant
@@ -73,7 +74,7 @@ func NewService() (*Service, error) {
 		return nil, fmt.Errorf("embeddings client: %w", err)
 	}
 
-	qdr, err := newQdrantClient()
+	qdr, err := qdrant.NewFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("qdrant client: %w", err)
 	}
