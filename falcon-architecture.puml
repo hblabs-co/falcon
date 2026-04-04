@@ -35,7 +35,7 @@ title Falcon — Service Architecture
 ' ─────────────────────────────
 ' External Actors
 ' ─────────────────────────────
-actor "Candidate" as candidate
+actor "User" as user
 node "Freelance Platforms\n(freelance.de, gulp.de…)" as platforms
 
 ' ─────────────────────────────
@@ -68,9 +68,9 @@ package "Infrastructure" {
 ' Flows
 ' ─────────────────────────────
 
-' Candidate flow
-candidate --> auth      : register / login
-candidate --> ingest    : upload CV (JWT)
+' User flow
+user --> auth      : register / login
+user --> ingest    : upload CV (JWT)
 
 ingest --> minio        : store file
 ingest --> ollama       : embed CV text
@@ -94,7 +94,7 @@ matchengine --> nats    : match.result
 
 ' Notification
 nats --> signal         : match.result
-signal --> candidate    : email / Telegram / push
+signal --> user    : email / Telegram / push
 
 ' ─────────────────────────────
 ' Legend

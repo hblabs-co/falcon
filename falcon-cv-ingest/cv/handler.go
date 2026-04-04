@@ -29,20 +29,19 @@ func Health(c *gin.Context) {
 
 // handlePrepare godoc
 // POST /cv/prepare
-// Body: { "candidate_id": "...", "filename": "cv.docx" }
+// Body: { "filename": "cv.docx" }
 // Returns: { "cv_id", "upload_url", "expires_at" }
 func handlePrepare(svc *Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body struct {
-			CandidateID string `json:"candidate_id" binding:"required"`
-			Filename    string `json:"filename"     binding:"required"`
+			Filename string `json:"filename" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		result, err := svc.Prepare(c.Request.Context(), body.CandidateID, body.Filename)
+		result, err := svc.Prepare(c.Request.Context(), body.Filename)
 		if err != nil {
 			logrus.Errorf("prepare: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not prepare upload"})
@@ -55,12 +54,21 @@ func handlePrepare(svc *Service) gin.HandlerFunc {
 
 // handleIndex godoc
 // POST /cv/:id/index
+// Body: { "email": "john@doe.com" }
 // Triggers async processing of an uploaded CV.
 func handleIndex(svc *Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cvID := c.Param("id")
 
-		if err := svc.Index(cvID); err != nil {
+		var body struct {
+			Email string `json:"email" binding:"required,email"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if err := svc.Index(cvID, body.Email); err != nil {
 			logrus.Errorf("index %s: %v", cvID, err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

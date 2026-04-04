@@ -3,7 +3,9 @@ package cv
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/ownhttp"
 )
@@ -30,6 +32,8 @@ func newEmbeddingsClient() (*embeddingsClient, error) {
 
 // Embed returns the embedding vector for the given text.
 func (c *embeddingsClient) Embed(ctx context.Context, text string) ([]float32, error) {
+	start := time.Now()
+
 	var result struct {
 		Data []struct {
 			Embedding []float32 `json:"embedding"`
@@ -49,6 +53,8 @@ func (c *embeddingsClient) Embed(ctx context.Context, text string) ([]float32, e
 	if len(result.Data) == 0 {
 		return nil, fmt.Errorf("embeddings API returned empty data")
 	}
+
+	logrus.WithField("took", time.Since(start).String()).Info("Embed")
 
 	return result.Data[0].Embedding, nil
 }

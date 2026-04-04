@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -92,7 +93,8 @@ func NewService() (*Service, error) {
 
 // Prepare creates a pending CV record in MongoDB and returns a presigned
 // MinIO PUT URL that the client uses to upload the file directly.
-func (s *Service) Prepare(ctx context.Context, candidateID, filename string) (*PrepareResult, error) {
+// No user identity is required at this stage.
+func (s *Service) Prepare(ctx context.Context, filename string) (*PrepareResult, error) {
 	id := gonanoid.Must()
 	key := fmt.Sprintf("cvs/%s/%s", id, filename)
 	expiresAt := time.Now().Add(presignedURLExpiry)
@@ -104,7 +106,6 @@ func (s *Service) Prepare(ctx context.Context, candidateID, filename string) (*P
 
 	cv := &models.PersistedCV{
 		ID:          id,
-		CandidateID: candidateID,
 		Filename:    filename,
 		MinioBucket: s.minioBucket,
 		MinioKey:    key,
@@ -116,32 +117,60 @@ func (s *Service) Prepare(ctx context.Context, candidateID, filename string) (*P
 		return nil, fmt.Errorf("save cv record: %w", err)
 	}
 
-	res := &PrepareResult{
+	return &PrepareResult{
 		CVID:      id,
 		UploadURL: uploadURL.String(),
 		ExpiresAt: expiresAt,
-	}
-
-	return res, nil
+	}, nil
 }
 
 // Index triggers async processing of a CV that has already been uploaded to MinIO.
-// It returns immediately with the CV ID; the caller polls or waits for the cv.indexed event.
-func (s *Service) Index(cvID string) error {
+// email is used to upsert a User record and obtain the user_id that is carried
+// through the entire pipeline.
+// It returns immediately; the caller polls or waits for the cv.indexed event.
+func (s *Service) Index(cvID, email string) error {
 	ctx := context.Background()
 
 	var cv models.PersistedCV
-	if err := system.GetStorage().Get(ctx, constants.MongoCVsCollection, bson.M{"id": cvID}, &cv); err != nil {
+	if err := system.GetStorage().GetById(ctx, constants.MongoCVsCollection, cvID, &cv); err != nil {
 		return fmt.Errorf("cv not found: %w", err)
 	}
 	if cv.Status == models.CVStatusIndexed || cv.Status == models.CVStatusIndexing {
 		return fmt.Errorf("cv already %s", cv.Status)
 	}
 
+	userID, err := s.upsertUser(ctx, email)
+	if err != nil {
+		return fmt.Errorf("upsert user: %w", err)
+	}
+
+	cv.UserID = userID
 	s.setStatus(ctx, cvID, models.CVStatusIndexing, "")
 
 	go s.process(cv)
 	return nil
+}
+
+// upsertUser returns the existing user ID for email, or creates a new User and
+// returns its ID.
+func (s *Service) upsertUser(ctx context.Context, email string) (string, error) {
+	var user models.User
+	err := system.GetStorage().Get(ctx, constants.MongoUsersCollection, bson.M{"email": email}, &user)
+	if err == nil {
+		return user.ID, nil
+	}
+
+	now := time.Now()
+	user = models.User{
+		ID:        gonanoid.Must(),
+		Email:     email,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+	if err := system.GetStorage().SetById(ctx, constants.MongoUsersCollection, user.ID, &user); err != nil {
+		return "", fmt.Errorf("create user: %w", err)
+	}
+	return user.ID, nil
 }
 
 // process runs the full pipeline: download → extract → embed → qdrant → event.
@@ -190,8 +219,10 @@ func (s *Service) process(cv models.PersistedCV) {
 	log.Infof("embedding generated (%d dims)", len(vector))
 
 	// 4. Upsert into Qdrant.
-	payload := map[string]string{"candidate_id": cv.CandidateID, "filename": cv.Filename}
-	err = s.qdrant.Upsert(ctx, cv.ID, vector, payload)
+	// Qdrant point IDs must be a UUID or uint64 — use a dedicated UUID, not the nanoid CV ID.
+	qdrantID := uuid.New().String()
+	payload := map[string]string{"user_id": cv.UserID, "filename": cv.Filename}
+	err = s.qdrant.Upsert(ctx, qdrantID, vector, payload)
 	if err != nil {
 		fail("qdrant upsert", err)
 		return
@@ -201,7 +232,7 @@ func (s *Service) process(cv models.PersistedCV) {
 	now := time.Now()
 	if err := system.GetStorage().Set(ctx, constants.MongoCVsCollection, bson.M{"id": cv.ID}, bson.M{
 		"status":     models.CVStatusIndexed,
-		"qdrant_id":  cv.ID,
+		"qdrant_id":  qdrantID,
 		"error":      "",
 		"updated_at": now,
 	}); err != nil {
@@ -210,9 +241,9 @@ func (s *Service) process(cv models.PersistedCV) {
 
 	// 6. Publish cv.indexed event.
 	event := models.CVIndexedEvent{
-		CVID:        cv.ID,
-		CandidateID: cv.CandidateID,
-		QdrantID:    cv.ID,
+		CVID:     cv.ID,
+		UserID:   cv.UserID,
+		QdrantID: qdrantID,
 	}
 	if err := system.Publish(ctx, constants.SubjectCVIndexed, event); err != nil {
 		log.Errorf("publish cv.indexed: %v", err)

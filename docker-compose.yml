@@ -37,19 +37,28 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
 
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"  # OpenAI-compatible API
-    volumes:
-      - ollama_data:/root/.ollama
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        ollama serve &
-        until ollama list > /dev/null 2>&1; do sleep 1; done
-        ollama pull bge-m3
-        wait
+  # ---------------------------------------------------------------------------
+  # Ollama is intentionally NOT run in Docker on Apple Silicon (M-series).
+  # Docker on macOS runs inside a Linux VM and has no access to the Metal GPU,
+  # forcing CPU-only inference (~23s per embedding with bge-m3).
+  # Running Ollama natively gives Metal GPU acceleration (<1s per embedding).
+  #
+  # To use the Docker version instead (e.g. on Linux with NVIDIA GPU):
+  #
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   entrypoint: ["/bin/sh", "-c"]
+  #   command:
+  #     - |
+  #       ollama serve &
+  #       until ollama list > /dev/null 2>&1; do sleep 1; done
+  #       ollama pull bge-m3
+  #       wait
+  # ---------------------------------------------------------------------------
 
 volumes:
   mongo_data:

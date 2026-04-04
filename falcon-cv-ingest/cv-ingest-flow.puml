@@ -7,7 +7,7 @@ skinparam noteBorderColor #888
 skinparam noteBackgroundColor #FFFDE7
 skinparam sequenceLifeLineBorderColor #555
 
-actor       "Candidate"           as client
+actor       "User"           as client
 participant "falcon-cv-ingest"    as ingest  #D0E8FF
 participant "MongoDB"             as mongo   #E8F5E9
 participant "MinIO"               as minio   #FFF3E0
@@ -17,9 +17,10 @@ participant "NATS JetStream"      as nats    #FCE4EC
 
 == 1 · Prepare Upload ==
 
-client  -> ingest   : POST /cv/prepare\n{ candidate_id, filename }
+client  -> ingest   : POST /cv/prepare\n{ filename }
 note right of ingest
-  Requires Authorization: Bearer <jwt>
+  No auth required.
+  User identity not yet known.
 end note
 
 ingest  -> mongo    : insert PersistedCV\n{ status: pending_upload }
@@ -42,7 +43,11 @@ minio  --> client   : 200 OK
 
 == 3 · Trigger Indexing ==
 
-client  -> ingest   : POST /cv/:id/index
+client  -> ingest   : POST /cv/:id/index\n{ email }
+note right of ingest
+  User provides email here.
+  email is stored as user_id.
+end note
 ingest  -> mongo    : get PersistedCV by id
 mongo  --> ingest   : PersistedCV{ status: pending_upload | uploaded }
 ingest  -> mongo    : update status → indexing
@@ -62,7 +67,7 @@ group Extract
 end group
 
 group Embed
-  ingest  -> embed    : POST /v1/embeddings\n{ input: text, model: text-embedding-3-small }
+  ingest  -> embed    : POST /v1/embeddings\n{ input: text, model: bge-m3 }
   embed  --> ingest   : []float32 (1536 dims)
 end group
 
@@ -73,7 +78,7 @@ end group
 
 group Persist & Notify
   ingest  -> mongo    : update status → indexed\nqdrant_id, updated_at
-  ingest  -> nats     : publish "cv.indexed"\n{ cv_id, candidate_id, qdrant_id }
+  ingest  -> nats     : publish "cv.indexed"\n{ cv_id, user_id, qdrant_id }
 end group
 
 == 5 · Downstream (falcon-dispatch) ==

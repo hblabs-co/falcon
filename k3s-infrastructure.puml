@@ -1,0 +1,94 @@
+@startuml k3s-infrastructure
+title Falcon — k3s Infrastructure (Apple Silicon)
+
+skinparam linetype ortho
+skinparam defaultFontSize 12
+skinparam nodeBackgroundColor #F8F9FA
+skinparam nodeBorderColor #888
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #AAAAAA
+skinparam databaseBackgroundColor #E8F5E9
+skinparam databaseBorderColor #66BB6A
+skinparam arrowColor #555555
+skinparam arrowThickness 1.2
+skinparam nodesep 100
+skinparam ranksep 250
+
+actor "Freelancer\n(browser)" as user
+
+cloud "Internet" as internet {
+  component "freelance.de\ngulp.de / malt.de" as portals #FFF3E0
+}
+
+node "k3s Cluster" #EEF2FF {
+
+  node "Control Plane" #D0E8FF {
+    component "k3s server\n(API + scheduler)" as k3s_server
+  }
+
+  node "Worker Node(s)" #D0F0FF {
+
+    package "Falcon Services" #E8EAF6 {
+      component "falcon-auth"         as auth
+      component "falcon-cv-ingest"    as ingest
+      component "falcon-scout"        as scout
+      component "falcon-dispatch"     as dispatch
+      component "falcon-match-engine" as engine
+      component "falcon-signal"       as signal
+    }
+
+    package "Data Layer" #E8F5E9 {
+      database  "MongoDB\n(StatefulSet)"        as mongo
+      database  "Qdrant\n(StatefulSet)"         as qdrant
+      database  "MinIO\n(StatefulSet)"          as minio
+      component "NATS JetStream\n(StatefulSet)" as nats
+    }
+
+    component "ollama\n(K8s Service → ExternalName)\nDNS: ollama.default.svc.cluster.local" as ollama_svc #FFF9C4
+  }
+
+  node "Mac Mini  |  Apple M-series" #FFE0B2 {
+    component "k3s agent" as k3s_agent
+    component "**Ollama** (native process)\nbge-m3  |  Metal GPU\n~1s / embedding" as ollama #FFCC80
+    note right of ollama
+      Runs natively on macOS.
+      No container — direct Metal access.
+      Starts on boot via brew services.
+    end note
+  }
+}
+
+' ── User traffic ──────────────────────────────────────────────────────────────
+user      --> ingest   : HTTPS\nPOST /cv/prepare\nPOST /cv/:id/index
+user      --> auth     : HTTPS\nPOST /auth/login
+
+' ── Scraping ──────────────────────────────────────────────────────────────────
+scout     --> portals  : HTTP scrape
+
+' ── Service → Data ────────────────────────────────────────────────────────────
+ingest    --> mongo    : store CV metadata
+ingest    --> minio    : presigned PUT / GET
+ingest    --> ollama_svc : POST /v1/embeddings
+ingest    --> qdrant   : upsert vector
+ingest    --> nats     : publish cv.indexed
+
+scout     --> mongo    : store project
+scout     --> nats     : publish project.created/updated
+
+dispatch  --> nats     : consume project.created/updated
+dispatch  --> qdrant   : vector similarity search
+dispatch  --> nats     : publish match.pending
+
+engine    --> nats     : consume match.pending
+engine    --> mongo    : fetch CV + project text
+engine    --> nats     : publish match.result
+
+signal    --> nats     : consume match.result
+signal    --> user     : email / Telegram / webhook
+
+auth      --> mongo    : users collection
+
+' ── Ollama Service → Mac Mini ─────────────────────────────────────────────────
+ollama_svc --> ollama  : HTTP :11434\n(ExternalName → Mac Mini IP)
+
+@enduml
