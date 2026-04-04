@@ -1,0 +1,2 @@
+curl --location 'https://www.freelance.de/api/ui/users/access-token' \
+--header 'Cookie: freelance=freelance_here; freelance_user=user_here; sso=sso_here'

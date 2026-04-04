@@ -1,0 +1,33 @@
+curl --location 'https://www.freelance.de/api/ui/projects/search' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer jwt_token_here' \
+--header 'Cookie: freelance=freelance_here; freelance_user=user_here; sso=sso_here' \
+--data '{
+    "keywords": [],
+    "projectsFilter": {
+        "remotePreference": [],
+        "city": [],
+        "county": [],
+        "country": [],
+        "projectStart": [],
+        "projectDuration": [],
+        "lastUpdate": [],
+        "includeExclude": [],
+        "typeOfContract": [],
+        "suggestedTerms": [],
+        "profession": [],
+        "lastChangedFilter": {
+            "filterSectionId": null,
+            "filterItemId": null
+        }
+    },
+    "pagination": {
+        "currentPage": 1,
+        "pageSize": "100",
+        "sortBy": "default",
+        "asc": false
+    },
+    "category": "",
+    "locale": "de-DE",
+    "searchAgentId": null
+}'
