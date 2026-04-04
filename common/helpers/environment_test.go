@@ -111,6 +111,35 @@ func TestReadEnvs(t *testing.T) {
 	}
 }
 
+func TestParseFloat32(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		def   float32
+		want  float32
+	}{
+		{"valid value", "0.85", 0.5, 0.85},
+		{"integer value", "1", 0.5, 1.0},
+		{"zero value", "0", 0.5, 0.0},
+		{"unset uses default", "", 0.75, 0.75},
+		{"only whitespace uses default", "   ", 0.75, 0.75},
+		{"invalid string uses default", "abc", 0.75, 0.75},
+		{"negative value", "-0.5", 0.0, -0.5},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.value != "" {
+				t.Setenv("TEST_FLOAT", tc.value)
+			}
+			got := ParseFloat32("TEST_FLOAT", tc.def)
+			if got != tc.want {
+				t.Errorf("ParseFloat32(%q, %v) = %v, want %v", tc.value, tc.def, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestReadEnvOptional(t *testing.T) {
 	tests := []struct {
 		name       string

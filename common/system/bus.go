@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -61,6 +62,47 @@ func InitBus(streams []jetstream.StreamConfig) {
 		bus = js
 		logrus.Infof("NATS JetStream connected — %d streams ready", len(streams))
 	})
+}
+
+// Subscribe creates a durable JetStream consumer and dispatches messages to
+// handler in a background goroutine. handler receives the raw JSON bytes;
+// returning an error nacks the message so it will be redelivered.
+func Subscribe(ctx context.Context, stream, consumer, subject string, handler func([]byte) error) error {
+	cons, err := GetBus().CreateOrUpdateConsumer(ctx, stream, jetstream.ConsumerConfig{
+		Name:          consumer,
+		FilterSubject: subject,
+		AckPolicy:     jetstream.AckExplicitPolicy,
+		DeliverPolicy: jetstream.DeliverNewPolicy,
+	})
+	if err != nil {
+		return fmt.Errorf("create consumer %s: %w", consumer, err)
+	}
+
+	msgs, err := cons.Messages()
+	if err != nil {
+		return fmt.Errorf("consumer %s messages: %w", consumer, err)
+	}
+
+	go func() {
+		for {
+			msg, err := msgs.Next()
+			if err != nil {
+				if ctx.Err() != nil {
+					return
+				}
+				logrus.Errorf("consumer %s: next: %v", consumer, err)
+				continue
+			}
+			if err := handler(msg.Data()); err != nil {
+				logrus.Errorf("consumer %s: handler: %v", consumer, err)
+				_ = msg.Nak()
+			} else {
+				_ = msg.Ack()
+			}
+		}
+	}()
+
+	return nil
 }
 
 // NewBusConfig builds a single-stream JetStream config.

@@ -62,6 +62,19 @@ func ParseInt(key string, def int) int {
 	return n
 }
 
+func ParseFloat32(key string, def float32) float32 {
+	v := ReadEnvOptional(key, "")
+	if v == "" {
+		return def
+	}
+	var f float64
+	if _, err := fmt.Sscanf(v, "%f", &f); err != nil {
+		logrus.Printf("invalid %s %q, using %v default", key, v, def)
+		return def
+	}
+	return float32(f)
+}
+
 func ParseDuration(key, def string) time.Duration {
 	v := ReadEnvOptional(key, def)
 	d, err := time.ParseDuration(v)
