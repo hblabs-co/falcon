@@ -222,7 +222,7 @@ func (s *Service) process(cv models.PersistedCV) {
 	// 4. Upsert into Qdrant.
 	// Qdrant point IDs must be a UUID or uint64 — use a dedicated UUID, not the nanoid CV ID.
 	qdrantID := uuid.New().String()
-	payload := map[string]string{"user_id": cv.UserID, "filename": cv.Filename}
+	payload := map[string]string{"cv_id": cv.ID, "user_id": cv.UserID, "filename": cv.Filename}
 	err = s.qdrant.Upsert(ctx, qdrantID, vector, payload)
 	if err != nil {
 		fail("qdrant upsert", err)
