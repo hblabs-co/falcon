@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
+	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 )
@@ -87,9 +88,7 @@ func processManyCandidates(ctx context.Context, candidates []*ProjectCandidate) 
 	}
 
 	total := len(toFetch)
-	for i, j := 0, total-1; i < j; i, j = i+1, j-1 {
-		toFetch[i], toFetch[j] = toFetch[j], toFetch[i]
-	}
+	helpers.Reverse(&toFetch)
 	for index, c := range toFetch {
 		c.Total = total
 		c.Current = index + 1
