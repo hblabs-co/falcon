@@ -34,68 +34,27 @@ func Run() {
 	}
 
 	system.Poll(system.Ctx(), system.PollInterval(), getLogger(), func() {
-		// TODO: ScrapeProjectCandidates does not paginate — only returns the first page.
-		// candidates, err := ScrapeProjectCandidates(system.Ctx())
-		candidates, err := FetchProjectCandidates(system.Ctx())
+		toFetch, err := collectNewCandidates(system.Ctx())
 		if err != nil {
-			getLogger().Errorf("fetch project candidates: %v", err)
+			getLogger().Errorf("collect candidates: %v", err)
 			return
 		}
-		candidatesLenght := len(candidates)
-		if candidatesLenght == 0 {
-			getLogger().Warn("no project candidates found — may indicate a scraping or fetch issue")
+
+		total := len(toFetch)
+		if total == 0 {
+			getLogger().Info("no new or updated projects")
 			return
 		}
-		getLogger().Infof("found %d project candidates", candidatesLenght)
-		processManyCandidates(system.Ctx(), candidates)
+
+		helpers.Reverse(&toFetch)
+		for i, c := range toFetch {
+			c.Total = total
+			c.Current = i + 1
+		}
+
+		getLogger().Infof("%d projects to fetch", total)
+		system.BatchProcess(system.Ctx(), toFetch, system.BatchCfg(), processOneCandidate)
 	})
-}
-
-// processCandidates compares scraped candidates against stored projects and
-// fetches full details for those that are new or updated.
-func processManyCandidates(ctx context.Context, candidates []*ProjectCandidate) {
-	// Extract platform IDs to query only the projects we need to compare.
-	platformIDs := make([]string, len(candidates))
-	for i, c := range candidates {
-		platformIDs[i] = c.PlatformID
-	}
-
-	// Fetch existing persisted projects for these platform IDs.
-	var existing []models.PersistedProject
-	if err := system.GetStorage().GetManyByField(ctx, constants.MongoProjectsCollection, "platform_id", platformIDs, &existing); err != nil {
-		getLogger().Errorf("fetch existing projects: %v", err)
-	}
-
-	existingMap := make(map[string]models.PersistedProject, len(existing))
-	for _, p := range existing {
-		existingMap[p.PlatformID] = p
-	}
-	getLogger().Debugf("DEBUG: found %d existing projects in db out of %d candidates", len(existing), len(candidates))
-
-	// Determine which candidates need a full detail fetch.
-	var toFetch []*ProjectCandidate
-	for _, c := range candidates {
-		e, found := existingMap[c.PlatformID]
-		if !found {
-			getLogger().Debugf("DEBUG: %s not found in db", c.PlatformID)
-		} else if e.PlatformUpdatedAt != c.PlatformUpdatedAt {
-			getLogger().Debugf("DEBUG: %s updated — stored=%q candidate=%q", c.PlatformID, e.PlatformUpdatedAt, c.PlatformUpdatedAt)
-		}
-		if !found || e.PlatformUpdatedAt != c.PlatformUpdatedAt {
-			c.ExistingID = e.ID
-			toFetch = append(toFetch, c)
-		}
-	}
-
-	total := len(toFetch)
-	helpers.Reverse(&toFetch)
-	for index, c := range toFetch {
-		c.Total = total
-		c.Current = index + 1
-	}
-
-	getLogger().Infof("%d projects need detail fetch (new or updated)", total)
-	system.BatchProcess(ctx, toFetch, system.BatchCfg(), processOneCandidate)
 }
 
 // processOneCandidate fetches full project details for a candidate and upserts a PersistedProject to MongoDB.
@@ -112,7 +71,7 @@ func processOneCandidate(ctx context.Context, c *ProjectCandidate) {
 	p := models.NewPersistedProject(result, c.PlatformID, Source, time.Now(), c.ExistingID)
 	// Use the candidate's PlatformUpdatedAt (ISO 8601 from the API) rather than
 	// the scraped detail value, which may be in a different format. This ensures
-	// the comparison in processManyCandidates stays consistent across restarts.
+	// the comparison stays consistent across restarts.
 	p.PlatformUpdatedAt = c.PlatformUpdatedAt
 	if err := system.GetStorage().Replace(ctx, constants.MongoProjectsCollection, p); err != nil {
 		inspector.GetLogger().Errorf("replace project %s: %v", p.PlatformID, err)
@@ -125,8 +84,7 @@ func processOneCandidate(ctx context.Context, c *ProjectCandidate) {
 		subject = constants.SubjectProjectUpdated
 	}
 
-	event := p.GetEvent()
-	if err := system.Publish(ctx, subject, event); err != nil {
+	if err := system.Publish(ctx, subject, p.GetEvent()); err != nil {
 		inspector.GetLogger().Errorf("publish %s: %v", subject, err)
 	} else {
 		inspector.GetLogger().Infof("published %s for %s", subject, p.GetId())

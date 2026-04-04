@@ -6,10 +6,74 @@ import (
 	"strings"
 	"time"
 
+	"hblabs.co/falcon/common/constants"
+	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/ownhttp"
+	"hblabs.co/falcon/common/system"
 )
 
-func NewCandidatesBody() map[string]any {
+const candidatesPageSize = 25
+
+// collectNewCandidates paginates the API (candidatesPageSize per page) and stops
+// as soon as a page contains at least one already-known candidate — at that point
+// all newer projects have been collected. Returns only candidates that need a
+// full detail fetch (new or updated), ordered oldest-first after Reverse.
+func collectNewCandidates(ctx context.Context) ([]*ProjectCandidate, error) {
+	s := getSession()
+	token, err := s.AccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var all []*ProjectCandidate
+
+	for page := 1; ; page++ {
+		candidates, err := fetchCandidatesPage(ctx, s, token, page)
+		if err != nil {
+			return nil, err
+		}
+		n := len(candidates)
+		if n == 0 {
+			break
+		}
+
+		platformIDs := make([]string, n)
+		for i, c := range candidates {
+			platformIDs[i] = c.PlatformID
+		}
+
+		var existing []models.PersistedProject
+		if err := system.GetStorage().GetManyByField(ctx, constants.MongoProjectsCollection, "platform_id", platformIDs, &existing); err != nil {
+			return nil, err
+		}
+
+		existingMap := make(map[string]models.PersistedProject, len(existing))
+		for _, p := range existing {
+			existingMap[p.PlatformID] = p
+		}
+
+		newOnPage := 0
+		for _, c := range candidates {
+			e, found := existingMap[c.PlatformID]
+			if !found || e.PlatformUpdatedAt != c.PlatformUpdatedAt {
+				c.ExistingID = e.ID
+				all = append(all, c)
+				newOnPage++
+			}
+		}
+
+		getLogger().Debugf("page %d: %d/%d new", page, newOnPage, n)
+
+		// Stop when we hit overlap (some known candidates) or the last page.
+		if newOnPage < n || n < candidatesPageSize {
+			break
+		}
+	}
+
+	return all, nil
+}
+
+func newCandidatesBody(page int) map[string]any {
 	return map[string]any{
 		"keywords": []any{},
 		"projectsFilter": map[string]any{
@@ -26,48 +90,29 @@ func NewCandidatesBody() map[string]any {
 			"profession":        []any{},
 			"lastChangedFilter": map[string]any{"filterSectionId": nil, "filterItemId": nil},
 		},
-		"pagination":    map[string]any{"currentPage": 1, "pageSize": "100", "sortBy": "default", "asc": false},
+		"pagination":    map[string]any{"currentPage": page, "pageSize": candidatesPageSize, "sortBy": "default", "asc": false},
 		"category":      "",
 		"locale":        "de-DE",
 		"searchAgentId": nil,
 	}
 }
 
-// FetchProjectCandidates retrieves project candidates from the freelance.de API.
-// It reuses a cached JWT access token, refreshing it only when expired or on 401.
-func FetchProjectCandidates(ctx context.Context) ([]*ProjectCandidate, error) {
-	s := getSession()
-
-	token, err := s.AccessToken(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("get access token: %w", err)
-	}
-
-	candidates, err := fetchCandidates(ctx, s, token)
-	if err != nil {
-		return nil, err
-	}
-
-	return candidates, nil
-}
-
-func fetchCandidates(ctx context.Context, s *Session, token string) ([]*ProjectCandidate, error) {
+// fetchCandidatesPage fetches a single page of project candidates from the API.
+func fetchCandidatesPage(ctx context.Context, s *Session, token string, page int) ([]*ProjectCandidate, error) {
 	var apiResp struct {
 		Projects apiProjects `json:"projects"`
 	}
 
 	client := ownhttp.New(projectsSearchURL, map[string]string{"Authorization": "Bearer " + token})
-	err := client.Post(ctx, "", ownhttp.Request{
+	if err := client.Post(ctx, "", ownhttp.Request{
 		Cookies: s.Cookies(),
-		Body:    NewCandidatesBody(),
+		Body:    newCandidatesBody(page),
 		Result:  &apiResp,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("fetch candidates: %w", err)
+	}); err != nil {
+		return nil, fmt.Errorf("fetch candidates page %d: %w", page, err)
 	}
 
-	res := apiResp.Projects.toCandidates()
-	return res, nil
+	return apiResp.Projects.toCandidates(), nil
 }
 
 type apiProjects []apiProject

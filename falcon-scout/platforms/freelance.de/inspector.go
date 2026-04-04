@@ -263,9 +263,10 @@ func registerHandlers(c *colly.Collector, project *Project) {
 				lines = append(lines, t)
 			}
 		}
-		if len(lines) > 0 {
+		linesLen := len(lines)
+		if linesLen > 0 {
 			contact.Name = lines[0]
-			if len(lines) > 1 {
+			if linesLen > 1 {
 				contact.Address = strings.Join(lines[1:], " ")
 			}
 		}
