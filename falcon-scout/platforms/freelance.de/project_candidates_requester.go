@@ -1,14 +1,37 @@
 package freelancede
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
+
+	"hblabs.co/falcon/common/ownhttp"
 )
+
+func NewCandidatesBody() map[string]any {
+	return map[string]any{
+		"keywords": []any{},
+		"projectsFilter": map[string]any{
+			"remotePreference":  []any{},
+			"city":              []any{},
+			"county":            []any{},
+			"country":           []any{},
+			"projectStart":      []any{},
+			"projectDuration":   []any{},
+			"lastUpdate":        []any{},
+			"includeExclude":    []any{},
+			"typeOfContract":    []any{},
+			"suggestedTerms":    []any{},
+			"profession":        []any{},
+			"lastChangedFilter": map[string]any{"filterSectionId": nil, "filterItemId": nil},
+		},
+		"pagination":    map[string]any{"currentPage": 1, "pageSize": "100", "sortBy": "default", "asc": false},
+		"category":      "",
+		"locale":        "de-DE",
+		"searchAgentId": nil,
+	}
+}
 
 // FetchProjectCandidates retrieves project candidates from the freelance.de API.
 // It reuses a cached JWT access token, refreshing it only when expired or on 401.
@@ -29,81 +52,39 @@ func FetchProjectCandidates(ctx context.Context) ([]*ProjectCandidate, error) {
 }
 
 func fetchCandidates(ctx context.Context, s *Session, token string) ([]*ProjectCandidate, error) {
-	body, err := json.Marshal(map[string]any{
-		"keywords": []any{},
-		"projectsFilter": map[string]any{
-			"remotePreference": []any{},
-			"city":             []any{},
-			"county":           []any{},
-			"country":          []any{},
-			"projectStart":     []any{},
-			"projectDuration":  []any{},
-			"lastUpdate":       []any{},
-			"includeExclude":   []any{},
-			"typeOfContract":   []any{},
-			"suggestedTerms":   []any{},
-			"profession":       []any{},
-			"lastChangedFilter": map[string]any{
-				"filterSectionId": nil,
-				"filterItemId":    nil,
-			},
-		},
-		"pagination": map[string]any{
-			"currentPage": 1,
-			"pageSize":    "100",
-			"sortBy":      "default",
-			"asc":         false,
-		},
-		"category":      "",
-		"locale":        "de-DE",
-		"searchAgentId": nil,
+	var apiResp struct {
+		Projects apiProjects `json:"projects"`
+	}
+
+	client := ownhttp.New(projectsSearchURL, map[string]string{"Authorization": "Bearer " + token})
+	err := client.Post(ctx, "", ownhttp.Request{
+		Cookies: s.Cookies(),
+		Body:    NewCandidatesBody(),
+		Result:  &apiResp,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("marshal request body: %w", err)
+		return nil, fmt.Errorf("fetch candidates: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, projectsSearchURL, bytes.NewReader(body))
-	if err != nil {
-		return nil, fmt.Errorf("build request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	for _, c := range s.Cookies() {
-		req.AddCookie(c)
-	}
+	res := apiResp.Projects.toCandidates()
+	return res, nil
+}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
+type apiProjects []apiProject
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		return nil, ErrCandidatesUnauthorized
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status: %s", resp.Status)
-	}
-
-	var apiResp struct {
-		Projects []apiProject `json:"projects"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
-		return nil, fmt.Errorf("decode response: %w", err)
-	}
-
-	candidates := make([]*ProjectCandidate, 0, len(apiResp.Projects))
-	for _, p := range apiResp.Projects {
+func (ps apiProjects) toCandidates() []*ProjectCandidate {
+	candidates := make([]*ProjectCandidate, 0, len(ps))
+	for _, p := range ps {
 		candidates = append(candidates, p.toCandidate())
 	}
-	return candidates, nil
+	return candidates
 }
 
 // apiProject maps the fields returned by /api/ui/projects/search.
 type apiProject struct {
-	ID          string `json:"id"`
-	ProjectTitle string `json:"projectTitle"`
-	CompanyName  string `json:"companyName"`
+	ID           string   `json:"id"`
+	ProjectTitle string   `json:"projectTitle"`
+	CompanyName  string   `json:"companyName"`
 	CompanyLogo  []string `json:"companyLogo"`
 	SkillTags    []struct {
 		SkillName string `json:"skillName"`
@@ -114,8 +95,8 @@ type apiProject struct {
 		County  string `json:"county"`
 		Country string `json:"country"`
 	} `json:"locations"`
-	Remote     string `json:"remote"`
-	LastUpdate string `json:"lastUpdate"`
+	Remote            string `json:"remote"`
+	LastUpdate        string `json:"lastUpdate"`
 	InsightApplicants struct {
 		Link struct {
 			URL string `json:"url"`
@@ -162,7 +143,7 @@ func (p *apiProject) toCandidate() *ProjectCandidate {
 		Skills:            skills,
 		StartDate:         p.ProjectStartDate,
 		Location:          locations,
-		Remote:            p.Remote == "Remote",
+		Remote:            strings.EqualFold(p.Remote, "remote"),
 		PlatformUpdatedAt: p.LastUpdate,
 		ScrapedAt:         time.Now(),
 	}

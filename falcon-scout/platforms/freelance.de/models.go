@@ -1,6 +1,7 @@
 package freelancede
 
 import (
+	"strings"
 	"time"
 
 	"hblabs.co/falcon/common/constants"
@@ -88,7 +89,7 @@ func (p *Project) GetLocation() string         { return p.Overview.Location }
 func (p *Project) GetSkills() []string         { return p.Skills }
 func (p *Project) GetRequiredSkills() []string { return p.RequiredSkills }
 func (p *Project) IsDirectClient() bool        { return p.DirectClient }
-func (p *Project) IsRemote() bool              { return p.Overview.Remote == "Remote" }
+func (p *Project) IsRemote() bool              { return strings.EqualFold(p.Overview.Remote, "remote") }
 func (p *Project) IsANUE() bool                { return p.ANUE }
 
 func (p *Project) GetRate() interfaces.Rate {

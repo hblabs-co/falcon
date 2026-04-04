@@ -13,6 +13,7 @@ import (
 // Mirrors the browser fetch() init object: url goes in the call, everything else here.
 type Request struct {
 	Headers map[string]string // merged with Client default headers; call-level headers win
+	Cookies []*http.Cookie    // added to the request as-is
 	Body    any               // marshaled to JSON; Content-Type set automatically
 	Result  any               // response body decoded into this if non-nil
 }
@@ -74,6 +75,9 @@ func (c *Client) DoRequest(ctx context.Context, method, path string, req Request
 		httpReq.Header.Set("Content-Type", "application/json")
 	}
 	c.applyHeaders(httpReq, req.Headers)
+	for _, cookie := range req.Cookies {
+		httpReq.AddCookie(cookie)
+	}
 
 	resp, err := c.inner.Do(httpReq)
 	if err != nil {
