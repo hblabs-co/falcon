@@ -12,4 +12,5 @@ const (
 	SubjectCVIndexed      = "cv.indexed"
 	SubjectMatchPending   = "match.pending"
 	SubjectMatchResult    = "match.result"
+	SubjectScrapeFailed   = "scrape.failed"
 )

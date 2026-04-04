@@ -23,6 +23,16 @@ type Storage struct {
 	db *mongo.Database
 }
 
+type StorageIndexSpec struct {
+	Collection string
+	Field      string
+	Unique     bool
+}
+
+func NewIndexSpec(collection, field string, unique bool) StorageIndexSpec {
+	return StorageIndexSpec{Collection: collection, Field: field, Unique: unique}
+}
+
 // GetStorage returns the process-wide Storage handle.
 // InitStorage must be called before GetStorage.
 func GetStorage() *Storage {
@@ -54,7 +64,8 @@ func InitStorage(ctx context.Context) error {
 			return
 		}
 		s := &Storage{db: client.Database(dbName)}
-		if err := s.EnsureIndex(ctx, constants.MongoProjectsCollection, "id", true); err != nil {
+		spec := NewIndexSpec(constants.MongoProjectsCollection, "id", true)
+		if err := s.EnsureIndex(ctx, spec); err != nil {
 			initErr = err
 			return
 		}
@@ -125,12 +136,12 @@ func (s *Storage) GetMany(ctx context.Context, collection string, filter bson.M,
 
 // EnsureIndex creates an index on field in collection if it does not already exist.
 // Pass unique=true to enforce uniqueness.
-func (s *Storage) EnsureIndex(ctx context.Context, collection, field string, unique bool) error {
+func (s *Storage) EnsureIndex(ctx context.Context, spec StorageIndexSpec) error {
 	model := mongo.IndexModel{
-		Keys:    bson.D{{Key: field, Value: 1}},
-		Options: options.Index().SetUnique(unique),
+		Keys:    bson.D{{Key: spec.Field, Value: 1}},
+		Options: options.Index().SetUnique(spec.Unique),
 	}
-	_, err := s.db.Collection(collection).Indexes().CreateOne(ctx, model)
+	_, err := s.db.Collection(spec.Collection).Indexes().CreateOne(ctx, model)
 	return err
 }
 
