@@ -1,0 +1,101 @@
+package signal
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/sideshow/apns2"
+	"github.com/sideshow/apns2/payload"
+	"github.com/sideshow/apns2/token"
+	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/common/helpers"
+	"hblabs.co/falcon/common/models"
+)
+
+type apnsClient struct {
+	client   *apns2.Client
+	bundleID string
+}
+
+func newAPNSClient() (*apnsClient, error) {
+	values, err := helpers.ReadEnvs("APNS_KEY_PATH", "APNS_KEY_ID", "APNS_TEAM_ID", "APNS_BUNDLE_ID")
+	if err != nil {
+		return nil, err
+	}
+	keyPath, keyID, teamID, bundleID := values[0], values[1], values[2], values[3]
+
+	authKey, err := token.AuthKeyFromFile(keyPath)
+	if err != nil {
+		return nil, fmt.Errorf("load apns key %s: %w", keyPath, err)
+	}
+
+	t := &token.Token{
+		AuthKey: authKey,
+		KeyID:   keyID,
+		TeamID:  teamID,
+	}
+
+	production := helpers.ReadEnvOptional("APNS_PRODUCTION", "false") == "true"
+	var client *apns2.Client
+	if production {
+		client = apns2.NewTokenClient(t).Production()
+	} else {
+		client = apns2.NewTokenClient(t).Development()
+	}
+
+	return &apnsClient{client: client, bundleID: bundleID}, nil
+}
+
+// Send delivers a push notification to the given device token.
+func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *models.MatchResultEvent) error {
+	title := labelTitle(result.Label)
+
+	p := payload.NewPayload().
+		AlertTitle(title).
+		AlertBody(result.Summary).
+		Sound("default").
+		Category("MATCH_RESULT").
+		Custom("project_id", result.ProjectID).
+		Custom("cv_id", result.CVID).
+		Custom("score", result.Score).
+		Custom("label", string(result.Label)).
+		Custom("summary", result.Summary).
+		Custom("matched_skills", result.MatchedSkills).
+		Custom("missing_skills", result.MissingSkills).
+		Custom("scores", map[string]float32{
+			"skills_match":          result.Scores.SkillsMatch,
+			"seniority_fit":         result.Scores.SeniorityFit,
+			"domain_experience":     result.Scores.DomainExperience,
+			"communication_clarity": result.Scores.CommunicationClarity,
+			"project_relevance":     result.Scores.ProjectRelevance,
+			"tech_stack_overlap":    result.Scores.TechStackOverlap,
+		})
+
+	notification := &apns2.Notification{
+		DeviceToken: deviceToken,
+		Topic:       a.bundleID,
+		Payload:     p,
+	}
+
+	resp, err := a.client.PushWithContext(ctx, notification)
+	if err != nil {
+		return fmt.Errorf("apns push: %w", err)
+	}
+	if !resp.Sent() {
+		return fmt.Errorf("apns rejected: %s (%d)", resp.Reason, resp.StatusCode)
+	}
+
+	logrus.Infof("apns sent — apns_id=%s device=%s…", resp.ApnsID, deviceToken[:8])
+	return nil
+}
+
+func labelTitle(label models.MatchLabel) string {
+	switch label {
+	case models.MatchLabelApplyImmediately:
+		return "Jetzt bewerben!"
+	case models.MatchLabelTopCandidate:
+		return "Starker Kandidat"
+	default:
+		return "Neue Projektempfehlung"
+	}
+}

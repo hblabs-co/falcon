@@ -79,6 +79,10 @@ func (s *Storage) GetById(ctx context.Context, collection string, id string, res
 	return s.Get(ctx, collection, filter, result)
 }
 
+func (s *Storage) GetByField(ctx context.Context, collection, field, value string, result any) error {
+	return s.Get(ctx, collection, bson.M{field: value}, result)
+}
+
 // Get finds a single document matching filter and decodes it into result.
 func (s *Storage) Get(ctx context.Context, collection string, filter bson.M, result any) error {
 	return s.db.Collection(collection).FindOne(ctx, filter).Decode(result)
