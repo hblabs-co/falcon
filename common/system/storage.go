@@ -174,3 +174,21 @@ func (s *Storage) Insert(ctx context.Context, collection string, doc any) error 
 	_, err := s.db.Collection(collection).InsertOne(ctx, doc)
 	return err
 }
+
+// GetAllByField finds all documents where field equals value and decodes them into
+// results (must be a pointer to a slice, e.g. *[]MyStruct).
+func (s *Storage) GetAllByField(ctx context.Context, collection, field, value string, results any) error {
+	return s.GetMany(ctx, collection, bson.M{field: value}, results)
+}
+
+// DeleteByField removes all documents where field equals value.
+func (s *Storage) DeleteByField(ctx context.Context, collection, field, value string) error {
+	_, err := s.db.Collection(collection).DeleteMany(ctx, bson.M{field: value})
+	return err
+}
+
+// DeleteManyByFieldIn removes all documents where field is one of the given values ($in).
+func (s *Storage) DeleteManyByFieldIn(ctx context.Context, collection, field string, values []string) error {
+	_, err := s.db.Collection(collection).DeleteMany(ctx, bson.M{field: bson.M{"$in": values}})
+	return err
+}
