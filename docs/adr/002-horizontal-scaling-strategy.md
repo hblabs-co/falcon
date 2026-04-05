@@ -17,9 +17,20 @@ The question is: which services need horizontal scaling, and which do not?
 ## Analysis per service
 
 ### falcon-scout
-Scrapes freelance platforms on a schedule. More replicas would mean more parallel
-requests to the same platforms, which triggers rate limiting and bans.
-**Decision: single replica, no horizontal scaling.**
+`falcon-scout` is a single codebase configured via the `PLATFORM` environment variable
+to scrape a specific platform (freelance.de, gulp.de, freelancermap.de, etc.).
+Each platform deployment is independent — it consumes `scrape.requested.{platform}`
+events from NATS and runs scraping jobs for that platform only.
+
+Scaling works **per platform**: if freelance.de needs more throughput, add replicas
+with `PLATFORM=freelance-de`. Those replicas share the NATS consumer `scout-freelance-de`
+so each scrape request is processed by exactly one replica. gulp.de replicas are
+completely isolated and do not interfere.
+
+This is fundamentally different from running more replicas of a monolithic scout — each
+platform's replica group competes only within its own message stream.
+
+**Decision: scales horizontally per platform. See ADR-004 for the full scraping architecture.**
 
 ### falcon-cv-ingest
 Handles HTTP uploads and async CV processing. Each CV is processed independently
@@ -60,10 +71,12 @@ only if the service becomes an HTTP bottleneck — not expected at this scale.
 
 ## Decision
 
-**Only `falcon-match-engine` requires horizontal scaling.**
+**Two services require horizontal scaling:**
 
-All other services run as single replicas. Scaling them would either cause problems
-(scout → platform bans) or provide no meaningful throughput improvement.
+- `falcon-match-engine` — scales by adding replicas (all share one NATS consumer per stream)
+- `falcon-scout` — scales per platform (each platform group shares one NATS consumer for that platform)
+
+All other services run as single replicas.
 
 ## Implementation
 
