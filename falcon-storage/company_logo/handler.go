@@ -1,4 +1,4 @@
-package logo
+package company_logo
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 )
 
 // Subscribe registers a durable NATS consumer for storage.logo.requested.
-func (s *Service) Subscribe() error {
+func (s *Service) subscribe(ctx context.Context) error {
 	stream := constants.StreamStorage
 	subject := constants.SubjectStorageCompanyLogoRequested
 	consumerName := "falcon-storage-logo"
 
 	err := system.Subscribe(
-		system.Ctx(),
+		ctx,
 		stream,
 		consumerName,
 		subject,

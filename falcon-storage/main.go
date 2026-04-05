@@ -4,7 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/storage/logo"
+	"hblabs.co/falcon/storage/company_logo"
 )
 
 func main() {
@@ -18,13 +18,13 @@ func main() {
 		constants.SubjectStorageCompanyLogoDownloaded,
 	))
 
-	svc, err := logo.NewService()
+	err := system.Run(
+		system.Ctx(),
+		company_logo.NewModule(),
+		// next_module.NewModule(),
+	)
 	if err != nil {
-		logrus.Fatalf("service init: %v", err)
-	}
-
-	if err := svc.Subscribe(); err != nil {
-		logrus.Fatalf("subscribe: %v", err)
+		logrus.Fatalf("start: %v", err)
 	}
 
 	system.Wait()

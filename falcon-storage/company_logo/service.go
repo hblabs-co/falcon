@@ -1,4 +1,4 @@
-package logo
+package company_logo
 
 import (
 	"bytes"
@@ -27,7 +27,7 @@ type Service struct {
 
 // NewService initialises the MinIO client, ensures the bucket exists,
 // and sets up the MongoDB index on companies.company_id.
-func NewService() (*Service, error) {
+func newService() (*Service, error) {
 	values, err := helpers.ReadEnvs("MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_PUBLIC_URL")
 	if err != nil {
 		return nil, err

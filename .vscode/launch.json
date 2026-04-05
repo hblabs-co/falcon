@@ -12,7 +12,8 @@
         "Debug Dispatch",
         "Debug Match Engine",
         "Debug Scrape API",
-        "Debug Signal"
+        "Debug Signal",
+        "Debug Storage"
       ],
       "stopAll": true,
       "preLaunchTask": "Docker: start infrastructure",
@@ -61,6 +62,13 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/falcon-match-engine"
+    },
+     {
+      "name": "Debug Storage",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-storage"
     }
   ]
 }
