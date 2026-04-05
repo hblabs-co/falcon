@@ -1,0 +1,54 @@
+{
+  "title": "Nutzungsbedingungen",
+  "lastUpdated": "April 2025",
+  "sections": [
+    {
+      "title": "1. Zustimmung",
+      "body": "Mit der Installation oder Nutzung von Falcon stimmen Sie diesen Nutzungsbedingungen zu. Wenn Sie nicht zustimmen, verwenden Sie die App bitte nicht."
+    },
+    {
+      "title": "2. Leistungsbeschreibung",
+      "body": "Falcon überwacht Freelance-Jobbörsen, analysiert Stellenangebote anhand Ihres Lebenslaufs mit KI-basiertem Matching und sendet Push-Benachrichtigungen bei relevanten Treffern. Der Dienst wird ohne Gewährleistung bereitgestellt und ist für die persönliche, nicht-kommerzielle Nutzung bestimmt."
+    },
+    {
+      "title": "3. Nutzungsvoraussetzungen",
+      "body": "Sie müssen mindestens 16 Jahre alt sein, um Falcon nutzen zu können. Mit der Nutzung der App bestätigen Sie, dass Sie diese Voraussetzung erfüllen."
+    },
+    {
+      "title": "4. Ihre Lebenslaufdaten",
+      "body": "Durch das Hochladen eines Lebenslaufs räumen Sie HB Labs SAS eine eingeschränkte Lizenz ein, diesen Inhalt ausschließlich zum Zweck der Erstellung von Job-Match-Ergebnissen für Sie zu verarbeiten. Sie behalten das vollständige Eigentum an Ihrem Lebenslauf. Wir geben Ihren Lebenslauf nicht an Arbeitgeber oder Dritte weiter, außer an Mistral AI für die Matching-Analyse (siehe Datenschutzerklärung)."
+    },
+    {
+      "title": "5. Keine Gewährleistung",
+      "body": "Falcon wird ohne jegliche Gewährleistung bereitgestellt. Wir garantieren nicht:\n\n• die Genauigkeit oder Vollständigkeit der Match-Scores.\n• einen unterbrechungsfreien oder fehlerfreien Betrieb des Dienstes.\n• dass Stellenangebote aktuell, korrekt oder verfügbar sind.\n\nMatch-Ergebnisse werden von einem KI-Modell generiert und sollten nicht als alleinige Grundlage für berufliche oder finanzielle Entscheidungen dienen."
+    },
+    {
+      "title": "6. Haftungsbeschränkung",
+      "body": "Soweit gesetzlich zulässig haftet HB Labs SAS nicht für mittelbare oder Folgeschäden, die aus der Nutzung von Falcon entstehen, einschließlich Datenverlust, verpasster Jobgelegenheiten oder der Abhängigkeit von KI-generierten Match-Ergebnissen."
+    },
+    {
+      "title": "7. Zulässige Nutzung",
+      "body": "Sie verpflichten sich, Folgendes zu unterlassen:\n\n• Reverse Engineering, Dekompilierung oder Manipulation der App oder ihrer Backend-Dienste.\n• Nutzung des Dienstes zum Scrapen, Harvesten oder Weiterverbreiten von Jobdaten.\n• Versuche, Rate-Limits oder Zugriffskontrollen zu umgehen.\n• Hochladen von Inhalten, die rechtswidrig, schädlich oder rechtsverletzend sind."
+    },
+    {
+      "title": "8. Geistiges Eigentum",
+      "body": "Der Name Falcon, das Logo und das App-Design sind Eigentum von HB Labs SAS. Der Quellcode steht unter der jeweiligen Open-Source-Lizenz zur Verfügung. Diese Bedingungen gewähren Ihnen keine Rechte an Marken von HB Labs SAS."
+    },
+    {
+      "title": "9. Kündigung",
+      "body": "Wir behalten uns das Recht vor, den Zugang zum Dienst jederzeit mit oder ohne Vorankündigung auszusetzen oder zu kündigen, wenn wir der Ansicht sind, dass gegen diese Bedingungen verstoßen wurde."
+    },
+    {
+      "title": "10. Anwendbares Recht",
+      "body": "Diese Bedingungen unterliegen dem französischen Recht. Etwaige Streitigkeiten unterliegen der ausschließlichen Zuständigkeit der Gerichte in Paris, Frankreich."
+    },
+    {
+      "title": "11. Änderungen",
+      "body": "Wir können diese Nutzungsbedingungen jederzeit aktualisieren. Die fortgesetzte Nutzung von Falcon nach Änderungen gilt als Zustimmung zu den aktualisierten Bedingungen."
+    },
+    {
+      "title": "12. Kontakt",
+      "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"
+    }
+  ]
+}

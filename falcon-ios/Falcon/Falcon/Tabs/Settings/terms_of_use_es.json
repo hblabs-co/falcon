@@ -1,0 +1,54 @@
+{
+  "title": "Términos de uso",
+  "lastUpdated": "abril de 2025",
+  "sections": [
+    {
+      "title": "1. Aceptación",
+      "body": "Al instalar o usar Falcon, acepta estos Términos de uso. Si no está de acuerdo, no utilice la app."
+    },
+    {
+      "title": "2. Descripción del servicio",
+      "body": "Falcon monitorea plataformas de empleo freelance, analiza ofertas de trabajo frente a su CV mediante coincidencia basada en IA, y envía notificaciones push cuando se encuentran coincidencias relevantes. El servicio se proporciona tal cual y está destinado a uso personal y no comercial."
+    },
+    {
+      "title": "3. Requisitos de uso",
+      "body": "Debe tener al menos 16 años para usar Falcon. Al usar la app confirma que cumple este requisito."
+    },
+    {
+      "title": "4. Sus datos del CV",
+      "body": "Al subir un CV, otorga a HB Labs SAS una licencia limitada para procesar ese contenido con el único propósito de generar resultados de coincidencia de empleo para usted. Usted conserva la propiedad total de su CV. No compartimos su CV con empleadores ni con terceros, excepto con Mistral AI para el análisis de coincidencia (consulte la Política de privacidad)."
+    },
+    {
+      "title": "5. Sin garantía",
+      "body": "Falcon se proporciona \"tal cual\" sin garantías de ningún tipo. No garantizamos:\n\n• La precisión o integridad de las puntuaciones de coincidencia.\n• El funcionamiento ininterrumpido o sin errores del servicio.\n• Que las ofertas de trabajo sean actuales, precisas o estén disponibles.\n\nLos resultados de coincidencia son generados por un modelo de IA y no deben ser la única base para ninguna decisión profesional o financiera."
+    },
+    {
+      "title": "6. Limitación de responsabilidad",
+      "body": "En la máxima medida permitida por la ley, HB Labs SAS no será responsable de daños indirectos o consecuentes derivados del uso de Falcon, incluyendo pérdida de datos, oportunidades de empleo perdidas o dependencia de resultados generados por IA."
+    },
+    {
+      "title": "7. Uso aceptable",
+      "body": "Usted se compromete a no:\n\n• Realizar ingeniería inversa, descompilar o manipular la app o sus servicios backend.\n• Usar el servicio para extraer, recopilar o redistribuir datos de empleo.\n• Intentar eludir límites de velocidad o controles de acceso.\n• Cargar contenido ilegal, dañino o que infrinja derechos de terceros."
+    },
+    {
+      "title": "8. Propiedad intelectual",
+      "body": "El nombre Falcon, el logotipo y el diseño de la app son propiedad de HB Labs SAS. El código fuente está disponible bajo su respectiva licencia de código abierto. Nada en estos términos le otorga derechos para usar las marcas comerciales de HB Labs SAS."
+    },
+    {
+      "title": "9. Terminación",
+      "body": "Nos reservamos el derecho de suspender o cancelar el acceso al servicio en cualquier momento, con o sin previo aviso, si consideramos que se han incumplido estos términos."
+    },
+    {
+      "title": "10. Ley aplicable",
+      "body": "Estos términos se rigen por las leyes de Francia. Cualquier disputa estará sujeta a la jurisdicción exclusiva de los tribunales de París, Francia."
+    },
+    {
+      "title": "11. Cambios",
+      "body": "Podemos actualizar estos Términos de uso en cualquier momento. El uso continuado de Falcon tras los cambios implica la aceptación de los términos actualizados."
+    },
+    {
+      "title": "12. Contacto",
+      "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"
+    }
+  ]
+}

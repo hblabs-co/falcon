@@ -1,0 +1,42 @@
+{
+  "title": "Datenschutzerklärung",
+  "lastUpdated": "April 2025",
+  "sections": [
+    {
+      "title": "1. Über uns",
+      "body": "Falcon wird von HB Labs SAS entwickelt und betrieben, einem in Frankreich registrierten Unternehmen. Bei Fragen zu dieser Richtlinie kontaktieren Sie uns unter general@hblabs.co."
+    },
+    {
+      "title": "2. Erhobene Daten",
+      "body": "Falcon erhebt nur die für den Betrieb notwendigen Mindestdaten:\n\n• Anonyme Benutzer-ID — eine zufällig generierte Kennung (nanoid), die lokal auf Ihrem Gerät gespeichert wird. Sie wird niemals mit Ihrem Namen, Ihrer E-Mail-Adresse oder einer persönlichen Identität verknüpft.\n• APNs-Geräte-Token — ein von Apple ausgestelltes Token, das ausschließlich zur Zustellung von Push-Benachrichtigungen an Ihr Gerät verwendet wird.\n• Sprachpräferenz für Benachrichtigungen — Ihre gewählte Sprache für Push-Benachrichtigungen, die auf unserem Server neben Ihrem Geräte-Token gespeichert wird.\n• Lebenslauftext — wenn Sie einen Lebenslauf hochladen, wird der extrahierte Klartext auf unserem Server gespeichert und lokal zur Generierung von Embeddings verarbeitet."
+    },
+    {
+      "title": "3. Verwendung Ihrer Daten",
+      "body": "• Lebenslauf-Embeddings werden lokal mit Ollama (Modell bge-m3) generiert. Ihr Lebenslauftext verlässt unsere Server bei diesem Schritt nicht.\n• Die Job-Matching-Analyse wird von Mistral AI durchgeführt, einem Drittanbieter mit Sitz in Frankreich (EU). Ihr Lebenslauftext und Stellenbeschreibungen werden an Mistral AI ausschließlich zur Berechnung eines Match-Scores und einer kurzen Zusammenfassung übermittelt. Die Daten werden nicht für das Training verwendet.\n• Push-Benachrichtigungen werden über die APNs-Infrastruktur von Apple mithilfe Ihres Geräte-Tokens zugestellt.\n\nWir verkaufen, teilen oder verwenden Ihre Daten nicht für Werbezwecke."
+    },
+    {
+      "title": "4. Drittanbieter",
+      "body": "• Mistral AI (mistral.ai) — Paris, Frankreich. Wird für LLM-basiertes Job-Matching verwendet. Unterliegt der Datenschutzrichtlinie von Mistral AI (https://legal.mistral.ai/terms/privacy-policy).\n• Apple Inc. — Zustellung von APNs-Push-Benachrichtigungen.\n\nKeine weiteren Drittanbieter erhalten Ihre Daten."
+    },
+    {
+      "title": "5. Datenspeicherung",
+      "body": "Geräte-Token und Sprachpräferenzen werden gespeichert, solange Sie die App nutzen. Lebenslaufdaten werden für laufendes Matching gespeichert. Sie können jederzeit die Löschung Ihrer Daten unter general@hblabs.co beantragen."
+    },
+    {
+      "title": "6. Ihre Rechte (DSGVO)",
+      "body": "Wenn Sie sich im Europäischen Wirtschaftsraum befinden, haben Sie das Recht:\n\n• auf Auskunft über die bei uns gespeicherten personenbezogenen Daten.\n• auf Berichtigung oder Löschung Ihrer Daten.\n• auf Widerspruch oder Einschränkung der Verarbeitung.\n• eine Beschwerde bei Ihrer zuständigen Datenschutzbehörde einzureichen.\n\nZur Ausübung dieser Rechte wenden Sie sich an general@hblabs.co."
+    },
+    {
+      "title": "7. Datensicherheit",
+      "body": "Daten werden auf privaten Servern gespeichert. Lebenslauf-Embeddings und Geräte-Token sind nicht öffentlich zugänglich. Wir treffen angemessene technische und organisatorische Maßnahmen zum Schutz Ihrer Daten."
+    },
+    {
+      "title": "8. Änderungen dieser Richtlinie",
+      "body": "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Aktualisierungen werden in der App angezeigt. Die fortgesetzte Nutzung von Falcon nach Änderungen gilt als Zustimmung zur überarbeiteten Richtlinie."
+    },
+    {
+      "title": "9. Kontakt",
+      "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"
+    }
+  ]
+}

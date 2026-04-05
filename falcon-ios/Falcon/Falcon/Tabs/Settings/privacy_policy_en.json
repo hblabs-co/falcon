@@ -1,0 +1,42 @@
+{
+  "title": "Privacy Policy",
+  "lastUpdated": "April 2025",
+  "sections": [
+    {
+      "title": "1. Who We Are",
+      "body": "Falcon is developed and operated by HB Labs SAS, a company registered in France. If you have any questions about this policy, contact us at general@hblabs.co."
+    },
+    {
+      "title": "2. Data We Collect",
+      "body": "Falcon collects only the minimum data necessary to operate:\n\n• Anonymous User ID — a randomly generated identifier (nanoid) stored locally on your device. It is never linked to your name, email, or any personal identity.\n• APNs Device Token — a token issued by Apple used exclusively to deliver push notifications to your device.\n• Notification Language Preference — your chosen language for push notifications, stored on our server alongside your device token.\n• CV Text — if you upload a curriculum vitae, the extracted plain text is stored on our server and processed locally to generate embeddings."
+    },
+    {
+      "title": "3. How We Use Your Data",
+      "body": "• CV Embeddings are generated on-premise using Ollama (bge-m3 model). Your CV text never leaves our servers during this step.\n• Job Matching Analysis is performed by Mistral AI, a third-party service based in France (EU). Your CV text and job descriptions are sent to Mistral AI solely for the purpose of computing a match score and a short summary. No data is used for training.\n• Push Notifications are sent via Apple's APNs infrastructure using your device token to deliver job match alerts.\n\nWe do not sell, share, or use your data for advertising."
+    },
+    {
+      "title": "4. Third Parties",
+      "body": "• Mistral AI (mistral.ai) — Paris, France. Used for LLM-based job matching. Subject to the Mistral AI Privacy Policy (https://legal.mistral.ai/terms/privacy-policy).\n• Apple Inc. — APNs push notification delivery.\n\nNo other third-party services receive your data."
+    },
+    {
+      "title": "5. Data Retention",
+      "body": "Device tokens and notification preferences are retained as long as you use the app. CV data is retained to enable ongoing matching. You may request deletion at any time by contacting general@hblabs.co."
+    },
+    {
+      "title": "6. Your Rights (GDPR)",
+      "body": "If you are located in the European Economic Area, you have the right to:\n\n• Access the personal data we hold about you.\n• Request correction or deletion of your data.\n• Object to or restrict processing of your data.\n• Lodge a complaint with your local data protection authority.\n\nTo exercise any of these rights, contact us at general@hblabs.co."
+    },
+    {
+      "title": "7. Security",
+      "body": "Data is stored on private servers. CV embeddings and device tokens are not exposed publicly. We apply reasonable technical and organizational measures to protect your data."
+    },
+    {
+      "title": "8. Changes to This Policy",
+      "body": "We may update this Privacy Policy from time to time. Updates will be reflected in the app. Continued use of Falcon after changes constitutes acceptance of the revised policy."
+    },
+    {
+      "title": "9. Contact",
+      "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"
+    }
+  ]
+}
