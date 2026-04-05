@@ -5,8 +5,9 @@ import (
 	"fmt"
 )
 
-// Module is implemented by every falcon-storage worker.
-// Register wires up NATS consumers and returns — consumers run in background goroutines.
+// Module is implemented by every worker that wants to register itself
+// into a service. Register wires up NATS consumers and returns immediately —
+// consumers run in background goroutines.
 type Module interface {
 	Register(ctx context.Context) error
 }

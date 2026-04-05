@@ -7,58 +7,22 @@ import (
 	"path/filepath"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/ownhttp"
 	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/storage/infra"
 )
 
-const companyLogosBucket = "company-logos"
+const bucket = "company-logos"
 
-// Service handles logo downloads and company metadata persistence.
-type Service struct {
-	minio          *minio.Client
-	minioPublicURL string
-}
+type service struct{}
 
-// NewService initialises the MinIO client, ensures the bucket exists,
-// and sets up the MongoDB index on companies.company_id.
-func newService() (*Service, error) {
-	values, err := helpers.ReadEnvs("MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_PUBLIC_URL")
-	if err != nil {
+func newService(ctx context.Context) (*service, error) {
+	if err := infra.EnsureBucket(ctx, bucket, true); err != nil {
 		return nil, err
-	}
-	endpoint, accessKey, secretKey, publicURL := values[0], values[1], values[2], values[3]
-
-	mc, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-		Secure: false,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("minio client: %w", err)
-	}
-
-	ctx := system.Ctx()
-
-	exists, err := mc.BucketExists(ctx, companyLogosBucket)
-	if err != nil {
-		return nil, fmt.Errorf("minio check bucket: %w", err)
-	}
-	if !exists {
-		if err := mc.MakeBucket(ctx, companyLogosBucket, minio.MakeBucketOptions{}); err != nil {
-			return nil, fmt.Errorf("minio make bucket: %w", err)
-		}
-		policy := fmt.Sprintf(
-			`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}`,
-			companyLogosBucket,
-		)
-		if err := mc.SetBucketPolicy(ctx, companyLogosBucket, policy); err != nil {
-			logrus.Warnf("minio: set public read policy: %v", err)
-		}
 	}
 
 	spec := system.CompoundIndexSpec{
@@ -67,17 +31,13 @@ func newService() (*Service, error) {
 		Unique:     true,
 	}
 	if err := system.GetStorage().EnsureCompoundIndex(ctx, spec); err != nil {
-		logrus.Warnf("ensure company_id index: %v", err)
+		logrus.Warnf("company_logo: ensure index: %v", err)
 	}
 
-	return &Service{minio: mc, minioPublicURL: publicURL}, nil
+	return &service{}, nil
 }
 
-// handleDownloadLogo processes a CompanyLogoDownloadRequestedEvent:
-// skips if the company is already known, downloads the logo, stores it in
-// MinIO, upserts the Company document in MongoDB, and publishes
-// company.logo.downloaded.
-func (s *Service) handleDownloadLogo(ctx context.Context, evt models.CompanyLogoDownloadRequestedEvent) error {
+func (s *service) handle(ctx context.Context, evt models.CompanyLogoDownloadRequestedEvent) error {
 	log := logrus.WithFields(logrus.Fields{"company_id": evt.CompanyID, "source": evt.Source})
 
 	var existing []models.Company
@@ -86,7 +46,6 @@ func (s *Service) handleDownloadLogo(ctx context.Context, evt models.CompanyLogo
 	); err != nil {
 		return fmt.Errorf("lookup company: %w", err)
 	}
-
 	if len(existing) > 0 {
 		log.Debugf("company already synced, skipping")
 		return nil
@@ -103,15 +62,15 @@ func (s *Service) handleDownloadLogo(ctx context.Context, evt models.CompanyLogo
 				ext = ".jpg"
 			}
 			objectKey := fmt.Sprintf("%s/%s%s", evt.Source, evt.CompanyID, ext)
-			_, err = s.minio.PutObject(
-				ctx, companyLogosBucket, objectKey,
+			_, err = infra.GetMinio().PutObject(
+				ctx, bucket, objectKey,
 				bytes.NewReader(data), int64(len(data)),
 				minio.PutObjectOptions{ContentType: contentType},
 			)
 			if err != nil {
-				log.Warnf("upload logo to minio: %v", err)
+				log.Warnf("upload logo: %v", err)
 			} else {
-				logoStorageURL = fmt.Sprintf("%s/%s/%s", s.minioPublicURL, companyLogosBucket, objectKey)
+				logoStorageURL = fmt.Sprintf("%s/%s/%s", infra.MinioPublicURL(), bucket, objectKey)
 			}
 		}
 	}
@@ -130,9 +89,8 @@ func (s *Service) handleDownloadLogo(ctx context.Context, evt models.CompanyLogo
 		CompanyID:      evt.CompanyID,
 		LogoStorageURL: logoStorageURL,
 	}
-	subject := constants.SubjectStorageCompanyLogoDownloaded
-	if err := system.Publish(ctx, subject, out); err != nil {
-		log.Warnf("publish %s: %v", subject, err)
+	if err := system.Publish(ctx, constants.SubjectStorageCompanyLogoDownloaded, out); err != nil {
+		log.Warnf("publish %s: %v", constants.SubjectStorageCompanyLogoDownloaded, err)
 	}
 
 	return nil

@@ -5,6 +5,7 @@ import (
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/storage/company_logo"
+	"hblabs.co/falcon/storage/cv"
 )
 
 func main() {
@@ -12,18 +13,20 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
+	// cv.prepare.requested / cv.prepared are NATS core request/reply — not in any stream.
 	system.InitBus(system.NewBusConfig(
 		constants.StreamStorage,
 		constants.SubjectStorageCompanyLogoRequested,
 		constants.SubjectStorageCompanyLogoDownloaded,
+		constants.SubjectCVIndexRequested,
+		constants.SubjectCVIndexed,
 	))
 
-	err := system.Run(
+	if err := system.Run(
 		system.Ctx(),
 		company_logo.NewModule(),
-		// next_module.NewModule(),
-	)
-	if err != nil {
+		cv.NewModule(),
+	); err != nil {
 		logrus.Fatalf("start: %v", err)
 	}
 

@@ -24,3 +24,26 @@ type CompanyLogoDownloadedEvent struct {
 	CompanyID      string `json:"company_id"`
 	LogoStorageURL string `json:"logo_storage_url"` // public MinIO URL, empty if logo unavailable
 }
+
+// CVPrepareRequestedEvent is published to "cv.prepare.requested" by any service
+// that needs a presigned MinIO upload URL for a new CV.
+type CVPrepareRequestedEvent struct {
+	RequestID string `json:"request_id"` // correlation ID — echoed back in CVPreparedEvent
+	Filename  string `json:"filename"`
+}
+
+// CVPreparedEvent is published to "cv.prepared" by falcon-storage
+// in response to CVPrepareRequestedEvent.
+type CVPreparedEvent struct {
+	RequestID string `json:"request_id"`
+	CVID      string `json:"cv_id"`
+	UploadURL string `json:"upload_url"`
+	ExpiresAt string `json:"expires_at"` // RFC3339
+}
+
+// CVIndexRequestedEvent is published to "cv.index.requested" to trigger
+// async CV processing (text extraction, embedding, Qdrant upsert).
+type CVIndexRequestedEvent struct {
+	CVID  string `json:"cv_id"`
+	Email string `json:"email"`
+}

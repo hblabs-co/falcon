@@ -130,6 +130,7 @@ type apiProject struct {
 	ID           string   `json:"id"`
 	ProjectTitle string   `json:"projectTitle"`
 	CompanyName  string   `json:"companyName"`
+	CompanyID    string   `json:"companyId"`
 	CompanyLogo  []string `json:"companyLogo"`
 	SkillTags    []struct {
 		SkillName string `json:"skillName"`
@@ -184,6 +185,7 @@ func (p *apiProject) toCandidate() *ProjectCandidate {
 		Source:            Source,
 		Title:             p.ProjectTitle,
 		Company:           p.CompanyName,
+		CompanyID:         p.CompanyID,
 		CompanyLogo:       logo,
 		Skills:            skills,
 		StartDate:         p.ProjectStartDate,

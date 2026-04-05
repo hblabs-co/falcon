@@ -6,6 +6,7 @@ import (
 
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/interfaces"
+	"hblabs.co/falcon/common/models"
 )
 
 // ProjectCandidate is a single entry from the /projekte listing page.
@@ -15,6 +16,7 @@ type ProjectCandidate struct {
 	Source            string    `json:"source"              bson:"source"`
 	Title             string    `json:"title"               bson:"title"`
 	Company           string    `json:"company"             bson:"company"`
+	CompanyID         string    `json:"company_id"          bson:"company_id"`
 	CompanyLogo       string    `json:"company_logo"        bson:"company_logo"`
 	Skills            []string  `json:"skills"              bson:"skills"`
 	StartDate         string    `json:"start_date"          bson:"start_date"`
@@ -28,6 +30,22 @@ type ProjectCandidate struct {
 
 	Current int
 	Total   int
+}
+
+func (c *ProjectCandidate) GetDownloadCompanyLogoRequestEvent() models.CompanyLogoDownloadRequestedEvent {
+	logoURL := ""
+	if c.CompanyLogo != "" {
+		logoURL = baseUrl + c.CompanyLogo
+	}
+
+	evt := models.CompanyLogoDownloadRequestedEvent{
+		CompanyID:   c.CompanyID,
+		CompanyName: c.Company,
+		LogoURL:     logoURL,
+		Source:      Source,
+	}
+
+	return evt
 }
 
 // ProjectOverview holds the quick-info items from the overview panel.

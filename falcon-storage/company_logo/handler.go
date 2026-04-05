@@ -10,29 +10,20 @@ import (
 	"hblabs.co/falcon/common/system"
 )
 
-// Subscribe registers a durable NATS consumer for storage.logo.requested.
-func (s *Service) subscribe(ctx context.Context) error {
+func (s *service) subscribe(ctx context.Context) error {
 	stream := constants.StreamStorage
 	subject := constants.SubjectStorageCompanyLogoRequested
-	consumerName := "falcon-storage-logo"
+	consumer := "falcon-storage-company-logo"
 
-	err := system.Subscribe(
-		ctx,
-		stream,
-		consumerName,
-		subject,
-		func(data []byte) error {
-			var evt models.CompanyLogoDownloadRequestedEvent
-			if err := json.Unmarshal(data, &evt); err != nil {
-				return err
-			}
-			return s.handleDownloadLogo(context.Background(), evt)
-		},
-	)
-
+	err := system.Subscribe(ctx, stream, consumer, subject, func(data []byte) error {
+		var evt models.CompanyLogoDownloadRequestedEvent
+		if err := json.Unmarshal(data, &evt); err != nil {
+			return err
+		}
+		return s.handle(context.Background(), evt)
+	})
 	if err == nil {
-		logrus.Infof("consumer %s subscribed to %s.%s", consumerName, stream, subject)
+		logrus.Infof("[company_logo] subscribed %s → %s", consumer, subject)
 	}
-
 	return err
 }

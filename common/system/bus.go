@@ -15,15 +15,18 @@ import (
 
 var (
 	busOnce sync.Once
+	natConn *natsio.Conn
 	bus     jetstream.JetStream
 )
 
 // GetBus returns the process-wide JetStream handle.
-func GetBus() jetstream.JetStream {
-	return bus
-}
+func GetBus() jetstream.JetStream { return bus }
 
-// Publish marshals payload to JSON and publishes it to subject.
+// GetConn returns the underlying NATS connection.
+// Needed for core NATS request/reply and non-JetStream subscriptions.
+func GetConn() *natsio.Conn { return natConn }
+
+// Publish marshals payload to JSON and publishes it to subject via JetStream.
 func Publish(ctx context.Context, subject string, payload any) error {
 	data, err := json.Marshal(payload)
 	if err != nil {
@@ -33,9 +36,53 @@ func Publish(ctx context.Context, subject string, payload any) error {
 	return err
 }
 
+// Request sends payload to subject using NATS core request/reply and
+// JSON-unmarshals the response into result (if non-nil).
+// Use this for synchronous RPC calls where the responder is not a JetStream consumer.
+func Request(ctx context.Context, subject string, payload any, result any) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	msg, err := natConn.RequestWithContext(ctx, subject, data)
+	if err != nil {
+		return err
+	}
+	if result != nil {
+		return json.Unmarshal(msg.Data, result)
+	}
+	return nil
+}
+
+// SubscribeCore registers a NATS core (non-JetStream) subscription.
+// handler receives the request data and returns a response payload (JSON-marshalled)
+// and an error. If the incoming message has a reply-to subject and handler returns
+// no error, the response is sent there automatically.
+// Returns an error indicating that the subscription itself could not be created.
+func SubscribeCore(subject string, handler func(data []byte) (any, error)) error {
+	_, err := natConn.Subscribe(subject, func(msg *natsio.Msg) {
+		result, err := handler(msg.Data)
+		if err != nil {
+			logrus.Errorf("core subscriber %s: %v", subject, err)
+			return
+		}
+		if msg.Reply == "" || result == nil {
+			return
+		}
+		resp, err := json.Marshal(result)
+		if err != nil {
+			logrus.Errorf("core subscriber %s: marshal reply: %v", subject, err)
+			return
+		}
+		if err := natConn.Publish(msg.Reply, resp); err != nil {
+			logrus.Errorf("core subscriber %s: send reply: %v", subject, err)
+		}
+	})
+	return err
+}
+
 // InitBus connects to NATS and ensures the given JetStream streams exist.
 // Reads NATS_URL from the environment — fatals if not set.
-// Callers pass their own stream configs so each service controls its own streams.
 func InitBus(streams []jetstream.StreamConfig) {
 	busOnce.Do(func() {
 		url, err := helpers.ReadEnv("NATS_URL")
@@ -59,21 +106,21 @@ func InitBus(streams []jetstream.StreamConfig) {
 			}
 		}
 
+		natConn = nc
 		bus = js
 		logrus.Infof("NATS JetStream connected — %d streams ready", len(streams))
 	})
 }
 
 // Subscribe creates a durable JetStream consumer and dispatches messages to
-// handler in a background goroutine. handler receives the raw JSON bytes;
-// returning an error nacks the message so it will be redelivered.
+// handler in a background goroutine. Returning an error nacks the message.
 func Subscribe(ctx context.Context, stream, consumer, subject string, handler func([]byte) error) error {
 	cons, err := GetBus().CreateOrUpdateConsumer(ctx, stream, jetstream.ConsumerConfig{
 		Name:          consumer,
 		FilterSubject: subject,
 		AckPolicy:     jetstream.AckExplicitPolicy,
 		DeliverPolicy: jetstream.DeliverNewPolicy,
-		AckWait: 10 * time.Minute,
+		AckWait:       10 * time.Minute,
 	})
 	if err != nil {
 		return fmt.Errorf("create consumer %s: %w", consumer, err)
@@ -107,7 +154,6 @@ func Subscribe(ctx context.Context, stream, consumer, subject string, handler fu
 }
 
 // NewBusConfig builds a single-stream JetStream config.
-// Services pass the result directly to InitBus — no need to import the jetstream package.
 func NewBusConfig(streamName string, subjects ...string) []jetstream.StreamConfig {
 	return []jetstream.StreamConfig{
 		{

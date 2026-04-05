@@ -1,8 +1,8 @@
-package company_logo
+package cv
 
 import "context"
 
-// Module wires the company-logo pipeline into falcon-storage.
+// Module wires the CV ingest pipeline into falcon-storage.
 type Module struct{}
 
 func NewModule() *Module { return &Module{} }

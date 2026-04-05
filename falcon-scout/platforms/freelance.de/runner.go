@@ -28,7 +28,6 @@ func Run() {
 			getLogger().Errorf("ensure index %s.%s: %v", spec.Collection, spec.Field, err)
 		}
 	}
-
 	if err := getSession().Login(); err != nil {
 		getLogger().Fatalf("login failed: %v", err)
 	}
@@ -91,6 +90,14 @@ func processOneCandidate(ctx context.Context, c *ProjectCandidate) {
 		return
 	}
 	inspector.GetLogger().Infof("project saved with internal id %s", p.GetId())
+
+	if c.CompanyID != "" {
+		evt := c.GetDownloadCompanyLogoRequestEvent()
+		subject := constants.SubjectStorageCompanyLogoRequested
+		if err := system.Publish(ctx, subject, evt); err != nil {
+			inspector.GetLogger().Warnf("publish %s for company %s: %v", subject, c.CompanyID, err)
+		}
+	}
 
 	subject := constants.SubjectProjectCreated
 	if c.ExistingID != "" {
