@@ -12,18 +12,21 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
-	system.InitBus(system.NewBusConfig(
-		constants.StreamMatches,
-		constants.SubjectMatchPending,
-		constants.SubjectMatchResult,
-	))
+	system.InitBus(system.MergeBusConfigs(
+		system.NewBusConfig(
+			constants.StreamSignal,
+			constants.SubjectSignalDeviceTokenRegister,
+		),
+		system.NewBusConfig(
+			constants.StreamMatches,
+			constants.SubjectMatchPending,
+			constants.SubjectMatchResult,
+		)))
 
-	svc, err := signal.NewService()
-	if err != nil {
-		logrus.Fatalf("service init: %v", err)
+	if err := system.Run(system.Ctx(), signal.NewModule()); err != nil {
+		logrus.Fatalf("start: %v", err)
 	}
 
-	if err := svc.Run(); err != nil {
-		logrus.Fatalf("server: %v", err)
-	}
+	system.Wait()
+	logrus.Info("service stopped")
 }

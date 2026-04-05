@@ -1,73 +1,45 @@
 package signal
 
 import (
-	"net/http"
-	"time"
+	"context"
 
-	"github.com/gin-gonic/gin"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 )
 
-// routes registers all HTTP routes on r for svc.
-func routes(r *gin.Engine) {
-	r.GET("/health", health)
-	r.POST("/device-token", handleRegisterToken())
-}
+// Module wires the signal pipeline into falcon-signal.
+type Module struct{}
 
-func health(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "ok"})
-}
+func NewModule() *Module { return &Module{} }
 
-// handleRegisterToken godoc
-// POST /device-token
-// Body: { "user_id": "...", "token": "<apns device token>" }
-// Upserts the device token for the given user.
-func handleRegisterToken() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var body struct {
-			UserID string `json:"user_id" binding:"required"`
-			Token  string `json:"token"   binding:"required"`
-		}
-		if err := c.ShouldBindJSON(&body); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx := c.Request.Context()
-		now := time.Now()
-
-		dt := models.DeviceToken{
-			ID:        gonanoid.Must(),
-			UserID:    body.UserID,
-			Token:     body.Token,
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-
-		if err := system.GetStorage().Set(ctx, constants.MongoDeviceTokensCollection,
-			map[string]any{"token": body.Token}, // upsert by token — each device is independent
-			dt,
-		); err != nil {
-			logrus.Errorf("register device token: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not register device token"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"status": "registered"})
+func (m *Module) Register(ctx context.Context) error {
+	svc, err := newService()
+	if err != nil {
+		return err
 	}
-}
 
-func ginLogger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		logrus.WithFields(logrus.Fields{
-			"method": c.Request.Method,
-			"path":   c.Request.URL.Path,
-			"status": c.Writer.Status(),
-		}).Info("request")
+	if err := system.Subscribe(
+		ctx,
+		constants.StreamMatches,
+		"falcon-signal-match-result",
+		constants.SubjectMatchResult,
+		svc.handleMatchResult,
+	); err != nil {
+		return err
 	}
+	logrus.Infof("[signal] subscribed → %s", constants.SubjectMatchResult)
+
+	if err := system.Subscribe(
+		ctx,
+		constants.StreamSignal,
+		"falcon-signal-device-token",
+		constants.SubjectSignalDeviceTokenRegister,
+		svc.handleRegisterToken,
+	); err != nil {
+		return err
+	}
+	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalDeviceTokenRegister)
+
+	return nil
 }

@@ -17,17 +17,17 @@ struct NotificationsView: View {
                     }
                     .listStyle(.insetGrouped)
                 } else {
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            heroBanner
-                                .padding(.horizontal, 16)
-                                .padding(.top, 8)
-                            ContentUnavailableView(
-                                lm.t(.alertsEmpty),
-                                systemImage: "bell.slash",
-                                description: Text(lm.t(.alertsEmptyDescription))
-                            )
-                        }
+                    VStack(spacing: 0) {
+                        heroBanner
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                        Spacer()
+                        ContentUnavailableView(
+                            lm.t(.alertsEmpty),
+                            systemImage: "bell.slash",
+                            description: Text(lm.t(.alertsEmptyDescription))
+                        )
+                        Spacer()
                     }
                 }
             }

@@ -22,4 +22,7 @@ const (
 	SubjectCVPrepareRequested           = "cv.prepare.requested"
 	SubjectCVPrepared                   = "cv.prepared"
 	SubjectCVIndexRequested             = "cv.index.requested"
+
+	StreamSignal                        = "SIGNAL"
+	SubjectSignalDeviceTokenRegister    = "signal.device_token.register"
 )

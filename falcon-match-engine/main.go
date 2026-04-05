@@ -12,11 +12,11 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
-	system.InitBus(system.NewBusConfig(
+	system.InitBus(system.MergeBusConfigs(system.NewBusConfig(
 		constants.StreamMatches,
 		constants.SubjectMatchPending,
 		constants.SubjectMatchResult,
-	))
+	)))
 
 	svc, err := match.NewService()
 	if err != nil {

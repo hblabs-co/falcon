@@ -2,11 +2,12 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/api/cv"
 	"hblabs.co/falcon/api/scrape"
 	"hblabs.co/falcon/api/server"
+	"hblabs.co/falcon/api/signal"
+	"hblabs.co/falcon/common/constants"
+	"hblabs.co/falcon/common/system"
 )
 
 func main() {
@@ -14,7 +15,7 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
-	system.InitBus(append(
+	system.InitBus(system.MergeBusConfigs(
 		system.NewBusConfig(
 			constants.StreamScrape,
 			constants.SubjectScrapeRequested+".>",
@@ -24,12 +25,16 @@ func main() {
 			constants.StreamStorage,
 			constants.SubjectCVIndexRequested,
 			constants.SubjectCVIndexed,
-		)...,
-	))
+		),
+		system.NewBusConfig(
+			constants.StreamSignal,
+			constants.SubjectSignalDeviceTokenRegister,
+		)))
 
 	if err := server.Run(
 		scrape.Routes{},
 		cv.Routes{},
+		signal.Routes{},
 	); err != nil {
 		logrus.Fatalf("server: %v", err)
 	}

@@ -47,3 +47,10 @@ type CVIndexRequestedEvent struct {
 	CVID  string `json:"cv_id"`
 	Email string `json:"email"`
 }
+
+// DeviceTokenRegisterEvent is published to "signal.device_token.register"
+// by falcon-api when a client registers or refreshes its APNs device token.
+type DeviceTokenRegisterEvent struct {
+	UserID string `json:"user_id"`
+	Token  string `json:"token"`
+}

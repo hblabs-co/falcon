@@ -12,7 +12,7 @@ func main() {
 	system.LoadEnvs()
 	system.ConfigLogger()
 	system.Init()
-	system.InitBus(append(
+	system.InitBus(system.MergeBusConfigs(
 		system.NewBusConfig(
 			constants.StreamProjects,
 			constants.SubjectProjectCreated,
@@ -22,8 +22,7 @@ func main() {
 			constants.StreamScrape,
 			constants.SubjectScrapeRequested+".>",
 			constants.SubjectScrapeFailed,
-		)...,
-	))
+		)))
 
 	RunScrapeConsumer()
 

@@ -15,10 +15,10 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     var signalStatus: SignalStatus = .idle
     var lastNotification: ReceivedNotification?
 
-    // Signal URL source of truth:
-    // - DEBUG   → UserDefaults (editable from Settings) with Config.signalURL as fallback
+    // API URL source of truth:
+    // - DEBUG   → UserDefaults (editable from Settings) with Config.apiURL as fallback
     // - Release → hardcoded production falcon-api URL, never user-editable
-    private(set) var signalURL: String
+    private(set) var apiURL: String
 
     enum SignalStatus {
         case idle, registering, registered
@@ -33,18 +33,18 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     private override init() {
         #if DEBUG
-        signalURL = UserDefaults.standard.string(forKey: "signal_url") ?? Config.signalURL
+        apiURL = UserDefaults.standard.string(forKey: "api_url") ?? Config.apiURL
         #else
-        signalURL = "https://api.falcon.hblabs.co" // TODO: confirm production falcon-api URL
+        apiURL = "https://api.falcon.hblabs.co" // TODO: confirm production falcon-api URL
         #endif
         super.init()
         deviceToken = UserDefaults.standard.string(forKey: "apns_device_token")
     }
 
 #if DEBUG
-    func devSetSignalURL(_ url: String) {
-        signalURL = url
-        UserDefaults.standard.set(url, forKey: "signal_url")
+    func devSetAPIURL(_ url: String) {
+        apiURL = url
+        UserDefaults.standard.set(url, forKey: "api_url")
     }
 #endif
 
@@ -77,11 +77,11 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         registrationError = error.localizedDescription
     }
 
-    // MARK: - Register with falcon-signal
+    // MARK: - Register with falcon-api
 
     func registerWithSignal(userID: String) {
         guard let token = deviceToken else { return }
-        guard let url = URL(string: "\(signalURL)/device-token") else { return }
+        guard let url = URL(string: "\(apiURL)/device-token") else { return }
 
         signalStatus = .registering
 

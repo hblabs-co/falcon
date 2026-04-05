@@ -6,6 +6,7 @@ enum AppTab {
 
 struct MainTabView: View {
     @Environment(LanguageManager.self) var lm
+    @Environment(NotificationManager.self) var nm
     @State private var selectedTab: AppTab = .jobs
     @State private var contactDrawer: ContactDrawerInfo? = nil
 
@@ -33,6 +34,7 @@ struct MainTabView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .task { await nm.refreshStatus() }
     }
 
     private var floatingTabBar: some View {

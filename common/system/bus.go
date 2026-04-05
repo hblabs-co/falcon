@@ -163,3 +163,13 @@ func NewBusConfig(streamName string, subjects ...string) []jetstream.StreamConfi
 		},
 	}
 }
+
+func MergeBusConfigs(configs ...[]jetstream.StreamConfig) []jetstream.StreamConfig {
+	var result []jetstream.StreamConfig
+
+	for _, cfg := range configs {
+		result = append(result, cfg...)
+	}
+
+	return result
+}

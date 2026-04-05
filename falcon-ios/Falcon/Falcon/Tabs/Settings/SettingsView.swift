@@ -57,9 +57,9 @@ struct SettingsView: View {
     private var configSection: some View {
         Section(lm.t(.sectionConfiguration)) {
             LabeledContent(lm.t(.configSignalURL)) {
-                TextField("http://localhost:8083", text: Binding(
-                    get: { nm.signalURL },
-                    set: { nm.devSetSignalURL($0) }
+                TextField("http://localhost:8080", text: Binding(
+                    get: { nm.apiURL },
+                    set: { nm.devSetAPIURL($0) }
                 ))
                 .multilineTextAlignment(.trailing)
                 .keyboardType(.URL)
@@ -264,7 +264,7 @@ struct SettingsView: View {
     private func mailURL(to address: String) -> URL {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
         let build   = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
-        let body = "\n\n---\nUser ID: \(session.userID)\nVersion: \(version) (\(build))\nSignal URL: \(nm.signalURL)"
+        let body = "\n\n---\nUser ID: \(session.userID)\nVersion: \(version) (\(build))\nAPI URL: \(nm.apiURL)"
         let params = "subject=Falcon Support&body=\(body)"
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         return URL(string: "mailto:\(address)?\(params)") ?? URL(string: "mailto:\(address)")!
@@ -359,7 +359,7 @@ struct SettingsView: View {
     }
 
     private var canRegister: Bool {
-        nm.deviceToken != nil && !session.userID.isEmpty && !nm.signalURL.isEmpty
+        nm.deviceToken != nil && !session.userID.isEmpty && !nm.apiURL.isEmpty
     }
 
     private var registerButtonLabel: String {

@@ -14,7 +14,7 @@ enum StringKey {
     case notifEnableButton
 
     // Configuration
-    case configSignalURL, configUserID
+    case configAPIURL, configUserID
     case configRegister, configRegistering, configRegistered
 
     // Device token
@@ -91,9 +91,9 @@ enum Strings {
             .notifStatusPending: "Pending",
             .notifEnableButton: "Enable Notifications",
 
-            .configSignalURL: "Signal URL",
+            .configAPIURL: "API URL",
             .configUserID: "User ID",
-            .configRegister: "Register with Signal",
+            .configRegister: "Register with API",
             .configRegistering: "Registering…",
             .configRegistered: "Registered ✓",
 
@@ -176,9 +176,9 @@ enum Strings {
             .notifStatusPending: "Ausstehend",
             .notifEnableButton: "Benachrichtigungen aktivieren",
 
-            .configSignalURL: "Signal URL",
+            .configAPIURL: "API URL",
             .configUserID: "Benutzer-ID",
-            .configRegister: "Bei Signal registrieren",
+            .configRegister: "Mit API registrieren",
             .configRegistering: "Wird registriert…",
             .configRegistered: "Registriert ✓",
 
@@ -261,9 +261,9 @@ enum Strings {
             .notifStatusPending: "Pendiente",
             .notifEnableButton: "Activar notificaciones",
 
-            .configSignalURL: "Signal URL",
+            .configAPIURL: "API URL",
             .configUserID: "ID de usuario",
-            .configRegister: "Registrar con Signal",
+            .configRegister: "Registrar con API",
             .configRegistering: "Registrando…",
             .configRegistered: "Registrado ✓",
 

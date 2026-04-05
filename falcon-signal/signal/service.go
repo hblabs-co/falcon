@@ -4,50 +4,26 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 )
 
-// Service consumes match.result events and delivers iOS push notifications.
+// Service handles push notifications and device token persistence.
 type Service struct {
 	apns *apnsClient
 }
 
-func NewService() (*Service, error) {
+func newService() (*Service, error) {
 	apns, err := newAPNSClient()
 	if err != nil {
 		return nil, fmt.Errorf("apns client: %w", err)
 	}
 	return &Service{apns: apns}, nil
-}
-
-// Run subscribes to match.result and starts the HTTP server. Blocks until exit.
-func (s *Service) Run() error {
-	if err := system.Subscribe(
-		system.Ctx(),
-		constants.StreamMatches,
-		"signal",
-		constants.SubjectMatchResult,
-		s.handleMatchResult,
-	); err != nil {
-		return fmt.Errorf("subscribe match.result: %w", err)
-	}
-	logrus.Infof("subscribed to %s", constants.SubjectMatchResult)
-
-	port := helpers.ReadEnvOptional("PORT", "8083")
-
-	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(ginLogger())
-	r.SetTrustedProxies(nil)
-
-	routes(r)
-	return r.Run(":" + port)
 }
 
 func (s *Service) handleMatchResult(data []byte) error {
@@ -66,7 +42,7 @@ func (s *Service) handleMatchResult(data []byte) error {
 
 	var tokens []models.DeviceToken
 	if err := system.GetStorage().GetAllByField(ctx, constants.MongoDeviceTokensCollection, "user_id", event.UserID, &tokens); err != nil {
-		log.Warnf("could not fetch device tokens for user %s: %v", event.UserID, err)
+		log.Warnf("fetch device tokens for user %s: %v", event.UserID, err)
 		return nil
 	}
 	if len(tokens) == 0 {
@@ -78,7 +54,7 @@ func (s *Service) handleMatchResult(data []byte) error {
 	for _, dt := range tokens {
 		if err := s.apns.Send(ctx, dt.Token, &event); err != nil {
 			if s.apns.IsStaleToken(err) {
-				log.Warnf("stale apns token for device %s… — queued for removal", dt.Token[:8])
+				log.Warnf("stale apns token %s…— queued for removal", dt.Token[:8])
 				staleTokens = append(staleTokens, dt.Token)
 			} else {
 				log.Errorf("send push to device %s…: %v", dt.Token[:8], err)
@@ -96,5 +72,34 @@ func (s *Service) handleMatchResult(data []byte) error {
 		}
 	}
 
+	return nil
+}
+
+func (s *Service) handleRegisterToken(data []byte) error {
+	var evt models.DeviceTokenRegisterEvent
+	if err := json.Unmarshal(data, &evt); err != nil {
+		return fmt.Errorf("unmarshal device_token.register: %w", err)
+	}
+
+	now := time.Now()
+	dt := models.DeviceToken{
+		ID:        gonanoid.Must(),
+		UserID:    evt.UserID,
+		Token:     evt.Token,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	ctx := context.Background()
+	if err := system.GetStorage().Set(
+		ctx,
+		constants.MongoDeviceTokensCollection,
+		map[string]any{"token": evt.Token},
+		dt,
+	); err != nil {
+		return fmt.Errorf("upsert device token: %w", err)
+	}
+
+	logrus.Infof("[signal] registered token %s… for user %s", evt.Token[:8], evt.UserID)
 	return nil
 }
