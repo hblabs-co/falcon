@@ -1,0 +1,6 @@
+// Copy this file to Config.swift and fill in your values.
+// Config.swift is gitignored and must never be committed.
+enum Config {
+    static let signalURL = "http://your-signal-server:8083"
+    static let userID    = "your-nanoid-user-id"
+}
