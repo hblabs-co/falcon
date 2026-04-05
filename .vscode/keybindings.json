@@ -1,0 +1,13 @@
+[
+  {
+    "key": "cmd+shift+x",
+    "command": "workbench.action.debug.stopAll",
+    "when": "inDebugMode"
+  },
+  {
+    "key": "cmd+shift+x",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Docker: stop infrastructure",
+    "when": "!inDebugMode"
+  }
+]
