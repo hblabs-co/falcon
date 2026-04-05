@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
@@ -80,15 +81,21 @@ func (s *Service) handleMatchPending(data []byte) error {
 		return fmt.Errorf("llm score: %w", err)
 	}
 
-	if result.Score < s.threshold {
-		log.Infof("score %.1f below threshold %.1f — skipping", result.Score, s.threshold)
-		return nil
-	}
-
 	result.CVID = event.CVID
 	result.UserID = event.UserID
 	result.ProjectID = event.ProjectID
 	result.Platform = event.Platform
+	result.PassedThreshold = result.Score >= s.threshold
+	result.ScoredAt = time.Now()
+
+	if err := system.GetStorage().Insert(ctx, constants.MongoMatchResultsCollection, result); err != nil {
+		log.Errorf("save match result to mongodb: %v", err)
+	}
+
+	if !result.PassedThreshold {
+		log.Infof("score %.1f below threshold %.1f — saved to mongodb, not forwarded", result.Score, s.threshold)
+		return nil
+	}
 
 	if err := system.Publish(ctx, constants.SubjectMatchResult, result); err != nil {
 		return fmt.Errorf("publish match.result: %w", err)

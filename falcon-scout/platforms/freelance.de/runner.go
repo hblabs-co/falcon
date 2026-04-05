@@ -57,6 +57,19 @@ func Run() {
 	})
 }
 
+// ScrapeURL handles an on-demand scrape for a single URL received via NATS.
+// It builds a minimal ProjectCandidate from the URL and delegates to processOneCandidate.
+func ScrapeURL(ctx context.Context, url string) {
+	candidate := &ProjectCandidate{
+		PlatformID: platformIDRe.FindString(url),
+		URL:        url,
+		Source:     Source,
+		Current:    1,
+		Total:      1,
+	}
+	processOneCandidate(ctx, candidate)
+}
+
 // processOneCandidate fetches full project details for a candidate and upserts a PersistedProject to MongoDB.
 func processOneCandidate(ctx context.Context, c *ProjectCandidate) {
 	inspector := &Inspector{Url: c.URL, PlatformID: c.PlatformID, Current: c.Current, Total: c.Total}

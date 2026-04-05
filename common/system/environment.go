@@ -26,6 +26,13 @@ func LoadEnvs() {
 	}
 }
 
+// Platform returns the PLATFORM environment variable. Fatals if not set.
+// Used by multi-platform services (e.g. falcon-scout) to identify which platform
+// this instance is responsible for.
+func Platform() string {
+	return MustEnv("PLATFORM")
+}
+
 // PollInterval reads POLL_INTERVAL from the environment (e.g. "30s", "5m").
 // Defaults to 30s if unset or invalid.
 func PollInterval() time.Duration {

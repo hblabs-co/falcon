@@ -23,8 +23,9 @@ Scoring rules you must follow:
 - missing_skills must list every requirement not clearly evidenced in the CV. An empty array means the CV explicitly covers ALL requirements — this should be rare.
 - negative_points must be honest. If there are gaps, list them. An empty array means there are zero concerns — use it sparingly.
 - communication_clarity reflects only writing quality and structure, not technical strength. A score of 10 means flawless professional writing — rare.
+- summary must be a single sentence in German, max 120 characters, suitable as an iOS push notification body. Format: "Score {score} · {strongest fit reason}, {main gap if any}."
 
-All text fields in the JSON response (positive_points, negative_points, improvement_tips, matched_skills, missing_skills) must be written in German.
+All text fields in the JSON response (positive_points, negative_points, improvement_tips, matched_skills, missing_skills, summary) must be written in German.
 
 Always respond with valid JSON only. No markdown, no explanation outside the JSON.`
 
@@ -55,7 +56,8 @@ Respond ONLY with this JSON (no markdown, no extra fields):
   "missing_skills": [<up to 5 skills the project requires that are absent or unclear in the CV — be thorough>],
   "positive_points": [<2-4 honest sentences about genuine strengths for this specific project>],
   "negative_points": [<1-3 honest sentences about real gaps or concerns — required if score < 8>],
-  "improvement_tips": [<up to 3 concrete, specific actions the candidate could take to improve chances on similar projects>]
+  "improvement_tips": [<up to 3 concrete, specific actions the candidate could take to improve chances on similar projects>],
+  "summary": "<single sentence in German, max 120 chars, for iOS push notification>"
 }
 
 PROJECT:
@@ -82,25 +84,28 @@ type llmResponse struct {
 	PositivePoints  []string `json:"positive_points"`
 	NegativePoints  []string `json:"negative_points"`
 	ImprovementTips []string `json:"improvement_tips"`
+	Summary         string   `json:"summary"`
 }
 
 // maxCVChars is the safety limit for CV text sent to the LLM (~12 000 tokens at ~4 chars/token).
 const maxCVChars = 48_000
 
 type llmClient struct {
-	http  *ownhttp.Client
-	model string
+	http     *ownhttp.Client
+	model    string
+	provider string
 }
 
 func newLLMClient() (*llmClient, error) {
-	values, err := helpers.ReadEnvs("LLM_URL", "LLM_API_KEY", "LLM_MODEL")
+	values, err := helpers.ReadEnvs("LLM_URL", "LLM_API_KEY", "LLM_MODEL", "LLM_PROVIDER")
 	if err != nil {
 		return nil, err
 	}
-	url, key, model := values[0], values[1], values[2]
+	url, key, model, provider := values[0], values[1], values[2], values[3]
 	return &llmClient{
-		http:  ownhttp.New(url, map[string]string{"Authorization": "Bearer " + key}),
-		model: model,
+		http:     ownhttp.New(url, map[string]string{"Authorization": "Bearer " + key}),
+		model:    model,
+		provider: provider,
 	}, nil
 }
 
@@ -166,8 +171,10 @@ func (c *llmClient) Score(ctx context.Context, projectTitle, projectDescription,
 	}).Info("LLM scored")
 
 	result := &models.MatchResultEvent{
-		Score: raw.Score,
-		Label: models.LabelFromScore(raw.Score),
+		Score:       raw.Score,
+		Label:       models.LabelFromScore(raw.Score),
+		LLMModel:    c.model,
+		LLMProvider: c.provider,
 		Scores: models.MatchScores{
 			SkillsMatch:          raw.Scores.SkillsMatch,
 			SeniorityFit:         raw.Scores.SeniorityFit,
@@ -181,6 +188,7 @@ func (c *llmClient) Score(ctx context.Context, projectTitle, projectDescription,
 		PositivePoints:  raw.PositivePoints,
 		NegativePoints:  raw.NegativePoints,
 		ImprovementTips: raw.ImprovementTips,
+		Summary:         raw.Summary,
 	}
 
 	return result, nil

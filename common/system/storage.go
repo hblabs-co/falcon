@@ -164,3 +164,9 @@ func (s *Storage) SetMany(ctx context.Context, collection string, docs []UpsertD
 	_, err := s.db.Collection(collection).BulkWrite(ctx, models)
 	return err
 }
+
+// Insert adds a new document to collection without upsert semantics.
+func (s *Storage) Insert(ctx context.Context, collection string, doc any) error {
+	_, err := s.db.Collection(collection).InsertOne(ctx, doc)
+	return err
+}

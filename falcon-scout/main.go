@@ -12,11 +12,20 @@ func main() {
 	system.LoadEnvs()
 	system.ConfigLogger()
 	system.Init()
-	system.InitBus(system.NewBusConfig(
-		constants.StreamProjects,
-		constants.SubjectProjectCreated,
-		constants.SubjectProjectUpdated,
+	system.InitBus(append(
+		system.NewBusConfig(
+			constants.StreamProjects,
+			constants.SubjectProjectCreated,
+			constants.SubjectProjectUpdated,
+		),
+		system.NewBusConfig(
+			constants.StreamScrape,
+			constants.SubjectScrapeRequested+".>",
+			constants.SubjectScrapeFailed,
+		)...,
 	))
+
+	RunScrapeConsumer()
 
 	go freelancede.Run()
 

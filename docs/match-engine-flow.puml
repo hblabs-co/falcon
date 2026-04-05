@@ -1,0 +1,40 @@
+@startuml match-engine-flow
+skinparam defaultFontSize 13
+skinparam roundcorner 8
+skinparam sequenceArrowThickness 1.5
+skinparam participantPadding 20
+
+participant "NATS\nSTREAM: MATCHES" as NATS
+participant "falcon-match-engine" as Engine
+participant "MongoDB" as Mongo
+participant "LLM\n(Ollama / Mistral)" as LLM
+participant "NATS\nSTREAM: MATCHES" as OUT
+
+NATS -> Engine : match.pending\n{ cv_id, user_id, project_id, similarity }
+
+Engine -> Mongo : fetch PersistedCV by cv_id
+Mongo --> Engine : extracted_text
+
+Engine -> Mongo : fetch PersistedProject by project_id
+Mongo --> Engine : title + description
+
+Engine -> LLM : POST /v1/chat/completions\n(system prompt + CV + project)
+LLM --> Engine : JSON { score, scores[6], matched_skills,\nmissing_skills, positive_points,\nnegative_points, improvement_tips }
+
+Engine -> Mongo : insert match_results\n{ ...result, passed_threshold, scored_at }
+
+alt score >= threshold (default 6.0)
+  Engine -> OUT : match.result\n{ cv_id, user_id, project_id, score,\nlabel, scores, skills, points, tips }
+else score < threshold
+  note over Engine : stored in MongoDB only.\nNot forwarded to NATS.
+end
+
+note over Engine
+  Each pod is an independent worker.
+  Scale by adding replicas — all share
+  the durable consumer "match-engine".
+  NATS delivers each message to
+  exactly one pod.
+end note
+
+@enduml

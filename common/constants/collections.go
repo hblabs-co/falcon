@@ -5,4 +5,5 @@ const (
 	MongoProjectsCollection       = "projects"
 	MongoCVsCollection            = "cvs"
 	MongoScrapeFailuresCollection = "scrape_failures"
+	MongoMatchResultsCollection   = "match_results"
 )

@@ -2,6 +2,9 @@
 
 Consumes `match.pending` events from NATS, scores each CV/project pair using an
 LLM, and publishes a `match.result` event for every candidate above the score threshold.
+Candidates below the threshold receive a `match.rejected` event instead.
+
+![Flow](../docs/match-engine-flow.png)
 
 > ⚠️ **This is the only service in the Falcon stack that needs horizontal scaling.**
 > Each LLM call takes several seconds. A single new project can generate dozens of

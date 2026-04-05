@@ -25,4 +25,7 @@ func main() {
 	if err := svc.Run(); err != nil {
 		logrus.Fatalf("server: %v", err)
 	}
+
+	system.Wait()
+	logrus.Info("service stopped")
 }
