@@ -49,7 +49,7 @@ func handleRegisterToken() gin.HandlerFunc {
 		}
 
 		if err := system.GetStorage().Set(ctx, constants.MongoDeviceTokensCollection,
-			map[string]any{"user_id": body.UserID},
+			map[string]any{"token": body.Token}, // upsert by token — each device is independent
 			dt,
 		); err != nil {
 			logrus.Errorf("register device token: %v", err)

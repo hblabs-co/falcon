@@ -64,17 +64,37 @@ func (s *Service) handleMatchResult(data []byte) error {
 
 	ctx := context.Background()
 
-	var dt models.DeviceToken
-	if err := system.GetStorage().GetByField(ctx, constants.MongoDeviceTokensCollection, "user_id", event.UserID, &dt); err != nil {
-		log.Warnf("no device token for user %s — skipping push", event.UserID)
+	var tokens []models.DeviceToken
+	if err := system.GetStorage().GetAllByField(ctx, constants.MongoDeviceTokensCollection, "user_id", event.UserID, &tokens); err != nil {
+		log.Warnf("could not fetch device tokens for user %s: %v", event.UserID, err)
+		return nil
+	}
+	if len(tokens) == 0 {
+		log.Warnf("no device tokens for user %s — skipping push", event.UserID)
 		return nil
 	}
 
-	if err := s.apns.Send(ctx, dt.Token, &event); err != nil {
-		log.Errorf("send push notification: %v", err)
-		return err
+	var staleTokens []string
+	for _, dt := range tokens {
+		if err := s.apns.Send(ctx, dt.Token, &event); err != nil {
+			if s.apns.IsStaleToken(err) {
+				log.Warnf("stale apns token for device %s… — queued for removal", dt.Token[:8])
+				staleTokens = append(staleTokens, dt.Token)
+			} else {
+				log.Errorf("send push to device %s…: %v", dt.Token[:8], err)
+			}
+			continue
+		}
+		log.Infof("push sent to user %s device %s…", event.UserID, dt.Token[:8])
 	}
 
-	log.Infof("push notification sent to user %s", event.UserID)
+	if len(staleTokens) > 0 {
+		if err := system.GetStorage().DeleteManyByFieldIn(ctx, constants.MongoDeviceTokensCollection, "token", staleTokens); err != nil {
+			log.Errorf("bulk delete stale tokens: %v", err)
+		} else {
+			log.Infof("removed %d stale token(s) for user %s", len(staleTokens), event.UserID)
+		}
+	}
+
 	return nil
 }

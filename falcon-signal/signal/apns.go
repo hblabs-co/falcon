@@ -3,6 +3,7 @@ package signal
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/payload"
@@ -87,6 +88,17 @@ func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *model
 
 	logrus.Infof("apns sent — apns_id=%s device=%s…", resp.ApnsID, deviceToken[:8])
 	return nil
+}
+
+// IsStaleToken returns true when the APNs error indicates the device token is
+// no longer valid (device unregistered or token expired). The caller should
+// remove the token from the database.
+func (a *apnsClient) IsStaleToken(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "BadDeviceToken") || strings.Contains(msg, "Unregistered")
 }
 
 func labelTitle(label models.MatchLabel) string {
