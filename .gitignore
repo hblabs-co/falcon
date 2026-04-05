@@ -4,3 +4,4 @@ coverage.out
 __debug_*
 *.p8
 falcon-ios/**/Config.swift
+falcon-ios/**/xcuserdata/
