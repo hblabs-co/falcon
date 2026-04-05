@@ -149,6 +149,27 @@ func (s *Storage) EnsureIndex(ctx context.Context, spec StorageIndexSpec) error 
 	return err
 }
 
+// CompoundIndexSpec describes a multi-field MongoDB index.
+type CompoundIndexSpec struct {
+	Collection string
+	Fields     []string
+	Unique     bool
+}
+
+// EnsureCompoundIndex creates a compound index on multiple fields.
+func (s *Storage) EnsureCompoundIndex(ctx context.Context, spec CompoundIndexSpec) error {
+	keys := make(bson.D, len(spec.Fields))
+	for i, f := range spec.Fields {
+		keys[i] = bson.E{Key: f, Value: 1}
+	}
+	model := mongo.IndexModel{
+		Keys:    keys,
+		Options: options.Index().SetUnique(spec.Unique),
+	}
+	_, err := s.db.Collection(spec.Collection).Indexes().CreateOne(ctx, model)
+	return err
+}
+
 // UpsertDoc pairs a filter with the document to upsert in a SetMany call.
 type UpsertDoc struct {
 	Filter bson.M

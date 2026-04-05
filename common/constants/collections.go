@@ -7,4 +7,5 @@ const (
 	MongoScrapeFailuresCollection = "scrape_failures"
 	MongoMatchResultsCollection   = "match_results"
 	MongoDeviceTokensCollection   = "device_tokens"
+	MongoCompaniesCollection      = "companies"
 )
