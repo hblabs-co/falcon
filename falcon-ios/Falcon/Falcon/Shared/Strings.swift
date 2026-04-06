@@ -24,8 +24,7 @@ enum StringKey {
     case lastNotifNone
 
     // Language settings
-    case langAppLabel, langNotifLabel
-    case langAppDescription, langNotifDescription
+    case langAppLabel
 
     // Alerts view
     case alertsEmpty, alertsEmptyDescription, alertsBannerTagline
@@ -63,6 +62,12 @@ enum StringKey {
     case tabStats
     case statsMatchesTotal, statsAvgScore, statsAlertsTotal
     case statsMatchHistory, statsTopSkills, statsTopSkillsEmpty
+
+    // No-CV warning
+    case noCVWarningTitle, noCVWarningBody
+
+    // No notifications permission
+    case noNotifPermissionTitle, noNotifPermissionBody, noNotifPermissionButton
 }
 
 enum Strings {
@@ -103,9 +108,6 @@ enum Strings {
             .lastNotifNone: "None received yet",
 
             .langAppLabel: "App Language",
-            .langNotifLabel: "Notification Language",
-            .langAppDescription: "Language used for the app interface.",
-            .langNotifDescription: "Language for push notifications and LLM match summaries.",
 
             .alertsEmpty: "No Alerts Yet",
             .alertsEmptyDescription: "Received notifications will appear here.",
@@ -155,6 +157,13 @@ enum Strings {
             .statsMatchHistory: "Match History",
             .statsTopSkills: "Top Skills Demanded",
             .statsTopSkillsEmpty: "Data will appear after your first match",
+
+            .noCVWarningTitle: "No job alerts yet",
+            .noCVWarningBody: "Upload your CV so Falcon can match you with relevant projects and send you alerts.",
+
+            .noNotifPermissionTitle: "Notifications disabled",
+            .noNotifPermissionBody: "Enable notifications so Falcon can alert you when a matching project is found.",
+            .noNotifPermissionButton: "Enable Notifications",
         ],
 
         .german: [
@@ -188,9 +197,6 @@ enum Strings {
             .lastNotifNone: "Noch keine empfangen",
 
             .langAppLabel: "App-Sprache",
-            .langNotifLabel: "Benachrichtigungssprache",
-            .langAppDescription: "Sprache der App-Oberfläche.",
-            .langNotifDescription: "Sprache für Push-Benachrichtigungen und LLM-Match-Zusammenfassungen.",
 
             .alertsEmpty: "Keine Benachrichtigungen",
             .alertsEmptyDescription: "Empfangene Benachrichtigungen erscheinen hier.",
@@ -240,6 +246,13 @@ enum Strings {
             .statsMatchHistory: "Match-Verlauf",
             .statsTopSkills: "Gefragte Skills",
             .statsTopSkillsEmpty: "Daten erscheinen nach dem ersten Match",
+
+            .noCVWarningTitle: "Noch keine Job-Alerts",
+            .noCVWarningBody: "Lade deinen Lebenslauf hoch, damit Falcon dich mit passenden Projekten matcht und Alerts sendet.",
+
+            .noNotifPermissionTitle: "Benachrichtigungen deaktiviert",
+            .noNotifPermissionBody: "Aktiviere Benachrichtigungen, damit Falcon dich bei einem passenden Projekt informieren kann.",
+            .noNotifPermissionButton: "Benachrichtigungen aktivieren",
         ],
 
         .spanish: [
@@ -273,9 +286,6 @@ enum Strings {
             .lastNotifNone: "Ninguna recibida aún",
 
             .langAppLabel: "Idioma de la app",
-            .langNotifLabel: "Idioma de notificaciones",
-            .langAppDescription: "Idioma usado en la interfaz de la app.",
-            .langNotifDescription: "Idioma para las notificaciones push y los resúmenes del LLM.",
 
             .alertsEmpty: "Sin alertas aún",
             .alertsEmptyDescription: "Las notificaciones recibidas aparecerán aquí.",
@@ -325,6 +335,13 @@ enum Strings {
             .statsMatchHistory: "Historial",
             .statsTopSkills: "Skills más demandados",
             .statsTopSkillsEmpty: "Los datos aparecerán tras tu primer match",
+
+            .noCVWarningTitle: "Sin alertas de empleo",
+            .noCVWarningBody: "Sube tu CV para que Falcon te conecte con proyectos relevantes y te envíe alertas.",
+
+            .noNotifPermissionTitle: "Notificaciones desactivadas",
+            .noNotifPermissionBody: "Activa las notificaciones para que Falcon te avise cuando encuentre un proyecto compatible.",
+            .noNotifPermissionButton: "Activar notificaciones",
         ],
     ]
     // swiftlint:enable line_length

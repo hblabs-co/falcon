@@ -16,18 +16,18 @@ final class SessionManager {
     var isAuthenticated: Bool { !userID.isEmpty }
 
     private init() {
-        #if DEBUG
-        userID = UserDefaults.standard.string(forKey: "user_id") ?? Config.userID
-        #else
-        // In production userID is set after successful falcon-auth login.
         userID = UserDefaults.standard.string(forKey: "user_id") ?? ""
-        #endif
     }
 
+    /// Registered by NotificationManager at startup. Called whenever a new userID is set.
+    var onUserIDAvailable: ((String) -> Void)?
+
     /// Called after a successful falcon-auth login with the decoded JWT subject.
+    /// Fires `onUserIDAvailable` so NotificationManager can auto-register the device token.
     func setFromJWT(_ id: String) {
         userID = id
         UserDefaults.standard.set(id, forKey: "user_id")
+        onUserIDAvailable?(id)
     }
 
     func clearSession() {
@@ -35,11 +35,4 @@ final class SessionManager {
         UserDefaults.standard.removeObject(forKey: "user_id")
     }
 
-#if DEBUG
-    /// Dev-only: allows overriding userID from the Settings config section.
-    func devSetUserID(_ id: String) {
-        userID = id
-        UserDefaults.standard.set(id, forKey: "user_id")
-    }
-#endif
 }

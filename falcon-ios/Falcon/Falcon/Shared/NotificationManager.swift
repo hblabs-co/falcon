@@ -39,6 +39,9 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         #endif
         super.init()
         deviceToken = UserDefaults.standard.string(forKey: "apns_device_token")
+        SessionManager.shared.onUserIDAvailable = { [weak self] id in
+            self?.registerWithSignal(userID: id)
+        }
     }
 
 #if DEBUG
@@ -71,6 +74,10 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     func onTokenReceived(_ token: String) {
         deviceToken = token
         registrationError = nil
+        let userID = SessionManager.shared.userID
+        if !userID.isEmpty {
+            registerWithSignal(userID: userID)
+        }
     }
 
     func onRegistrationFailed(_ error: Error) {

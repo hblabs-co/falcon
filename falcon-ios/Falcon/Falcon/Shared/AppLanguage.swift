@@ -24,9 +24,9 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     }
 
     /// Reads the first preferred system language and maps it to a supported language.
-    /// Falls back to Spanish if the system language is not supported.
+    /// Falls back to English if the system language is not supported.
     static var fromSystem: AppLanguage {
-        let code = String((Locale.preferredLanguages.first ?? "es").prefix(2))
-        return AppLanguage(rawValue: code) ?? .spanish
+        let code = String((Locale.preferredLanguages.first ?? "en").prefix(2))
+        return AppLanguage(rawValue: code) ?? .english
     }
 }

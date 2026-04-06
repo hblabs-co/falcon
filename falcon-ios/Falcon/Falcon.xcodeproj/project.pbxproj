@@ -10,6 +10,9 @@
 		CF615B1C2F81FFCA008434B9 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CF615B1B2F81FFCA008434B9 /* UserNotifications.framework */; };
 		CF615B1E2F81FFCA008434B9 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CF615B1D2F81FFCA008434B9 /* UserNotificationsUI.framework */; };
 		CF615B282F81FFCA008434B9 /* FalconNotification.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CF615B192F81FFCA008434B9 /* FalconNotification.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CFE766C92F83508000FBE9E7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CFE766C82F83508000FBE9E7 /* WidgetKit.framework */; };
+		CFE766CB2F83508000FBE9E7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CFE766CA2F83508000FBE9E7 /* SwiftUI.framework */; };
+		CFE766DA2F83508100FBE9E7 /* FalconWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CFE766C72F83508000FBE9E7 /* FalconWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -19,6 +22,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = CF615B182F81FFCA008434B9;
 			remoteInfo = FalconNotification;
+		};
+		CFE766D82F83508100FBE9E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CF615AEB2F81F1A4008434B9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CFE766C62F83508000FBE9E7;
+			remoteInfo = FalconWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -30,6 +40,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				CF615B282F81FFCA008434B9 /* FalconNotification.appex in Embed Foundation Extensions */,
+				CFE766DA2F83508100FBE9E7 /* FalconWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -41,6 +52,9 @@
 		CF615B192F81FFCA008434B9 /* FalconNotification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FalconNotification.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF615B1B2F81FFCA008434B9 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		CF615B1D2F81FFCA008434B9 /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
+		CFE766C72F83508000FBE9E7 /* FalconWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FalconWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CFE766C82F83508000FBE9E7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		CFE766CA2F83508000FBE9E7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -58,6 +72,20 @@
 			);
 			target = CF615B182F81FFCA008434B9 /* FalconNotification */;
 		};
+		CFE766DE2F83508100FBE9E7 /* Exceptions for "FalconWidget" folder in "FalconWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CFE766C62F83508000FBE9E7 /* FalconWidgetExtension */;
+		};
+		CFE766E22F8352BF00FBE9E7 /* Exceptions for "Falcon" folder in "FalconWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/FalconJobsActivity.swift,
+			);
+			target = CFE766C62F83508000FBE9E7 /* FalconWidgetExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -65,6 +93,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				CF615B072F81F395008434B9 /* Exceptions for "Falcon" folder in "Falcon" target */,
+				CFE766E22F8352BF00FBE9E7 /* Exceptions for "Falcon" folder in "FalconWidgetExtension" target */,
 			);
 			path = Falcon;
 			sourceTree = "<group>";
@@ -75,6 +104,14 @@
 				CF615B332F82038C008434B9 /* Exceptions for "FalconNotification" folder in "FalconNotification" target */,
 			);
 			path = FalconNotification;
+			sourceTree = "<group>";
+		};
+		CFE766CC2F83508000FBE9E7 /* FalconWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CFE766DE2F83508100FBE9E7 /* Exceptions for "FalconWidget" folder in "FalconWidgetExtension" target */,
+			);
+			path = FalconWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -96,6 +133,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CFE766C42F83508000FBE9E7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CFE766CB2F83508000FBE9E7 /* SwiftUI.framework in Frameworks */,
+				CFE766C92F83508000FBE9E7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -104,6 +150,7 @@
 			children = (
 				CF615AF52F81F1A4008434B9 /* Falcon */,
 				CF615B1F2F81FFCA008434B9 /* FalconNotification */,
+				CFE766CC2F83508000FBE9E7 /* FalconWidget */,
 				CF615B1A2F81FFCA008434B9 /* Frameworks */,
 				CF615AF42F81F1A4008434B9 /* Products */,
 			);
@@ -114,6 +161,7 @@
 			children = (
 				CF615AF32F81F1A4008434B9 /* Falcon.app */,
 				CF615B192F81FFCA008434B9 /* FalconNotification.appex */,
+				CFE766C72F83508000FBE9E7 /* FalconWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -123,6 +171,8 @@
 			children = (
 				CF615B1B2F81FFCA008434B9 /* UserNotifications.framework */,
 				CF615B1D2F81FFCA008434B9 /* UserNotificationsUI.framework */,
+				CFE766C82F83508000FBE9E7 /* WidgetKit.framework */,
+				CFE766CA2F83508000FBE9E7 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -143,6 +193,7 @@
 			);
 			dependencies = (
 				CF615B272F81FFCA008434B9 /* PBXTargetDependency */,
+				CFE766D92F83508100FBE9E7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				CF615AF52F81F1A4008434B9 /* Falcon */,
@@ -176,6 +227,28 @@
 			productReference = CF615B192F81FFCA008434B9 /* FalconNotification.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		CFE766C62F83508000FBE9E7 /* FalconWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CFE766DB2F83508100FBE9E7 /* Build configuration list for PBXNativeTarget "FalconWidgetExtension" */;
+			buildPhases = (
+				CFE766C32F83508000FBE9E7 /* Sources */,
+				CFE766C42F83508000FBE9E7 /* Frameworks */,
+				CFE766C52F83508000FBE9E7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CFE766CC2F83508000FBE9E7 /* FalconWidget */,
+			);
+			name = FalconWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = FalconWidgetExtension;
+			productReference = CFE766C72F83508000FBE9E7 /* FalconWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -190,6 +263,9 @@
 						CreatedOnToolsVersion = 26.4;
 					};
 					CF615B182F81FFCA008434B9 = {
+						CreatedOnToolsVersion = 26.4;
+					};
+					CFE766C62F83508000FBE9E7 = {
 						CreatedOnToolsVersion = 26.4;
 					};
 				};
@@ -210,6 +286,7 @@
 			targets = (
 				CF615AF22F81F1A4008434B9 /* Falcon */,
 				CF615B182F81FFCA008434B9 /* FalconNotification */,
+				CFE766C62F83508000FBE9E7 /* FalconWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -223,6 +300,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CF615B172F81FFCA008434B9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CFE766C52F83508000FBE9E7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -246,6 +330,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CFE766C32F83508000FBE9E7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -253,6 +344,11 @@
 			isa = PBXTargetDependency;
 			target = CF615B182F81FFCA008434B9 /* FalconNotification */;
 			targetProxy = CF615B262F81FFCA008434B9 /* PBXContainerItemProxy */;
+		};
+		CFE766D92F83508100FBE9E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CFE766C62F83508000FBE9E7 /* FalconWidgetExtension */;
+			targetProxy = CFE766D82F83508100FBE9E7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -528,6 +624,71 @@
 			};
 			name = Release;
 		};
+		CFE766DC2F83508100FBE9E7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KC5LD84VKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FalconWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FalconWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.hblabs.falcon.Falcon.FalconWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CFE766DD2F83508100FBE9E7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KC5LD84VKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FalconWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FalconWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.hblabs.falcon.Falcon.FalconWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -554,6 +715,15 @@
 			buildConfigurations = (
 				CF615B2A2F81FFCA008434B9 /* Debug */,
 				CF615B2B2F81FFCA008434B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CFE766DB2F83508100FBE9E7 /* Build configuration list for PBXNativeTarget "FalconWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CFE766DC2F83508100FBE9E7 /* Debug */,
+				CFE766DD2F83508100FBE9E7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -15,7 +15,7 @@ struct MainTabView: View {
             Group {
                 switch selectedTab {
                 case .jobs:        JobsView()
-                case .alerts:      NotificationsView()
+                case .alerts:      NotificationsView(selectedTab: $selectedTab)
                 case .stats:       StatsView()
                 case .profile:     ProfileView()
                 case .settings:    SettingsView(contactDrawer: $contactDrawer)

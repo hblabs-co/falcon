@@ -3,6 +3,8 @@ import SwiftUI
 struct NotificationsView: View {
     @Environment(NotificationManager.self) var nm
     @Environment(LanguageManager.self) var lm
+    @Environment(SessionManager.self) var session
+    @Binding var selectedTab: AppTab
 
     var body: some View {
         NavigationStack {
@@ -22,17 +24,51 @@ struct NotificationsView: View {
                             .padding(.horizontal, 16)
                             .padding(.top, 8)
                         Spacer()
-                        ContentUnavailableView(
-                            lm.t(.alertsEmpty),
-                            systemImage: "bell.slash",
-                            description: Text(lm.t(.alertsEmptyDescription))
-                        )
+                        if nm.authStatus != .authorized {
+                            notificationsDisabledView
+                        } else if session.userID.isEmpty {
+                            VStack(spacing: 16) {
+                                ContentUnavailableView(
+                                    lm.t(.noCVWarningTitle),
+                                    systemImage: "exclamationmark.triangle.fill",
+                                    description: Text(lm.t(.noCVWarningBody))
+                                )
+                                Button(lm.t(.profileCVUpload)) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        selectedTab = .profile
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        } else {
+                            ContentUnavailableView(
+                                lm.t(.alertsEmpty),
+                                systemImage: "bell.slash",
+                                description: Text(lm.t(.alertsEmptyDescription))
+                            )
+                        }
                         Spacer()
                     }
                 }
             }
             .navigationTitle(lm.t(.tabAlerts))
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 90) }
+        }
+    }
+
+    // MARK: - Notifications disabled state
+
+    private var notificationsDisabledView: some View {
+        VStack(spacing: 16) {
+            ContentUnavailableView(
+                lm.t(.noNotifPermissionTitle),
+                systemImage: "bell.slash.fill",
+                description: Text(lm.t(.noNotifPermissionBody))
+            )
+            Button(lm.t(.noNotifPermissionButton)) {
+                nm.requestPermission()
+            }
+            .buttonStyle(.borderedProminent)
         }
     }
 

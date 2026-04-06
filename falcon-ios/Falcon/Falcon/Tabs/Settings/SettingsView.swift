@@ -51,12 +51,32 @@ struct SettingsView: View {
                     nm.requestPermission()
                 }
             }
+            if session.userID.isEmpty {
+                noCVWarningRow
+            }
+        }
+    }
+
+    private var noCVWarningRow: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(lm.t(.noCVWarningTitle))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.primary)
+                Text(lm.t(.noCVWarningBody))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } icon: {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
         }
     }
 
     private var configSection: some View {
         Section(lm.t(.sectionConfiguration)) {
-            LabeledContent(lm.t(.configSignalURL)) {
+            LabeledContent(lm.t(.configAPIURL)) {
                 TextField("http://localhost:8080", text: Binding(
                     get: { nm.apiURL },
                     set: { nm.devSetAPIURL($0) }
@@ -66,16 +86,6 @@ struct SettingsView: View {
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
             }
-            LabeledContent(lm.t(.configUserID)) {
-                TextField("nanoid…", text: Binding(
-                    get: { session.userID },
-                    set: { session.devSetUserID($0) }
-                ))
-                .multilineTextAlignment(.trailing)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-            }
-
             Button(action: register) {
                 HStack {
                     Text(registerButtonLabel)
@@ -97,27 +107,34 @@ struct SettingsView: View {
         Section(lm.t(.sectionLanguage)) {
             Picker(lm.t(.langAppLabel), selection: Binding(
                 get: { lm.appLanguage },
-                set: { lm.appLanguage = $0 }
+                set: { lang in
+                    lm.appLanguage = lang
+                    saveLanguageConfig(lang)
+                }
             )) {
                 ForEach(AppLanguage.allCases) { lang in
                     Text("\(lang.flag) \(lang.displayName)").tag(lang)
                 }
             }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Picker(lm.t(.langNotifLabel), selection: Binding(
-                    get: { lm.notificationLanguage },
-                    set: { lm.notificationLanguage = $0 }
-                )) {
-                    ForEach(AppLanguage.allCases) { lang in
-                        Text("\(lang.flag) \(lang.displayName)").tag(lang)
-                    }
-                }
-                Text(lm.t(.langNotifDescription))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
+    }
+
+    // MARK: - Config API
+
+    private func saveLanguageConfig(_ lang: AppLanguage) {
+        let userID = session.userID
+        guard !userID.isEmpty,
+              let url = URL(string: "\(nm.apiURL)/me/config") else { return }
+        var req = URLRequest(url: url)
+        req.httpMethod = "PUT"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: [
+            "user_id":  userID,
+            "platform": "ios",
+            "name":     "app_language",
+            "value":    lang.rawValue
+        ])
+        URLSession.shared.dataTask(with: req).resume()
     }
 
     private var tokenSection: some View {
