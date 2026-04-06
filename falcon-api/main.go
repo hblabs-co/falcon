@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/api/cv"
+	"hblabs.co/falcon/api/me"
 	"hblabs.co/falcon/api/projects"
 	"hblabs.co/falcon/api/scrape"
 	"hblabs.co/falcon/api/server"
@@ -31,6 +32,7 @@ func main() {
 		cv.Routes{},
 		signal.Routes{},
 		projects.Routes{},
+		me.Routes{},
 	); err != nil {
 		logrus.Fatalf("server: %v", err)
 	}

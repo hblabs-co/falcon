@@ -48,7 +48,25 @@ type normalizedDoc struct {
 	PlatformUpdatedAt string         `bson:"platform_updated_at"`
 	CompanyName       string         `bson:"company_name"`
 	En                map[string]any `bson:"en"`
+	De                map[string]any `bson:"de"`
+	Es                map[string]any `bson:"es"`
 	NormalizedAt      time.Time      `bson:"normalized_at"`
+}
+
+// langContent returns the localized content map for the requested language,
+// falling back to English when the requested language is missing or empty.
+func (d *normalizedDoc) langContent(lang string) map[string]any {
+	switch lang {
+	case "de":
+		if len(d.De) > 0 {
+			return d.De
+		}
+	case "es":
+		if len(d.Es) > 0 {
+			return d.Es
+		}
+	}
+	return d.En
 }
 
 func handleListProjects(c *gin.Context) {
@@ -57,6 +75,11 @@ func handleListProjects(c *gin.Context) {
 		if n, err := strconv.Atoi(p); err == nil && n > 0 {
 			page = n
 		}
+	}
+
+	lang := c.Query("lang")
+	if lang != "de" && lang != "es" {
+		lang = "en"
 	}
 
 	ctx := c.Request.Context()
@@ -107,7 +130,7 @@ func handleListProjects(c *gin.Context) {
 			CompanyLogoURL:      logoMap[d.CompanyName],
 			RecruiterRodeoStats: statsMap[d.CompanyName],
 			NormalizedAt:        d.NormalizedAt.Format(time.RFC3339),
-			Data:                d.En,
+			Data:                d.langContent(lang),
 		}
 	}
 
