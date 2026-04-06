@@ -13,12 +13,17 @@ import (
 	"hblabs.co/falcon/common/ownhttp"
 )
 
-const userPromptTemplate = `Normalize the following project JSON into the structured format described in your instructions.
-Respond ONLY with the JSON object {"en":{...},"de":{...},"es":{...}}. No markdown, no explanation.
+const normalizePromptTemplate = `Extract and normalize the following project JSON according to your instructions.
+Respond ONLY with the JSON object (no language wrapper keys). No markdown, no explanation.
 
 {{project_json}}`
 
-// llmResponse is the top-level object returned by the LLM.
+const translatePromptTemplate = `Translate the following normalized project JSON from German to English and Spanish.
+Respond ONLY with {"en":{...},"es":{...}}. No markdown, no explanation.
+
+{{de_json}}`
+
+// llmResponse is the top-level object returned after both LLM steps.
 type llmResponse struct {
 	En map[string]any `json:"en"`
 	De map[string]any `json:"de"`
@@ -26,39 +31,99 @@ type llmResponse struct {
 }
 
 type llmClient struct {
-	http         *ownhttp.Client
-	model        string
-	provider     string
-	systemPrompt string
+	http              *ownhttp.Client
+	model             string
+	provider          string
+	normalizePrompt   string
+	translatePrompt   string
 }
 
-func newLLMClient(systemPrompt string) (*llmClient, error) {
+func newLLMClient(normalizePrompt, translatePrompt string) (*llmClient, error) {
 	values, err := helpers.ReadEnvs("LLM_URL", "LLM_API_KEY", "LLM_MODEL", "LLM_PROVIDER")
 	if err != nil {
 		return nil, err
 	}
 	url, key, model, provider := values[0], values[1], values[2], values[3]
 	return &llmClient{
-		http:         ownhttp.New(url, map[string]string{"Authorization": "Bearer " + key}),
-		model:        model,
-		provider:     provider,
-		systemPrompt: systemPrompt,
+		http:            ownhttp.New(url, map[string]string{"Authorization": "Bearer " + key}),
+		model:           model,
+		provider:        provider,
+		normalizePrompt: normalizePrompt,
+		translatePrompt: translatePrompt,
 	}, nil
 }
 
-// Normalize sends a PersistedProject to the LLM and returns the structured trilingual result
-// along with the raw response content (useful for error reporting regardless of concurrency).
+// Normalize runs two LLM calls:
+//  1. Extract and normalize the project into a structured German JSON.
+//  2. Translate that German JSON into English and Spanish.
+//
+// Returns the trilingual result plus the raw LLM content from whichever step failed
+// (useful for error recording).
 func (c *llmClient) Normalize(ctx context.Context, project *models.PersistedProject) (*llmResponse, string, error) {
-	start := time.Now()
 	log := logrus.WithField("project_id", project.ID)
+	start := time.Now()
 
+	// ── Step 1: extract → German ──────────────────────────────────────────────
+	deContent, rawDE, err := c.normalizeDE(ctx, project)
+	if err != nil {
+		return nil, rawDE, err
+	}
+	log.Infof("step 1 done (de_keys=%d, took=%s)", len(deContent), time.Since(start))
+
+	// ── Step 2: translate DE → EN + ES ────────────────────────────────────────
+	step2Start := time.Now()
+	en, es, rawTranslate, err := c.translateToEnEs(ctx, deContent)
+	if err != nil {
+		return nil, rawTranslate, err
+	}
+	log.Infof("step 2 done (en_keys=%d es_keys=%d, took=%s)", len(en), len(es), time.Since(step2Start))
+
+	log.WithField("total", time.Since(start)).Info("project normalized (2-step)")
+	return &llmResponse{En: en, De: deContent, Es: es}, rawDE, nil
+}
+
+// normalizeDE calls the LLM to produce a single structured JSON object in German.
+func (c *llmClient) normalizeDE(ctx context.Context, project *models.PersistedProject) (map[string]any, string, error) {
 	projectJSON, err := json.Marshal(project)
 	if err != nil {
 		return nil, "", fmt.Errorf("marshal project: %w", err)
 	}
 
-	userPrompt := strings.ReplaceAll(userPromptTemplate, "{{project_json}}", string(projectJSON))
+	userPrompt := strings.ReplaceAll(normalizePromptTemplate, "{{project_json}}", string(projectJSON))
+	content, err := c.chat(ctx, c.normalizePrompt, userPrompt)
+	if err != nil {
+		return nil, "", fmt.Errorf("llm normalize request: %w", err)
+	}
 
+	result, parseErr := parseSingleObject(project.ID, content)
+	if parseErr != nil {
+		return nil, content, fmt.Errorf("parse normalize response: %w", parseErr)
+	}
+	return result, content, nil
+}
+
+// translateToEnEs calls the LLM to translate a German JSON object into EN and ES.
+func (c *llmClient) translateToEnEs(ctx context.Context, de map[string]any) (map[string]any, map[string]any, string, error) {
+	deJSON, err := json.Marshal(de)
+	if err != nil {
+		return nil, nil, "", fmt.Errorf("marshal de content: %w", err)
+	}
+
+	userPrompt := strings.ReplaceAll(translatePromptTemplate, "{{de_json}}", string(deJSON))
+	content, err := c.chat(ctx, c.translatePrompt, userPrompt)
+	if err != nil {
+		return nil, nil, "", fmt.Errorf("llm translate request: %w", err)
+	}
+
+	en, es, parseErr := parseTranslateResponse(content)
+	if parseErr != nil {
+		return nil, nil, content, fmt.Errorf("parse translate response: %w", parseErr)
+	}
+	return en, es, content, nil
+}
+
+// chat sends a single chat completion request and returns the message content.
+func (c *llmClient) chat(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
 	var resp struct {
 		Choices []struct {
 			Message struct {
@@ -71,7 +136,7 @@ func (c *llmClient) Normalize(ctx context.Context, project *models.PersistedProj
 		Body: map[string]any{
 			"model": c.model,
 			"messages": []map[string]string{
-				{"role": "system", "content": c.systemPrompt},
+				{"role": "system", "content": systemPrompt},
 				{"role": "user", "content": userPrompt},
 			},
 			"temperature": 0.1,
@@ -79,131 +144,90 @@ func (c *llmClient) Normalize(ctx context.Context, project *models.PersistedProj
 		},
 		Result: &resp,
 	}); err != nil {
-		return nil, "", fmt.Errorf("llm request: %w", err)
+		return "", err
 	}
 
 	if len(resp.Choices) == 0 {
-		return nil, "", fmt.Errorf("llm returned no choices")
+		return "", fmt.Errorf("llm returned no choices")
 	}
-
-	content := resp.Choices[0].Message.Content
-
-	// Write raw LLM response to file for debugging.
-	// debugFile := fmt.Sprintf("/tmp/llm_response_%s.json", project.ID)
-	// _ = os.WriteFile(debugFile, []byte(content), 0644)
-	// log.Infof("LLM raw response written to %s", debugFile)
-
-	raw, err := parseResponse(project.ID, content)
-	if err != nil {
-		return nil, content, fmt.Errorf("parse llm response: %w", err)
-	}
-
-	log.WithFields(logrus.Fields{
-		"took":    time.Since(start).String(),
-		"en_keys": len(raw.En),
-		"de_keys": len(raw.De),
-		"es_keys": len(raw.Es),
-	}).Info("LLM normalized project")
-
-	return raw, content, nil
+	return resp.Choices[0].Message.Content, nil
 }
 
-// parseResponse handles three malformed LLM output patterns:
-//  1. Perfect JSON  → direct unmarshal
-//  2. Languages nested inside "en"  → extract de/es from en
-//  3. Multiple top-level objects    → {"en":{...}}, {"de":{...}}, {"es":{...}}
-//  4. Truncated JSON (missing })    → brace repair, then re-apply 1-3
-func parseResponse(projectID, content string) (*llmResponse, error) {
+// parseSingleObject parses a plain JSON object (no language wrapper).
+// Handles the LLM accidentally wrapping in {"de":{...}} or {"en":{...}}.
+func parseSingleObject(projectID, content string) (map[string]any, error) {
 	log := logrus.WithField("project_id", projectID)
 
-	// Strip markdown fences and surrounding text.
-	start := strings.Index(content, "{")
-	if start == -1 {
-		return nil, fmt.Errorf("no JSON object found (content: %.200s)", content)
-	}
-	content = content[start:]
-
-	// Strategy 1 & 2: direct unmarshal (may succeed even with nested langs).
-	var raw llmResponse
-	if err := json.Unmarshal([]byte(content), &raw); err == nil {
-		return fixNestedLanguages(log, &raw), nil
+	content = trimToJSON(content)
+	if content == "" {
+		return nil, fmt.Errorf("no JSON object found in normalize response")
 	}
 
-	// Strategy 3: multiple top-level objects, e.g. {"en":{...}}, {"de":{...}}, {"es":{...}}
-	if merged, mergeErr := mergeTopLevelObjects(log, content); mergeErr == nil {
-		return fixNestedLanguages(log, merged), nil
+	// Try direct unmarshal.
+	var obj map[string]any
+	if err := json.Unmarshal([]byte(content), &obj); err == nil {
+		// If the LLM accidentally wrapped in a language key, unwrap it.
+		for _, key := range []string{"de", "en", "es"} {
+			if inner, ok := obj[key]; ok {
+				if innerMap, ok := inner.(map[string]any); ok && len(obj) == 1 {
+					log.Warnf("unwrapped accidental language wrapper %q from normalize response", key)
+					return innerMap, nil
+				}
+			}
+		}
+		return obj, nil
 	}
 
-	// Strategy 4: truncated — repair by appending closing braces, then retry 1-3.
+	// Brace repair for truncated output.
 	repaired := content
 	for i := range 5 {
 		repaired += "}"
-		if err := json.Unmarshal([]byte(repaired), &raw); err == nil {
-			log.Warnf("repaired truncated LLM JSON by appending %d closing brace(s)", i+1)
-			return fixNestedLanguages(log, &raw), nil
-		}
-		if merged, mergeErr := mergeTopLevelObjects(log, repaired); mergeErr == nil {
-			log.Warnf("repaired truncated multi-object LLM JSON by appending %d closing brace(s)", i+1)
-			return fixNestedLanguages(log, merged), nil
+		if err := json.Unmarshal([]byte(repaired), &obj); err == nil {
+			log.Warnf("repaired truncated normalize JSON by appending %d brace(s)", i+1)
+			return obj, nil
 		}
 	}
 
-	return nil, fmt.Errorf("unable to parse after all repair strategies (content: %.300s)", content)
+	return nil, fmt.Errorf("unable to parse normalize response (content: %.300s)", content)
 }
 
-// fixNestedLanguages moves de/es out of en if the LLM nested them there.
-func fixNestedLanguages(log *logrus.Entry, r *llmResponse) *llmResponse {
-	if len(r.De) > 0 && len(r.Es) > 0 {
-		return r // already correct
-	}
-	if len(r.En) == 0 {
-		return r
+// parseTranslateResponse parses {"en":{...},"es":{...}} from the translation step.
+func parseTranslateResponse(content string) (map[string]any, map[string]any, error) {
+	content = trimToJSON(content)
+	if content == "" {
+		return nil, nil, fmt.Errorf("no JSON object found in translate response")
 	}
 
-	moved := false
-	if de, ok := r.En["de"]; ok {
-		if deMap, ok := de.(map[string]any); ok {
-			r.De = deMap
-			delete(r.En, "de")
-			moved = true
+	// Try direct unmarshal into a wrapper struct.
+	var wrapper struct {
+		En map[string]any `json:"en"`
+		Es map[string]any `json:"es"`
+	}
+	if err := json.Unmarshal([]byte(content), &wrapper); err == nil {
+		if len(wrapper.En) > 0 && len(wrapper.Es) > 0 {
+			return wrapper.En, wrapper.Es, nil
 		}
 	}
-	if es, ok := r.En["es"]; ok {
-		if esMap, ok := es.(map[string]any); ok {
-			r.Es = esMap
-			delete(r.En, "es")
-			moved = true
+
+	// Brace repair for truncated output.
+	repaired := content
+	for range 5 {
+		repaired += "}"
+		if err := json.Unmarshal([]byte(repaired), &wrapper); err == nil {
+			if len(wrapper.En) > 0 {
+				return wrapper.En, wrapper.Es, nil
+			}
 		}
 	}
-	if moved {
-		log.Warn("extracted de/es that were nested inside en")
-	}
-	return r
+
+	return nil, nil, fmt.Errorf("unable to parse translate response (content: %.300s)", content)
 }
 
-// mergeTopLevelObjects handles {"en":{...}}, {"de":{...}}, {"es":{...}} by
-// decoding each object in sequence and merging keys into one llmResponse.
-func mergeTopLevelObjects(log *logrus.Entry, content string) (*llmResponse, error) {
-	dec := json.NewDecoder(strings.NewReader(content))
-	merged := make(map[string]any)
-	for dec.More() {
-		var obj map[string]any
-		if err := dec.Decode(&obj); err != nil {
-			return nil, err
-		}
-		for k, v := range obj {
-			merged[k] = v
-		}
+// trimToJSON strips everything before the first '{'.
+func trimToJSON(content string) string {
+	idx := strings.Index(content, "{")
+	if idx == -1 {
+		return ""
 	}
-	// Re-encode + decode into typed struct.
-	b, err := json.Marshal(merged)
-	if err != nil {
-		return nil, err
-	}
-	var r llmResponse
-	if err := json.Unmarshal(b, &r); err != nil {
-		return nil, err
-	}
-	log.Warn("merged multiple top-level JSON objects from LLM response")
-	return &r, nil
+	return content[idx:]
 }

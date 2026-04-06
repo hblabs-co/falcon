@@ -10,7 +10,10 @@ import (
 )
 
 //go:embed prompt.md
-var systemPrompt string
+var normalizePrompt string
+
+//go:embed prompt_translate.md
+var translatePrompt string
 
 func main() {
 	system.LoadEnvs()
@@ -24,7 +27,7 @@ func main() {
 		logrus.Fatalf("storage init: %v", err)
 	}
 
-	svc, err := normalizer.NewService(ctx, systemPrompt)
+	svc, err := normalizer.NewService(ctx, normalizePrompt, translatePrompt)
 	if err != nil {
 		logrus.Fatalf("service init: %v", err)
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -33,7 +34,7 @@ type Service struct {
 	llm *llmClient
 }
 
-func NewService(ctx context.Context, systemPrompt string) (*Service, error) {
+func NewService(ctx context.Context, normalizePrompt, translatePrompt string) (*Service, error) {
 
 	if err := system.GetStorage().EnsureIndex(ctx, system.NewIndexSpec(
 		constants.MongoNormalizedProjectsCollection, "project_id", true,
@@ -47,7 +48,7 @@ func NewService(ctx context.Context, systemPrompt string) (*Service, error) {
 		logrus.Fatalf("ensure index platform_updated_at: %v", err)
 	}
 
-	llm, err := newLLMClient(systemPrompt)
+	llm, err := newLLMClient(normalizePrompt, translatePrompt)
 	if err != nil {
 		return nil, fmt.Errorf("llm client: %w", err)
 	}
@@ -105,7 +106,11 @@ func (s *Service) handleEvent(data []byte) error {
 
 	raw, rawContent, llmErr := s.llm.Normalize(ctx, &project)
 	if llmErr != nil {
-		s.saveError(ctx, &project, llmErr, rawContent)
+		errName := constants.ErrNameNormalizerLLMParse
+		if strings.Contains(llmErr.Error(), "translate") {
+			errName = constants.ErrNameNormalizerTranslateParse
+		}
+		s.saveError(ctx, &project, errName, llmErr, rawContent)
 		return nil // ack — do not redeliver into infinite LLM loop
 	}
 
@@ -141,10 +146,10 @@ func (s *Service) handleEvent(data []byte) error {
 	return nil
 }
 
-func (s *Service) saveError(ctx context.Context, project *models.PersistedProject, normErr error, rawContent string) {
+func (s *Service) saveError(ctx context.Context, project *models.PersistedProject, errName string, normErr error, rawContent string) {
 	system.RecordError(ctx, models.ServiceError{
 		ServiceName:       constants.ServiceNormalizer,
-		ErrorName:         constants.ErrNameNormalizerLLMParse,
+		ErrorName:         errName,
 		Error:             normErr.Error(),
 		ProjectID:         project.ID,
 		Platform:          project.Platform,
