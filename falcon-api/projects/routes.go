@@ -54,7 +54,7 @@ type normalizedDoc struct {
 }
 
 // langContent returns the localized content map for the requested language,
-// falling back to English when the requested language is missing or empty.
+// falling back through en → de → es → empty map so "data" is never null.
 func (d *normalizedDoc) langContent(lang string) map[string]any {
 	switch lang {
 	case "de":
@@ -66,7 +66,16 @@ func (d *normalizedDoc) langContent(lang string) map[string]any {
 			return d.Es
 		}
 	}
-	return d.En
+	if len(d.En) > 0 {
+		return d.En
+	}
+	if len(d.De) > 0 {
+		return d.De
+	}
+	if len(d.Es) > 0 {
+		return d.Es
+	}
+	return map[string]any{}
 }
 
 func handleListProjects(c *gin.Context) {

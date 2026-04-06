@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -18,8 +19,8 @@ Respond ONLY with the JSON object (no language wrapper keys). No markdown, no ex
 
 {{project_json}}`
 
-const translatePromptTemplate = `Translate the following normalized project JSON from German to English and Spanish.
-Respond ONLY with {"en":{...},"es":{...}}. No markdown, no explanation.
+const translatePromptTemplate = `Translate the human-readable text in the following normalized project JSON from German to {{target_language}}.
+Respond ONLY with the translated JSON object directly (no language wrapper key). No markdown, no explanation.
 
 {{de_json}}`
 
@@ -70,7 +71,7 @@ func (c *llmClient) Normalize(ctx context.Context, project *models.PersistedProj
 	}
 	log.Infof("step 1 done (de_keys=%d, took=%s)", len(deContent), time.Since(start))
 
-	// ── Step 2: translate DE → EN + ES ────────────────────────────────────────
+	// ── Step 2: translate DE → EN + ES (parallel) ────────────────────────────
 	step2Start := time.Now()
 	en, es, rawTranslate, err := c.translateToEnEs(ctx, deContent)
 	if err != nil {
@@ -102,24 +103,59 @@ func (c *llmClient) normalizeDE(ctx context.Context, project *models.PersistedPr
 	return result, content, nil
 }
 
-// translateToEnEs calls the LLM to translate a German JSON object into EN and ES.
+// translateToEnEs fires two parallel LLM requests — one for EN, one for ES.
+// Each request translates from the German object to a single target language,
+// which reduces token count and eliminates cross-language hallucinations.
 func (c *llmClient) translateToEnEs(ctx context.Context, de map[string]any) (map[string]any, map[string]any, string, error) {
 	deJSON, err := json.Marshal(de)
 	if err != nil {
 		return nil, nil, "", fmt.Errorf("marshal de content: %w", err)
 	}
+	deStr := string(deJSON)
 
-	userPrompt := strings.ReplaceAll(translatePromptTemplate, "{{de_json}}", string(deJSON))
-	content, err := c.chat(ctx, c.translatePrompt, userPrompt)
-	if err != nil {
-		return nil, nil, "", fmt.Errorf("llm translate request: %w", err)
+	type result struct {
+		obj     map[string]any
+		raw     string
+		err     error
 	}
 
-	en, es, parseErr := parseTranslateResponse(content)
-	if parseErr != nil {
-		return nil, nil, content, fmt.Errorf("parse translate response: %w", parseErr)
+	var wg sync.WaitGroup
+	enCh := make(chan result, 1)
+	esCh := make(chan result, 1)
+
+	translate := func(targetLang, targetName string, ch chan<- result) {
+		defer wg.Done()
+		prompt := strings.ReplaceAll(translatePromptTemplate, "{{target_language}}", targetName)
+		prompt = strings.ReplaceAll(prompt, "{{de_json}}", deStr)
+		content, chatErr := c.chat(ctx, c.translatePrompt, prompt)
+		if chatErr != nil {
+			ch <- result{err: fmt.Errorf("llm translate %s request: %w", targetLang, chatErr), raw: content}
+			return
+		}
+		obj, parseErr := parseSingleObject("translate-"+targetLang, content)
+		if parseErr != nil {
+			ch <- result{err: fmt.Errorf("parse translate %s response: %w", targetLang, parseErr), raw: content}
+			return
+		}
+		ch <- result{obj: obj, raw: content}
 	}
-	return en, es, content, nil
+
+	wg.Add(2)
+	go translate("en", "English", enCh)
+	go translate("es", "Spanish", esCh)
+	wg.Wait()
+
+	enRes := <-enCh
+	esRes := <-esCh
+
+	if enRes.err != nil {
+		return nil, nil, enRes.raw, enRes.err
+	}
+	if esRes.err != nil {
+		logrus.Warnf("translate es failed (%v), falling back to en for es", esRes.err)
+		return enRes.obj, enRes.obj, esRes.raw, nil
+	}
+	return enRes.obj, esRes.obj, "", nil
 }
 
 // chat sends a single chat completion request and returns the message content.
@@ -192,13 +228,14 @@ func parseSingleObject(projectID, content string) (map[string]any, error) {
 }
 
 // parseTranslateResponse parses {"en":{...},"es":{...}} from the translation step.
+// Falls back to per-language brace extraction when the outer JSON is syntactically corrupt.
 func parseTranslateResponse(content string) (map[string]any, map[string]any, error) {
 	content = trimToJSON(content)
 	if content == "" {
 		return nil, nil, fmt.Errorf("no JSON object found in translate response")
 	}
 
-	// Try direct unmarshal into a wrapper struct.
+	// Strategy 1: direct unmarshal.
 	var wrapper struct {
 		En map[string]any `json:"en"`
 		Es map[string]any `json:"es"`
@@ -209,7 +246,7 @@ func parseTranslateResponse(content string) (map[string]any, map[string]any, err
 		}
 	}
 
-	// Brace repair for truncated output.
+	// Strategy 2: brace repair for truncated output.
 	repaired := content
 	for range 5 {
 		repaired += "}"
@@ -220,7 +257,68 @@ func parseTranslateResponse(content string) (map[string]any, map[string]any, err
 		}
 	}
 
+	// Strategy 3: the outer JSON may be corrupt (e.g. a syntax error inside one language block).
+	// Extract each language block independently using brace counting.
+	en := extractLangBlock(content, "en")
+	es := extractLangBlock(content, "es")
+	if en != nil {
+		if es == nil {
+			// en is valid but es is corrupt — use en as fallback for es rather than failing.
+			logrus.Warn("parseTranslateResponse: es block corrupt, falling back to en for es")
+			es = en
+		}
+		return en, es, nil
+	}
+
 	return nil, nil, fmt.Errorf("unable to parse translate response (content: %.300s)", content)
+}
+
+// extractLangBlock finds the JSON object for a given language key inside content
+// using brace counting — tolerates surrounding syntax errors in other keys.
+func extractLangBlock(content, key string) map[string]any {
+	search := `"` + key + `":`
+	idx := strings.Index(content, search)
+	if idx == -1 {
+		return nil
+	}
+	rest := strings.TrimLeft(content[idx+len(search):], " \t\n\r")
+	if !strings.HasPrefix(rest, "{") {
+		return nil
+	}
+	depth := 0
+	inString := false
+	escaped := false
+	for i, c := range rest {
+		if escaped {
+			escaped = false
+			continue
+		}
+		if c == '\\' && inString {
+			escaped = true
+			continue
+		}
+		if c == '"' {
+			inString = !inString
+			continue
+		}
+		if inString {
+			continue
+		}
+		switch c {
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				var obj map[string]any
+				if err := json.Unmarshal([]byte(rest[:i+1]), &obj); err == nil {
+					return obj
+				}
+				return nil
+			}
+		}
+	}
+	return nil
 }
 
 // trimToJSON strips everything before the first '{'.
