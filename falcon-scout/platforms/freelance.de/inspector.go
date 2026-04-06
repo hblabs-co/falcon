@@ -5,11 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly/v2"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
@@ -107,23 +107,34 @@ func (pi *Inspector) inspect() (*Project, error) {
 	return &project, nil
 }
 
-// SaveFailure persists the raw HTML and inspect error to MongoDB and publishes
-// a scrape.failed event. Call this after Inspect() returns an error.
+// SaveFailure persists the raw HTML and inspect error to the shared "errors" collection
+// and publishes a scrape.failed event. Call this after Inspect() returns an error.
 func (pi *Inspector) SaveFailure(ctx context.Context, inspectErr error) {
-	failure := &models.ScrapeFailure{
-		ID:         gonanoid.Must(),
-		PlatformID: pi.PlatformID,
+	buf := make([]byte, 4096)
+	n := runtime.Stack(buf, false)
+
+	failure := &models.ServiceError{
+		ServiceName: constants.ServiceScout,
+		Error:       inspectErr.Error(),
+		StackTrace:  string(buf[:n]),
+		OccurredAt:  time.Now(),
+
 		Platform:   Source,
+		PlatformID: pi.PlatformID,
 		URL:        pi.Url,
-		Error:      inspectErr.Error(),
 		HTML:       pi.HTML,
-		FailedAt:   time.Now(),
 	}
-	if err := system.GetStorage().SetById(ctx, constants.MongoScrapeFailuresCollection, failure.ID, failure); err != nil {
+	if err := system.GetStorage().Insert(ctx, constants.MongoErrorsCollection, failure); err != nil {
 		pi.GetLogger().Errorf("save scrape failure: %v", err)
 		return
 	}
-	if err := system.Publish(ctx, constants.SubjectScrapeFailed, failure.GetEvent()); err != nil {
+	evt := &models.ScrapeFailedEvent{
+		Platform:   Source,
+		PlatformID: pi.PlatformID,
+		URL:        pi.Url,
+		Error:      inspectErr.Error(),
+	}
+	if err := system.Publish(ctx, constants.SubjectScrapeFailed, evt); err != nil {
 		pi.GetLogger().Errorf("publish scrape.failed: %v", err)
 	}
 }

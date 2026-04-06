@@ -17,7 +17,7 @@ func getLogger() *logrus.Entry {
 
 var indexes = []system.StorageIndexSpec{
 	system.NewIndexSpec(constants.MongoProjectsCollection, "platform_id", true),
-	system.NewIndexSpec(constants.MongoScrapeFailuresCollection, "platform_id", false),
+	system.NewIndexSpec(constants.MongoErrorsCollection, "service_name", false),
 }
 
 func Run() {

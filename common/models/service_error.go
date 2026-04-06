@@ -6,16 +6,27 @@ import (
 	"hblabs.co/falcon/common/constants"
 )
 
-// ServiceError is the shared document written to the "errors" collection by any service.
+// ServiceError is the unified error document written to the "errors" collection by any service.
+// Service-specific fields use omitempty so they are absent from MongoDB when not applicable.
 type ServiceError struct {
-	ServiceName       string    `json:"service_name"        bson:"service_name"`
-	ProjectID         string    `json:"project_id"          bson:"project_id"`
-	Platform          string    `json:"platform"            bson:"platform"`
-	PlatformUpdatedAt string    `json:"platform_updated_at" bson:"platform_updated_at"`
-	Error             string    `json:"error"               bson:"error"`
-	RawLLMContent     string    `json:"raw_llm_content,omitempty" bson:"raw_llm_content,omitempty"`
-	StackTrace        string    `json:"stack_trace"         bson:"stack_trace"`
-	OccurredAt        time.Time `json:"occurred_at"         bson:"occurred_at"`
+	// Common fields — always present
+	ServiceName string    `json:"service_name" bson:"service_name"`
+	Error       string    `json:"error"        bson:"error"`
+	StackTrace  string    `json:"stack_trace"  bson:"stack_trace"`
+	OccurredAt  time.Time `json:"occurred_at"  bson:"occurred_at"`
+
+	// Project context — set by normalizer, scout, dispatch, match-engine
+	ProjectID         string `json:"project_id,omitempty"          bson:"project_id,omitempty"`
+	Platform          string `json:"platform,omitempty"            bson:"platform,omitempty"`
+	PlatformUpdatedAt string `json:"platform_updated_at,omitempty" bson:"platform_updated_at,omitempty"`
+
+	// LLM errors — set by normalizer and match-engine
+	RawLLMContent string `json:"raw_llm_content,omitempty" bson:"raw_llm_content,omitempty"`
+
+	// Scrape errors — set by scout
+	PlatformID string `json:"platform_id,omitempty" bson:"platform_id,omitempty"`
+	URL        string `json:"url,omitempty"         bson:"url,omitempty"`
+	HTML       string `json:"html,omitempty"        bson:"html,omitempty"`
 }
 
 func (e *ServiceError) IsNormalizerError() bool  { return e.ServiceName == constants.ServiceNormalizer }
