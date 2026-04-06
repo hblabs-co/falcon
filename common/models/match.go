@@ -39,10 +39,11 @@ const (
 // of score. Only events where PassedThreshold=true are published to NATS "match.result"
 // and forwarded to falcon-signal. This allows full analytics over all LLM evaluations.
 type MatchResultEvent struct {
-	CVID      string  `json:"cv_id"      bson:"cv_id"`
-	UserID    string  `json:"user_id"    bson:"user_id"`
-	ProjectID string  `json:"project_id" bson:"project_id"`
-	Platform  string  `json:"platform"   bson:"platform"`
+	CVID         string `json:"cv_id"        bson:"cv_id"`
+	UserID       string `json:"user_id"      bson:"user_id"`
+	ProjectID    string `json:"project_id"   bson:"project_id"`
+	ProjectTitle string `json:"project_title" bson:"project_title"`
+	Platform     string `json:"platform"     bson:"platform"`
 
 	// Overall score 0–10, average of the six dimension scores.
 	Score  float32     `json:"score"  bson:"score"`

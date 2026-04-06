@@ -49,10 +49,9 @@ func newAPNSClient() (*apnsClient, error) {
 
 // Send delivers a push notification to the given device token.
 func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *models.MatchResultEvent) error {
-	title := labelTitle(result.Label)
-
 	p := payload.NewPayload().
-		AlertTitle(title).
+		AlertTitle(result.ProjectTitle).
+		AlertSubtitle(labelTitle(result.Label)).
 		AlertBody(result.Summary).
 		Sound("default").
 		Category("MATCH_RESULT").

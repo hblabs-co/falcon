@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	freelancede "hblabs.co/falcon/scout/platforms/freelance.de"
 )
@@ -13,16 +12,10 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 	system.InitBus(system.MergeBusConfigs(
-		system.NewBusConfig(
-			constants.StreamProjects,
-			constants.SubjectProjectCreated,
-			constants.SubjectProjectUpdated,
-		),
-		system.NewBusConfig(
-			constants.StreamScrape,
-			constants.SubjectScrapeRequested+".>",
-			constants.SubjectScrapeFailed,
-		)))
+		system.StreamProjects(),
+		system.StreamScrape(),
+		system.StreamStorage(),
+	))
 
 	RunScrapeConsumer()
 

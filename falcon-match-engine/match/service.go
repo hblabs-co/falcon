@@ -84,6 +84,7 @@ func (s *Service) handleMatchPending(data []byte) error {
 	result.CVID = event.CVID
 	result.UserID = event.UserID
 	result.ProjectID = event.ProjectID
+	result.ProjectTitle = project.Title
 	result.Platform = event.Platform
 	result.PassedThreshold = result.Score >= s.threshold
 	result.ScoredAt = time.Now()

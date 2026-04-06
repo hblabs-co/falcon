@@ -38,7 +38,12 @@ func newService(ctx context.Context) (*service, error) {
 }
 
 func (s *service) handle(ctx context.Context, evt models.CompanyLogoDownloadRequestedEvent) error {
-	log := logrus.WithFields(logrus.Fields{"company_id": evt.CompanyID, "source": evt.Source})
+	log := logrus.WithFields(logrus.Fields{
+		"company_id":   evt.CompanyID,
+		"company_name": evt.CompanyName,
+		"source":       evt.Source,
+	})
+	log.Infof("received company logo request — logo_url=%s", evt.LogoURL)
 
 	var existing []models.Company
 	if err := system.GetStorage().GetManyByField(
@@ -47,16 +52,20 @@ func (s *service) handle(ctx context.Context, evt models.CompanyLogoDownloadRequ
 		return fmt.Errorf("lookup company: %w", err)
 	}
 	if len(existing) > 0 {
-		log.Debugf("company already synced, skipping")
+		log.Infof("company already synced, skipping (logo=%s)", existing[0].LogoMinioURL)
 		return nil
 	}
 
 	logoStorageURL := ""
-	if evt.LogoURL != "" {
+	if evt.LogoURL == "" {
+		log.Warnf("no logo URL provided, saving company without logo")
+	} else {
+		log.Infof("downloading logo from %s", evt.LogoURL)
 		data, contentType, err := ownhttp.DownloadBytes(evt.LogoURL)
 		if err != nil {
-			log.Warnf("download logo: %v", err)
+			log.Warnf("download logo failed: %v", err)
 		} else {
+			log.Infof("logo downloaded — size=%d bytes content_type=%s", len(data), contentType)
 			ext := filepath.Ext(evt.LogoURL)
 			if ext == "" {
 				ext = ".jpg"
@@ -68,9 +77,10 @@ func (s *service) handle(ctx context.Context, evt models.CompanyLogoDownloadRequ
 				minio.PutObjectOptions{ContentType: contentType},
 			)
 			if err != nil {
-				log.Warnf("upload logo: %v", err)
+				log.Warnf("upload to minio failed (key=%s): %v", objectKey, err)
 			} else {
 				logoStorageURL = fmt.Sprintf("%s/%s/%s", infra.MinioPublicURL(), bucket, objectKey)
+				log.Infof("logo uploaded to minio — url=%s", logoStorageURL)
 			}
 		}
 	}
@@ -83,7 +93,7 @@ func (s *service) handle(ctx context.Context, evt models.CompanyLogoDownloadRequ
 	); err != nil {
 		return fmt.Errorf("upsert company: %w", err)
 	}
-	log.Infof("saved company %q logo=%s", evt.CompanyName, logoStorageURL)
+	log.Infof("company saved — name=%q logo=%s", evt.CompanyName, logoStorageURL)
 
 	out := models.CompanyLogoDownloadedEvent{
 		CompanyID:      evt.CompanyID,

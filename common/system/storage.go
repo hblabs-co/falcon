@@ -196,6 +196,35 @@ func (s *Storage) Insert(ctx context.Context, collection string, doc any) error 
 	return err
 }
 
+// FindPage returns one page of documents sorted by sortField.
+// Pass sortDesc=true for newest-first. Returns total matching count alongside results.
+// results must be a pointer to a slice.
+func (s *Storage) FindPage(ctx context.Context, collection string, filter bson.M, sortField string, sortDesc bool, page, pageSize int, results any) (int64, error) {
+	coll := s.db.Collection(collection)
+
+	total, err := coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+
+	sortDir := 1
+	if sortDesc {
+		sortDir = -1
+	}
+
+	skip := int64((page - 1) * pageSize)
+	opts := options.Find().
+		SetSort(bson.D{{Key: sortField, Value: sortDir}}).
+		SetSkip(skip).
+		SetLimit(int64(pageSize))
+
+	cursor, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return 0, err
+	}
+	return total, cursor.All(ctx, results)
+}
+
 // GetAllByField finds all documents where field equals value and decodes them into
 // results (must be a pointer to a slice, e.g. *[]MyStruct).
 func (s *Storage) GetAllByField(ctx context.Context, collection, field, value string, results any) error {

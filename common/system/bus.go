@@ -10,6 +10,7 @@ import (
 	natsio "github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
 )
 
@@ -166,10 +167,55 @@ func NewBusConfig(streamName string, subjects ...string) []jetstream.StreamConfi
 
 func MergeBusConfigs(configs ...[]jetstream.StreamConfig) []jetstream.StreamConfig {
 	var result []jetstream.StreamConfig
-
 	for _, cfg := range configs {
 		result = append(result, cfg...)
 	}
-
 	return result
+}
+
+// Canonical stream configs — always declare the FULL subject list.
+// CreateOrUpdateStream replaces the config, so partial declarations from one
+// service would silently remove subjects declared by another. Using these
+// ensures every service agrees on the complete definition regardless of start order.
+
+func StreamProjects() []jetstream.StreamConfig {
+	return NewBusConfig(
+		constants.StreamProjects,
+		constants.SubjectProjectCreated,
+		constants.SubjectProjectUpdated,
+		constants.SubjectProjectNormalized,
+	)
+}
+
+func StreamMatches() []jetstream.StreamConfig {
+	return NewBusConfig(
+		constants.StreamMatches,
+		constants.SubjectMatchPending,
+		constants.SubjectMatchResult,
+	)
+}
+
+func StreamScrape() []jetstream.StreamConfig {
+	return NewBusConfig(
+		constants.StreamScrape,
+		constants.SubjectScrapeRequested+".>",
+		constants.SubjectScrapeFailed,
+	)
+}
+
+func StreamStorage() []jetstream.StreamConfig {
+	return NewBusConfig(
+		constants.StreamStorage,
+		constants.SubjectStorageCompanyLogoRequested,
+		constants.SubjectStorageCompanyLogoDownloaded,
+		constants.SubjectCVIndexRequested,
+		constants.SubjectCVIndexed,
+	)
+}
+
+func StreamSignal() []jetstream.StreamConfig {
+	return NewBusConfig(
+		constants.StreamSignal,
+		constants.SubjectSignalDeviceTokenRegister,
+	)
 }

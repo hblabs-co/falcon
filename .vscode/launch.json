@@ -12,7 +12,8 @@
         "Debug Scout",
         "Debug Dispatch",
         "Debug Match Engine",
-        "Debug Storage"
+        "Debug Storage",
+        "Debug Normalizer"
       ],
       "stopAll": true,
       "preLaunchTask": "Docker: start infrastructure",
@@ -55,12 +56,19 @@
       "mode": "auto",
       "program": "${workspaceFolder}/falcon-match-engine"
     },
-     {
+    {
       "name": "Debug Storage",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/falcon-storage"
+    },
+    {
+      "name": "Debug Normalizer",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-normalizer"
     }
   ]
 }

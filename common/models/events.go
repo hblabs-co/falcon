@@ -54,3 +54,11 @@ type DeviceTokenRegisterEvent struct {
 	UserID string `json:"user_id"`
 	Token  string `json:"token"`
 }
+
+// ProjectNormalizedEvent is published to "project.normalized" by falcon-normalizer
+// after a project has been enriched and written to projects_normalized.
+type ProjectNormalizedEvent struct {
+	ProjectID string `json:"project_id"`
+	Platform  string `json:"platform"`
+	Title     string `json:"title"`
+}

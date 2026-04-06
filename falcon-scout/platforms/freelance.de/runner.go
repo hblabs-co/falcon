@@ -91,12 +91,20 @@ func processOneCandidate(ctx context.Context, c *ProjectCandidate) {
 	}
 	inspector.GetLogger().Infof("project saved with internal id %s", p.GetId())
 
+	// Enrich the candidate with detail-page data, preserving listing values as fallback.
+	c.UpdateFromResult(result)
 	if c.CompanyID != "" {
 		evt := c.GetDownloadCompanyLogoRequestEvent()
 		subject := constants.SubjectStorageCompanyLogoRequested
+		inspector.GetLogger().Infof("publishing company logo request — company_id=%s name=%q logo_url=%s",
+			c.CompanyID, c.Company, evt.LogoURL)
 		if err := system.Publish(ctx, subject, evt); err != nil {
-			inspector.GetLogger().Warnf("publish %s for company %s: %v", subject, c.CompanyID, err)
+			inspector.GetLogger().Errorf("publish %s for company %s: %v", subject, c.CompanyID, err)
+		} else {
+			inspector.GetLogger().Infof("company logo request queued — company_id=%s", c.CompanyID)
 		}
+	} else {
+		inspector.GetLogger().Warnf("skipping company logo — no company_id on candidate")
 	}
 
 	subject := constants.SubjectProjectCreated

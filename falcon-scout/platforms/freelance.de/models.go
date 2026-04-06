@@ -32,6 +32,32 @@ type ProjectCandidate struct {
 	Total   int
 }
 
+// UpdateFromResult enriches the candidate with non-empty values scraped from the
+// project detail page. Fields already present in the candidate (from the listing)
+// are preserved when the result has no value, so the candidate always ends up with
+// the most complete data available from both sources.
+func (c *ProjectCandidate) UpdateFromResult(result interfaces.Project) {
+	if v := result.GetTitle(); v != "" {
+		c.Title = v
+	}
+	if v := result.GetCompany(); v != "" {
+		c.Company = v
+	}
+
+	if v := result.GetStartDate(); v != "" {
+		c.StartDate = v
+	}
+	if v := result.GetLocation(); v != "" {
+		c.Location = []string{v}
+	}
+	if result.IsRemote() {
+		c.Remote = true
+	}
+	if v := result.GetSkills(); len(v) > 0 {
+		c.Skills = v
+	}
+}
+
 func (c *ProjectCandidate) GetDownloadCompanyLogoRequestEvent() models.CompanyLogoDownloadRequestedEvent {
 	logoURL := ""
 	if c.CompanyLogo != "" {

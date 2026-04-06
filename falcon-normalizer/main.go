@@ -1,10 +1,16 @@
 package main
 
 import (
+	_ "embed"
+
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/dispatch/dispatch"
+
+	"hblabs.co/falcon/normalizer/normalizer"
 )
+
+//go:embed prompt.md
+var systemPrompt string
 
 func main() {
 	system.LoadEnvs()
@@ -13,7 +19,12 @@ func main() {
 
 	system.InitBus(system.StreamProjects())
 
-	svc, err := dispatch.NewService()
+	ctx := system.Ctx()
+	if err := system.InitStorage(ctx); err != nil {
+		logrus.Fatalf("storage init: %v", err)
+	}
+
+	svc, err := normalizer.NewService(ctx, systemPrompt)
 	if err != nil {
 		logrus.Fatalf("service init: %v", err)
 	}

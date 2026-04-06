@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/storage/company_logo"
 	"hblabs.co/falcon/storage/cv"
@@ -14,13 +13,7 @@ func main() {
 	system.Init()
 
 	// cv.prepare.requested / cv.prepared are NATS core request/reply — not in any stream.
-	system.InitBus(system.NewBusConfig(
-		constants.StreamStorage,
-		constants.SubjectStorageCompanyLogoRequested,
-		constants.SubjectStorageCompanyLogoDownloaded,
-		constants.SubjectCVIndexRequested,
-		constants.SubjectCVIndexed,
-	))
+	system.InitBus(system.StreamStorage())
 
 	if err := system.Run(
 		system.Ctx(),

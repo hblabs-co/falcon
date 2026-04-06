@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/match-engine/match"
 )
@@ -12,11 +11,7 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
-	system.InitBus(system.MergeBusConfigs(system.NewBusConfig(
-		constants.StreamMatches,
-		constants.SubjectMatchPending,
-		constants.SubjectMatchResult,
-	)))
+	system.InitBus(system.StreamMatches())
 
 	svc, err := match.NewService()
 	if err != nil {
