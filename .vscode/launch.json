@@ -69,6 +69,13 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/falcon-normalizer"
-    }
+    },
+     {
+      "name": "Debug Recruiter Rodeo Import",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-import/recruiter_rodeo"
+    },
   ]
 }

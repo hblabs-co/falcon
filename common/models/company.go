@@ -15,6 +15,8 @@ type Company struct {
 	LogoMinioURL string    `json:"logo_minio_url" bson:"logo_minio_url"` // empty if logo unavailable
 	CreatedAt    time.Time `json:"created_at"     bson:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"     bson:"updated_at"`
+
+	RecruiterRodeoStats *RecruiterRodeoStats `json:"recruiter_rodeo_stats,omitempty" bson:"recruiter_rodeo_stats,omitempty"`
 }
 
 func NewCompany(companyID, companyName, logoMinioURL string) *Company {
