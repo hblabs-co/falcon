@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -74,14 +75,15 @@ func (s *Service) Run() error {
 func (s *Service) handleEvent(data []byte) error {
 	var event models.ProjectEvent
 	if err := json.Unmarshal(data, &event); err != nil {
-		return fmt.Errorf("unmarshal project event: %w", err)
+		// Malformed event — ack it so it never retries.
+		logrus.Errorf("unmarshal project event: %v (dropping message)", err)
+		return nil
 	}
 
 	log := logrus.WithFields(logrus.Fields{
 		"project_id": event.ProjectID,
 		"platform":   event.Platform,
 	})
-	log.Info("normalizing project")
 
 	ctx := context.Background()
 
@@ -90,9 +92,22 @@ func (s *Service) handleEvent(data []byte) error {
 		return fmt.Errorf("fetch project %s: %w", event.ProjectID, err)
 	}
 
-	raw, err := s.llm.Normalize(ctx, &project)
-	if err != nil {
-		return fmt.Errorf("llm normalize: %w", err)
+	// Idempotency: skip if this exact version is already normalized.
+	var existing NormalizedProject
+	if err := system.GetStorage().Get(ctx, constants.MongoNormalizedProjectsCollection,
+		bson.M{"project_id": project.ID, "platform_updated_at": project.PlatformUpdatedAt},
+		&existing,
+	); err == nil {
+		log.Info("project already normalized for this version, skipping")
+		return nil
+	}
+
+	log.Info("normalizing project")
+
+	raw, rawContent, llmErr := s.llm.Normalize(ctx, &project)
+	if llmErr != nil {
+		s.saveError(ctx, &project, llmErr, rawContent)
+		return nil // ack — do not redeliver into infinite LLM loop
 	}
 
 	doc := &NormalizedProject{
@@ -122,6 +137,30 @@ func (s *Service) handleEvent(data []byte) error {
 		return fmt.Errorf("publish project.normalized: %w", err)
 	}
 
-	log.Infof("project normalized and published — de_keys=%d", len(raw.De))
+	log.Infof("project normalized and published — en_keys=%d de_keys=%d es_keys=%d",
+		len(raw.En), len(raw.De), len(raw.Es))
 	return nil
+}
+
+func (s *Service) saveError(ctx context.Context, project *models.PersistedProject, normErr error, rawContent string) {
+	buf := make([]byte, 4096)
+	n := runtime.Stack(buf, false)
+	stack := string(buf[:n])
+
+	doc := &models.ServiceError{
+		ServiceName:       constants.ServiceNormalizer,
+		ProjectID:         project.ID,
+		Platform:          project.Platform,
+		PlatformUpdatedAt: project.PlatformUpdatedAt,
+		Error:             normErr.Error(),
+		RawLLMContent:     rawContent,
+		StackTrace:        stack,
+		OccurredAt:        time.Now(),
+	}
+
+	if err := system.GetStorage().Insert(ctx, constants.MongoErrorsCollection, doc); err != nil {
+		logrus.Errorf("failed to save normalizer error for project %s: %v", project.ID, err)
+		return
+	}
+	logrus.Warnf("normalizer error saved to DB for project %s: %v", project.ID, normErr)
 }

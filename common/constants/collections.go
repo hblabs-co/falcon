@@ -9,4 +9,5 @@ const (
 	MongoDeviceTokensCollection   = "device_tokens"
 	MongoCompaniesCollection           = "companies"
 	MongoNormalizedProjectsCollection  = "projects_normalized"
+	MongoErrorsCollection              = "errors"
 )
