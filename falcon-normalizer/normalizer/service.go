@@ -158,9 +158,10 @@ func (s *Service) saveError(ctx context.Context, project *models.PersistedProjec
 		OccurredAt:        time.Now(),
 	}
 
+	log := logrus.WithField("project_id", project.ID)
 	if err := system.GetStorage().Insert(ctx, constants.MongoErrorsCollection, doc); err != nil {
-		logrus.Errorf("failed to save normalizer error for project %s: %v", project.ID, err)
+		log.Errorf("failed to save normalizer error: %v", err)
 		return
 	}
-	logrus.Warnf("normalizer error saved to DB for project %s: %v", project.ID, normErr)
+	log.Warnf("normalizer error saved to DB: %v", normErr)
 }

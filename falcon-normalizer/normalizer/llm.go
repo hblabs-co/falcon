@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -51,6 +50,7 @@ func newLLMClient(systemPrompt string) (*llmClient, error) {
 // along with the raw response content (useful for error reporting regardless of concurrency).
 func (c *llmClient) Normalize(ctx context.Context, project *models.PersistedProject) (*llmResponse, string, error) {
 	start := time.Now()
+	log := logrus.WithField("project_id", project.ID)
 
 	projectJSON, err := json.Marshal(project)
 	if err != nil {
@@ -89,21 +89,20 @@ func (c *llmClient) Normalize(ctx context.Context, project *models.PersistedProj
 	content := resp.Choices[0].Message.Content
 
 	// Write raw LLM response to file for debugging.
-	debugFile := fmt.Sprintf("/tmp/llm_response_%s.json", project.ID)
-	_ = os.WriteFile(debugFile, []byte(content), 0644)
-	logrus.Infof("LLM raw response written to %s", debugFile)
+	// debugFile := fmt.Sprintf("/tmp/llm_response_%s.json", project.ID)
+	// _ = os.WriteFile(debugFile, []byte(content), 0644)
+	// log.Infof("LLM raw response written to %s", debugFile)
 
-	raw, err := parseResponse(content)
+	raw, err := parseResponse(project.ID, content)
 	if err != nil {
 		return nil, content, fmt.Errorf("parse llm response: %w", err)
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"project_id": project.ID,
-		"took":       time.Since(start).String(),
-		"en_keys":    len(raw.En),
-		"de_keys":    len(raw.De),
-		"es_keys":    len(raw.Es),
+	log.WithFields(logrus.Fields{
+		"took":    time.Since(start).String(),
+		"en_keys": len(raw.En),
+		"de_keys": len(raw.De),
+		"es_keys": len(raw.Es),
 	}).Info("LLM normalized project")
 
 	return raw, content, nil
@@ -114,7 +113,9 @@ func (c *llmClient) Normalize(ctx context.Context, project *models.PersistedProj
 //  2. Languages nested inside "en"  → extract de/es from en
 //  3. Multiple top-level objects    → {"en":{...}}, {"de":{...}}, {"es":{...}}
 //  4. Truncated JSON (missing })    → brace repair, then re-apply 1-3
-func parseResponse(content string) (*llmResponse, error) {
+func parseResponse(projectID, content string) (*llmResponse, error) {
+	log := logrus.WithField("project_id", projectID)
+
 	// Strip markdown fences and surrounding text.
 	start := strings.Index(content, "{")
 	if start == -1 {
@@ -125,12 +126,12 @@ func parseResponse(content string) (*llmResponse, error) {
 	// Strategy 1 & 2: direct unmarshal (may succeed even with nested langs).
 	var raw llmResponse
 	if err := json.Unmarshal([]byte(content), &raw); err == nil {
-		return fixNestedLanguages(&raw), nil
+		return fixNestedLanguages(log, &raw), nil
 	}
 
 	// Strategy 3: multiple top-level objects, e.g. {"en":{...}}, {"de":{...}}, {"es":{...}}
-	if merged, mergeErr := mergeTopLevelObjects(content); mergeErr == nil {
-		return fixNestedLanguages(merged), nil
+	if merged, mergeErr := mergeTopLevelObjects(log, content); mergeErr == nil {
+		return fixNestedLanguages(log, merged), nil
 	}
 
 	// Strategy 4: truncated — repair by appending closing braces, then retry 1-3.
@@ -138,12 +139,12 @@ func parseResponse(content string) (*llmResponse, error) {
 	for i := range 5 {
 		repaired += "}"
 		if err := json.Unmarshal([]byte(repaired), &raw); err == nil {
-			logrus.Warnf("repaired truncated LLM JSON by appending %d closing brace(s)", i+1)
-			return fixNestedLanguages(&raw), nil
+			log.Warnf("repaired truncated LLM JSON by appending %d closing brace(s)", i+1)
+			return fixNestedLanguages(log, &raw), nil
 		}
-		if merged, mergeErr := mergeTopLevelObjects(repaired); mergeErr == nil {
-			logrus.Warnf("repaired truncated multi-object LLM JSON by appending %d closing brace(s)", i+1)
-			return fixNestedLanguages(merged), nil
+		if merged, mergeErr := mergeTopLevelObjects(log, repaired); mergeErr == nil {
+			log.Warnf("repaired truncated multi-object LLM JSON by appending %d closing brace(s)", i+1)
+			return fixNestedLanguages(log, merged), nil
 		}
 	}
 
@@ -151,7 +152,7 @@ func parseResponse(content string) (*llmResponse, error) {
 }
 
 // fixNestedLanguages moves de/es out of en if the LLM nested them there.
-func fixNestedLanguages(r *llmResponse) *llmResponse {
+func fixNestedLanguages(log *logrus.Entry, r *llmResponse) *llmResponse {
 	if len(r.De) > 0 && len(r.Es) > 0 {
 		return r // already correct
 	}
@@ -175,14 +176,14 @@ func fixNestedLanguages(r *llmResponse) *llmResponse {
 		}
 	}
 	if moved {
-		logrus.Warn("extracted de/es that were nested inside en")
+		log.Warn("extracted de/es that were nested inside en")
 	}
 	return r
 }
 
 // mergeTopLevelObjects handles {"en":{...}}, {"de":{...}}, {"es":{...}} by
 // decoding each object in sequence and merging keys into one llmResponse.
-func mergeTopLevelObjects(content string) (*llmResponse, error) {
+func mergeTopLevelObjects(log *logrus.Entry, content string) (*llmResponse, error) {
 	dec := json.NewDecoder(strings.NewReader(content))
 	merged := make(map[string]any)
 	for dec.More() {
@@ -203,6 +204,6 @@ func mergeTopLevelObjects(content string) (*llmResponse, error) {
 	if err := json.Unmarshal(b, &r); err != nil {
 		return nil, err
 	}
-	logrus.Warn("merged multiple top-level JSON objects from LLM response")
+	log.Warn("merged multiple top-level JSON objects from LLM response")
 	return &r, nil
 }
