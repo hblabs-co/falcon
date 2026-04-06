@@ -24,13 +24,14 @@ func (Routes) Mount(r *gin.Engine) {
 }
 
 type projectItem struct {
-	ProjectID         string         `json:"project_id"`
-	Platform          string         `json:"platform"`
-	PlatformUpdatedAt string         `json:"platform_updated_at"`
-	CompanyName       string         `json:"company_name"`
-	CompanyLogoURL    string         `json:"company_logo_url"`
-	NormalizedAt      string         `json:"normalized_at"`
-	Data              map[string]any `json:"data"` // English normalized content
+	ProjectID            string                       `json:"project_id"`
+	Platform             string                       `json:"platform"`
+	PlatformUpdatedAt    string                       `json:"platform_updated_at"`
+	CompanyName          string                       `json:"company_name"`
+	CompanyLogoURL       string                       `json:"company_logo_url"`
+	RecruiterRodeoStats  *models.RecruiterRodeoStats  `json:"recruiter_rodeo_stats,omitempty"`
+	NormalizedAt         string                       `json:"normalized_at"`
+	Data                 map[string]any               `json:"data"` // English normalized content
 }
 
 type paginationMeta struct {
@@ -78,6 +79,7 @@ func handleListProjects(c *gin.Context) {
 		}
 	}
 	logoMap := make(map[string]string, len(nameSet))
+	statsMap := make(map[string]*models.RecruiterRodeoStats, len(nameSet))
 	if len(nameSet) > 0 {
 		names := make([]string, 0, len(nameSet))
 		for n := range nameSet {
@@ -85,23 +87,27 @@ func handleListProjects(c *gin.Context) {
 		}
 		var companies []models.Company
 		if err := store.GetManyByField(ctx, constants.MongoCompaniesCollection, "company_name", names, &companies); err != nil {
-			logrus.Warnf("fetch company logos: %v", err)
+			logrus.Warnf("fetch company data: %v", err)
 		}
 		for _, co := range companies {
 			logoMap[co.CompanyName] = co.LogoMinioURL
+			if co.RecruiterRodeoStats != nil {
+				statsMap[co.CompanyName] = co.RecruiterRodeoStats
+			}
 		}
 	}
 
 	items := make([]projectItem, len(docs))
 	for i, d := range docs {
 		items[i] = projectItem{
-			ProjectID:         d.ProjectID,
-			Platform:          d.Platform,
-			PlatformUpdatedAt: d.PlatformUpdatedAt,
-			CompanyName:       d.CompanyName,
-			CompanyLogoURL:    logoMap[d.CompanyName],
-			NormalizedAt:      d.NormalizedAt.Format(time.RFC3339),
-			Data:              d.En,
+			ProjectID:           d.ProjectID,
+			Platform:            d.Platform,
+			PlatformUpdatedAt:   d.PlatformUpdatedAt,
+			CompanyName:         d.CompanyName,
+			CompanyLogoURL:      logoMap[d.CompanyName],
+			RecruiterRodeoStats: statsMap[d.CompanyName],
+			NormalizedAt:        d.NormalizedAt.Format(time.RFC3339),
+			Data:                d.En,
 		}
 	}
 
