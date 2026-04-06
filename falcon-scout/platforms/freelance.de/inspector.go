@@ -5,9 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"runtime"
 	"strings"
-	"time"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/sirupsen/logrus"
@@ -110,24 +108,15 @@ func (pi *Inspector) inspect() (*Project, error) {
 // SaveFailure persists the raw HTML and inspect error to the shared "errors" collection
 // and publishes a scrape.failed event. Call this after Inspect() returns an error.
 func (pi *Inspector) SaveFailure(ctx context.Context, inspectErr error) {
-	buf := make([]byte, 4096)
-	n := runtime.Stack(buf, false)
-
-	failure := &models.ServiceError{
+	system.RecordError(ctx, models.ServiceError{
 		ServiceName: constants.ServiceScout,
+		ErrorName:   constants.ErrNameScrapeInspectFailed,
 		Error:       inspectErr.Error(),
-		StackTrace:  string(buf[:n]),
-		OccurredAt:  time.Now(),
-
-		Platform:   Source,
-		PlatformID: pi.PlatformID,
-		URL:        pi.Url,
-		HTML:       pi.HTML,
-	}
-	if err := system.GetStorage().Insert(ctx, constants.MongoErrorsCollection, failure); err != nil {
-		pi.GetLogger().Errorf("save scrape failure: %v", err)
-		return
-	}
+		Platform:    Source,
+		PlatformID:  pi.PlatformID,
+		URL:         pi.Url,
+		HTML:        pi.HTML,
+	})
 	evt := &models.ScrapeFailedEvent{
 		Platform:   Source,
 		PlatformID: pi.PlatformID,

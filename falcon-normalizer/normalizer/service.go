@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"runtime"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -143,25 +142,13 @@ func (s *Service) handleEvent(data []byte) error {
 }
 
 func (s *Service) saveError(ctx context.Context, project *models.PersistedProject, normErr error, rawContent string) {
-	buf := make([]byte, 4096)
-	n := runtime.Stack(buf, false)
-	stack := string(buf[:n])
-
-	doc := &models.ServiceError{
+	system.RecordError(ctx, models.ServiceError{
 		ServiceName:       constants.ServiceNormalizer,
+		ErrorName:         constants.ErrNameNormalizerLLMParse,
+		Error:             normErr.Error(),
 		ProjectID:         project.ID,
 		Platform:          project.Platform,
 		PlatformUpdatedAt: project.PlatformUpdatedAt,
-		Error:             normErr.Error(),
 		RawLLMContent:     rawContent,
-		StackTrace:        stack,
-		OccurredAt:        time.Now(),
-	}
-
-	log := logrus.WithField("project_id", project.ID)
-	if err := system.GetStorage().Insert(ctx, constants.MongoErrorsCollection, doc); err != nil {
-		log.Errorf("failed to save normalizer error: %v", err)
-		return
-	}
-	log.Warnf("normalizer error saved to DB: %v", normErr)
+	})
 }

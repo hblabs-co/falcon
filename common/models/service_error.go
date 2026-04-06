@@ -11,6 +11,7 @@ import (
 type ServiceError struct {
 	// Common fields — always present
 	ServiceName string    `json:"service_name" bson:"service_name"`
+	ErrorName   string    `json:"error_name"   bson:"error_name"`
 	Error       string    `json:"error"        bson:"error"`
 	StackTrace  string    `json:"stack_trace"  bson:"stack_trace"`
 	OccurredAt  time.Time `json:"occurred_at"  bson:"occurred_at"`

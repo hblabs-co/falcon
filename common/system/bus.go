@@ -154,6 +154,75 @@ func Subscribe(ctx context.Context, stream, consumer, subject string, handler fu
 	return nil
 }
 
+// RetryAttempt carries context about the current delivery of a message.
+type RetryAttempt struct {
+	// Number is 1-indexed (1 = first delivery).
+	Number uint64
+	// IsLast is true when this is the final allowed delivery.
+	// The handler must resolve the error itself (e.g. save to DB) and return nil.
+	IsLast bool
+}
+
+// SubscribeWithBackoff creates a durable consumer with explicit retry backoff.
+// maxDeliver = len(backoff) + 1.  handler receives the raw bytes plus a
+// RetryAttempt so it can decide how to handle exhausted retries.
+// Returning an error nacks and triggers the next backoff delay.
+// On the last attempt the handler MUST return nil after handling the failure.
+func SubscribeWithBackoff(
+	ctx context.Context,
+	stream, consumer, subject string,
+	backoff []time.Duration,
+	handler func(data []byte, attempt RetryAttempt) error,
+) error {
+	maxDeliver := len(backoff) + 1
+
+	cons, err := GetBus().CreateOrUpdateConsumer(ctx, stream, jetstream.ConsumerConfig{
+		Name:          consumer,
+		FilterSubject: subject,
+		AckPolicy:     jetstream.AckExplicitPolicy,
+		DeliverPolicy: jetstream.DeliverNewPolicy,
+		AckWait:       2 * time.Hour, // must be > longest backoff interval
+		MaxDeliver:    maxDeliver,
+		BackOff:       backoff,
+	})
+	if err != nil {
+		return fmt.Errorf("create consumer %s: %w", consumer, err)
+	}
+
+	msgs, err := cons.Messages()
+	if err != nil {
+		return fmt.Errorf("consumer %s messages: %w", consumer, err)
+	}
+
+	go func() {
+		for {
+			msg, err := msgs.Next()
+			if err != nil {
+				if ctx.Err() != nil {
+					return
+				}
+				logrus.Errorf("consumer %s: next: %v", consumer, err)
+				continue
+			}
+
+			attempt := RetryAttempt{Number: 1}
+			if meta, err := msg.Metadata(); err == nil {
+				attempt.Number = meta.NumDelivered
+			}
+			attempt.IsLast = int(attempt.Number) >= maxDeliver
+
+			if err := handler(msg.Data(), attempt); err != nil {
+				logrus.Errorf("consumer %s: attempt %d/%d: %v", consumer, attempt.Number, maxDeliver, err)
+				_ = msg.Nak()
+			} else {
+				_ = msg.Ack()
+			}
+		}
+	}()
+
+	return nil
+}
+
 // NewBusConfig builds a single-stream JetStream config.
 func NewBusConfig(streamName string, subjects ...string) []jetstream.StreamConfig {
 	return []jetstream.StreamConfig{
