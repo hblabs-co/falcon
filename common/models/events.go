@@ -68,4 +68,5 @@ type ProjectNormalizedEvent struct {
 type MagicLinkRequestedEvent struct {
 	Email     string `json:"email"`
 	MagicLink string `json:"magic_link"` // full deep-link URL: falcon://auth?token=<raw>
+	Platform  string `json:"platform"`   // "ios", "android", "web" — extracted from User-Agent
 }

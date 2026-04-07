@@ -102,6 +102,14 @@ func (c *Client) Upsert(ctx context.Context, id string, vector []float32, payloa
 	})
 }
 
+// Delete removes a single point from Qdrant by its UUID. A no-op if the point does not exist.
+func (c *Client) Delete(ctx context.Context, id string) error {
+	path := "/collections/" + c.collection + "/points/delete"
+	return c.http.Post(ctx, path, ownhttp.Request{
+		Body: map[string]any{"points": []string{id}},
+	})
+}
+
 // Search returns the top matches for vector above scoreThreshold.
 func (c *Client) Search(ctx context.Context, vector []float32, limit int, scoreThreshold float32) ([]SearchResult, error) {
 	var resp struct {

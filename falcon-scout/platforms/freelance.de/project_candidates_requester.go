@@ -30,7 +30,7 @@ func stopOnYesterday(candidates []*ProjectCandidate, _, _ int) bool {
 	for _, c := range candidates {
 		candidateDate := extractDate(c.PlatformUpdatedAt)
 		if candidateDate != today {
-			getLogger().Infof("[stopOnYesterday] hit non-today candidate: platform_id=%s date=%q parsed=%s today=%s", c.PlatformID, c.PlatformUpdatedAt, candidateDate, today)
+			getLogger().Debugf("[stopOnYesterday] hit non-today candidate: platform_id=%s date=%q parsed=%s today=%s", c.PlatformID, c.PlatformUpdatedAt, candidateDate, today)
 			return false
 		}
 	}
@@ -91,7 +91,7 @@ func collectCandidates(ctx context.Context, name string, cont shouldContinue) ([
 
 		all = append(all, filtered...)
 		shouldCont := cont(candidates, len(filtered), n)
-		getLogger().Infof("[%s] page %d: %d/%d new, continue=%v", name, page, len(filtered), n, shouldCont)
+		getLogger().Debugf("[%s] page %d: %d/%d new, continue=%v", name, page, len(filtered), n, shouldCont)
 
 		if !shouldCont {
 			break
