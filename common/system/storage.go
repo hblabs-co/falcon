@@ -149,6 +149,17 @@ func (s *Storage) EnsureIndex(ctx context.Context, spec StorageIndexSpec) error 
 	return err
 }
 
+// EnsureTTLIndex creates an index that auto-deletes documents when the date field
+// value is in the past. MongoDB runs the TTL monitor every 60 seconds.
+func (s *Storage) EnsureTTLIndex(ctx context.Context, collection, field string) error {
+	model := mongo.IndexModel{
+		Keys:    bson.D{{Key: field, Value: 1}},
+		Options: options.Index().SetExpireAfterSeconds(0),
+	}
+	_, err := s.db.Collection(collection).Indexes().CreateOne(ctx, model)
+	return err
+}
+
 // CompoundIndexSpec describes a multi-field MongoDB index.
 type CompoundIndexSpec struct {
 	Collection string

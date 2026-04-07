@@ -31,6 +31,11 @@ func (Routes) Mount(r *gin.Engine) {
 	g := r.Group("/auth")
 	g.POST("/magic", handleMagic)
 	g.GET("/verify", handleVerify)
+
+	// TTL index: MongoDB auto-deletes expired tokens.
+	if err := system.GetStorage().EnsureTTLIndex(system.Ctx(), constants.MongoTokensCollection, "expires_at"); err != nil {
+		logrus.Fatalf("ensure tokens TTL index: %v", err)
+	}
 }
 
 // handleMagic godoc
