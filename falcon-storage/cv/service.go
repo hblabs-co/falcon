@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	cvsBucket            = "cvs"
-	presignedURLExpiry   = 15 * time.Minute
+	cvsBucket          = "cvs"
+	presignedURLExpiry = 15 * time.Minute
 )
 
 type service struct {
@@ -31,6 +31,10 @@ type service struct {
 func newService(ctx context.Context) (*service, error) {
 	if err := infra.EnsureBucket(ctx, cvsBucket, false); err != nil {
 		return nil, err
+	}
+
+	if err := system.GetStorage().EnsureIndex(ctx, system.NewIndexSpec(constants.MongoCVsCollection, "user_id", false)); err != nil {
+		return nil, fmt.Errorf("ensure cvs.user_id index: %w", err)
 	}
 
 	emb, err := embeddings.NewFromEnv()
@@ -56,7 +60,7 @@ func (s *service) prepare(ctx context.Context, evt models.CVPrepareRequestedEven
 	key := fmt.Sprintf("cvs/%s/%s", id, evt.Filename)
 	expiresAt := time.Now().Add(presignedURLExpiry)
 
-	uploadURL, err := infra.GetMinio().PresignedPutObject(ctx, cvsBucket, key, presignedURLExpiry)
+	uploadURL, err := infra.GetMinioPublic().PresignedPutObject(ctx, cvsBucket, key, presignedURLExpiry)
 	if err != nil {
 		return nil, fmt.Errorf("presign: %w", err)
 	}
@@ -94,7 +98,7 @@ func (s *service) index(ctx context.Context, evt models.CVIndexRequestedEvent) e
 		return nil
 	}
 	switch cv.Status {
-	case models.CVStatusIndexed, models.CVStatusIndexing:
+	case models.CVStatusIndexed, models.CVStatusIndexing, models.CVStatusNormalizing, models.CVStatusNormalized:
 		log.Infof("already %s, skipping", cv.Status)
 		return nil
 	case models.CVStatusFailed:
@@ -125,6 +129,11 @@ func (s *service) index(ctx context.Context, evt models.CVIndexRequestedEvent) e
 	userID, err := s.upsertUser(ctx, evt.Email)
 	if err != nil {
 		return fmt.Errorf("upsert user: %w", err) // transient — retry
+	}
+
+	// Replace any previous CV for this user (MongoDB + MinIO + Qdrant).
+	if err := s.replaceExistingCV(ctx, userID, cv.ID, log); err != nil {
+		return fmt.Errorf("replace existing cv: %w", err) // transient — retry
 	}
 
 	_ = system.GetStorage().SetById(ctx, constants.MongoCVsCollection, cv.ID, bson.M{
@@ -171,12 +180,53 @@ func (s *service) index(ctx context.Context, evt models.CVIndexRequestedEvent) e
 		"updated_at":     time.Now(),
 	})
 
-	// 7. Publish cv.indexed.
+	// 7. Publish cv.indexed and transition to normalizing.
 	out := models.CVIndexedEvent{CVID: cv.ID, UserID: userID, QdrantID: qdrantID}
 	if err := system.Publish(ctx, constants.SubjectCVIndexed, out); err != nil {
 		log.Warnf("publish cv.indexed: %v", err)
 	} else {
-		log.Infof("published cv.indexed")
+		log.Infof("published cv.indexed — status → normalizing")
+		_ = system.GetStorage().SetById(ctx, constants.MongoCVsCollection, cv.ID, bson.M{
+			"status": models.CVStatusNormalizing, "updated_at": time.Now(),
+		})
+	}
+
+	return nil
+}
+
+// replaceExistingCV deletes all previous CVs for userID from MongoDB, MinIO, and Qdrant,
+// excluding the CV that is currently being indexed (currentCVID).
+func (s *service) replaceExistingCV(ctx context.Context, userID, currentCVID string, log *logrus.Entry) error {
+	var previous []models.PersistedCV
+	if err := system.GetStorage().GetManyByField(ctx, constants.MongoCVsCollection, "user_id", []string{userID}, &previous); err != nil {
+		return fmt.Errorf("query previous cvs: %w", err)
+	}
+
+	for _, old := range previous {
+		if old.ID == currentCVID {
+			continue
+		}
+
+		// Delete from MinIO.
+		if old.MinioKey != "" {
+			if err := infra.GetMinio().RemoveObject(ctx, old.MinioBucket, old.MinioKey, minio.RemoveObjectOptions{}); err != nil {
+				log.Warnf("remove old minio object %s: %v", old.MinioKey, err)
+			}
+		}
+
+		// Delete from Qdrant.
+		if old.QdrantID != "" {
+			if err := s.qdrant.Delete(ctx, old.QdrantID); err != nil {
+				log.Warnf("delete old qdrant point %s: %v", old.QdrantID, err)
+			}
+		}
+
+		// Delete from MongoDB.
+		if err := system.GetStorage().DeleteByField(ctx, constants.MongoCVsCollection, "id", old.ID); err != nil {
+			log.Warnf("delete old cv doc %s: %v", old.ID, err)
+		} else {
+			log.Infof("replaced previous cv %s for user %s", old.ID, userID)
+		}
 	}
 
 	return nil

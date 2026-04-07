@@ -3,6 +3,8 @@ package infra
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/minio/minio-go/v7"
@@ -12,37 +14,69 @@ import (
 )
 
 var (
-	minioOnce   sync.Once
-	minioClient *minio.Client
-	minioURL    string
+	minioOnce         sync.Once
+	minioClient       *minio.Client
+	minioPublicClient *minio.Client
+	minioURL          string
 )
 
 // GetMinio returns the process-wide MinIO client, initialising it on first call.
 func GetMinio() *minio.Client {
-	minioOnce.Do(func() {
-		values, err := helpers.ReadEnvs("MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_PUBLIC_URL")
-		if err != nil {
-			logrus.Fatalf("infra/minio: %v", err)
-		}
-		endpoint, accessKey, secretKey, publicURL := values[0], values[1], values[2], values[3]
-		minioURL = publicURL
-
-		mc, err := minio.New(endpoint, &minio.Options{
-			Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-			Secure: false,
-		})
-		if err != nil {
-			logrus.Fatalf("infra/minio: new client: %v", err)
-		}
-		minioClient = mc
-	})
+	minioOnce.Do(initMinio)
 	return minioClient
+}
+
+// GetMinioPublic returns a MinIO client configured with the public endpoint.
+// Use this for PresignedPutObject so the returned URL is device-accessible.
+func GetMinioPublic() *minio.Client {
+	minioOnce.Do(initMinio)
+	return minioPublicClient
+}
+
+func initMinio() {
+	values, err := helpers.ReadEnvs("MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_PUBLIC_URL")
+	if err != nil {
+		logrus.Fatalf("infra/minio: %v", err)
+	}
+	endpoint, accessKey, secretKey, publicURL := values[0], values[1], values[2], values[3]
+	minioURL = publicURL
+
+	mc, err := minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		logrus.Fatalf("infra/minio: new client: %v", err)
+	}
+	minioClient = mc
+
+	// Parse MINIO_PUBLIC_URL (e.g. "http://192.168.1.10:9000") into host:port for the public client.
+	publicEndpoint, secure := parseMinioEndpoint(publicURL)
+	mcp, err := minio.New(publicEndpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+		Secure: secure,
+	})
+	if err != nil {
+		logrus.Fatalf("infra/minio: new public client: %v", err)
+	}
+	minioPublicClient = mcp
 }
 
 // MinioPublicURL returns the public base URL for MinIO (e.g. http://localhost:9000).
 func MinioPublicURL() string {
 	GetMinio() // ensure initialised
 	return minioURL
+}
+
+// parseMinioEndpoint strips the scheme from a URL like "http://host:9000"
+// and returns ("host:9000", false) or ("host:9000", true) for https.
+func parseMinioEndpoint(rawURL string) (endpoint string, secure bool) {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Host == "" {
+		// rawURL might already be host:port — use as-is
+		return strings.TrimPrefix(strings.TrimPrefix(rawURL, "https://"), "http://"), strings.HasPrefix(rawURL, "https://")
+	}
+	return u.Host, u.Scheme == "https"
 }
 
 // EnsureBucket creates bucket if it does not exist. Pass publicRead=true to set
