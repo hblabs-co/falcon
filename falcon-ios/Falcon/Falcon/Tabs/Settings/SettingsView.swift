@@ -35,6 +35,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(lm.t(.tabSettings))
+            .withLoginToolbar()
             .task { await nm.refreshStatus() }
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 90) }
         }

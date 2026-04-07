@@ -6,7 +6,6 @@ struct ProfileView: View {
     @Environment(CVUploadViewModel.self) var vm
     @Environment(SessionManager.self) var session
     @State private var showFilePicker = false
-    @State private var showLoginSheet = false
 
     private var isActivelyProcessing: Bool {
         switch vm.state {
@@ -33,39 +32,7 @@ struct ProfileView: View {
                 .padding(.bottom, 110)
             }
             .navigationTitle(lm.t(.tabProfile))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if session.isAuthenticated {
-                        HStack(spacing: 6) {
-                            Image(systemName: "checkmark.shield.fill")
-                                .foregroundStyle(.green)
-                            Text(session.email)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                    } else if !isActivelyProcessing {
-                        Button {
-                            showLoginSheet = true
-                        } label: {
-                            HStack(spacing: 5) {
-                                Image(systemName: "person.badge.key.fill")
-                                Text(lm.t(.profileLoginButton))
-                            }
-                            .font(.system(size: 14, weight: .medium))
-                        }
-                    }
-                }
-            }
-            .sheet(isPresented: $showLoginSheet) {
-                LoginSheet()
-                    .presentationDetents([.medium])
-                    .presentationCornerRadius(22)
-                    .presentationDragIndicator(.visible)
-            }
-            .onChange(of: session.isAuthenticated) { _, authenticated in
-                if authenticated { showLoginSheet = false }
-            }
+            .withLoginToolbar(showEmail: true)
             .fileImporter(
                 isPresented: $showFilePicker,
                 allowedContentTypes: [UTType("org.openxmlformats.wordprocessingml.document")!],
@@ -635,10 +602,16 @@ struct LoginSheet: View {
             return
         }
 
+        let deviceID = KeychainHelper.deviceID
+
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try? JSONEncoder().encode(["email": email])
+        req.httpBody = try? JSONEncoder().encode([
+            "email": email,
+            "device_id": deviceID,
+            "platform": "ios"
+        ])
 
         print("[login] POST \(url)")
 

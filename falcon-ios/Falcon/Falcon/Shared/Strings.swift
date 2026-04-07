@@ -82,6 +82,7 @@ enum StringKey {
     case settingsLogout
     case processingFact1, processingFact2, processingFact3, processingFact4, processingFact5
     case reviewGood, reviewAcceptable, reviewBad, reviewLabel, reviewCount
+    case cvDetailTasks, cvDetailTechnologies, cvDetailShowMore, cvDetailShowLess
 
     // No notifications permission
     case noNotifPermissionTitle, noNotifPermissionBody, noNotifPermissionButton
@@ -232,6 +233,10 @@ enum Strings {
             .reviewBad: "Bad Recruiter",
             .reviewLabel: "Recruiter",
             .reviewCount: "reviews",
+            .cvDetailTasks: "Tasks",
+            .cvDetailTechnologies: "Technologies",
+            .cvDetailShowMore: "Show more...",
+            .cvDetailShowLess: "Show less",
 
             .noNotifPermissionTitle: "Notifications disabled",
             .noNotifPermissionBody: "Enable notifications so Falcon can alert you when a matching project is found.",
@@ -382,6 +387,10 @@ enum Strings {
             .reviewBad: "Schlechter Vermittler",
             .reviewLabel: "Vermittler",
             .reviewCount: "Bewertungen",
+            .cvDetailTasks: "Aufgaben",
+            .cvDetailTechnologies: "Technologien",
+            .cvDetailShowMore: "Mehr anzeigen...",
+            .cvDetailShowLess: "Weniger anzeigen",
 
             .noNotifPermissionTitle: "Benachrichtigungen deaktiviert",
             .noNotifPermissionBody: "Aktiviere Benachrichtigungen, damit Falcon dich bei einem passenden Projekt informieren kann.",
@@ -532,6 +541,10 @@ enum Strings {
             .reviewBad: "Mal Reclutador",
             .reviewLabel: "Reclutador",
             .reviewCount: "reseñas",
+            .cvDetailTasks: "Tareas",
+            .cvDetailTechnologies: "Tecnologías",
+            .cvDetailShowMore: "Ver más...",
+            .cvDetailShowLess: "Ver menos",
 
             .noNotifPermissionTitle: "Notificaciones desactivadas",
             .noNotifPermissionBody: "Activa las notificaciones para que Falcon te avise cuando encuentre un proyecto compatible.",

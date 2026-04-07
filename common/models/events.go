@@ -48,11 +48,12 @@ type CVIndexRequestedEvent struct {
 	Email string `json:"email"`
 }
 
-// DeviceTokenRegisterEvent is published to "signal.device_token.register"
-// by falcon-api when a client registers or refreshes its APNs device token.
-type DeviceTokenRegisterEvent struct {
-	UserID string `json:"user_id"`
-	Token  string `json:"token"`
+// IOSDeviceTokenRegisterEvent is published to "signal.device_token.register"
+// by falcon-api when an iOS client registers or refreshes its APNs device token.
+type IOSDeviceTokenRegisterEvent struct {
+	UserID   string `json:"user_id"`
+	DeviceID string `json:"device_id"`
+	Token    string `json:"token"`
 }
 
 // ProjectNormalizedEvent is published to "project.normalized" by falcon-normalizer

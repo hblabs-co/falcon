@@ -233,6 +233,7 @@ struct CVProfileView: View {
 
 private struct ExperienceDetailSheet: View {
     let entry: NormalizedCVData.ExperienceEntry
+    @Environment(LanguageManager.self) var lm
     @State private var descriptionExpanded = false
 
     var body: some View {
@@ -303,7 +304,7 @@ private struct ExperienceDetailSheet: View {
                                 descriptionExpanded.toggle()
                             }
                         } label: {
-                            Text(descriptionExpanded ? "Show less" : "Show more...")
+                            Text(descriptionExpanded ? lm.t(.cvDetailShowLess) : lm.t(.cvDetailShowMore))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(Color.accentColor)
                         }
@@ -314,7 +315,7 @@ private struct ExperienceDetailSheet: View {
                 // Tasks
                 if !entry.tasks.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
-                        Label("Tasks", systemImage: "list.bullet")
+                        Label(lm.t(.cvDetailTasks), systemImage: "list.bullet")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.secondary)
                             .textCase(.uppercase)
@@ -339,7 +340,7 @@ private struct ExperienceDetailSheet: View {
                 // Technologies
                 if !entry.technologies.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
-                        Label("Technologies", systemImage: "cpu.fill")
+                        Label(lm.t(.cvDetailTechnologies), systemImage: "cpu.fill")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.secondary)
                             .textCase(.uppercase)

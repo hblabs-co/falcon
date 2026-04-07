@@ -10,6 +10,7 @@ final class SessionManager {
 
     private(set) var userID: String = ""
     private(set) var email: String = ""
+    var displayName: String = ""
     private(set) var isRestoring = true
     private(set) var cachedJWT: String?
 
@@ -77,6 +78,7 @@ final class SessionManager {
         cachedJWT = nil
         userID = ""
         email = ""
+        displayName = ""
     }
 
     // MARK: - Helpers

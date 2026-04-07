@@ -5,7 +5,7 @@ const (
 	MongoCVsCollection                 = "cvs"
 	MongoScrapeFailuresCollection      = "scrape_failures"
 	MongoMatchResultsCollection        = "match_results"
-	MongoDeviceTokensCollection        = "device_tokens"
+	MongoIOSDeviceTokensCollection     = "ios_device_tokens"
 	MongoCompaniesCollection           = "companies"
 	MongoNormalizedProjectsCollection  = "projects_normalized"
 	MongoErrorsCollection              = "errors"

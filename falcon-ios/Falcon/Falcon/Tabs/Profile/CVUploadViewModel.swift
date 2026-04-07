@@ -76,6 +76,7 @@ final class CVUploadViewModel {
 
             if let normalized = cv.normalized {
                 normalizedCV = normalized
+                updateDisplayName(normalized)
             }
             applyServerStatus(cv.status)
 
@@ -134,6 +135,7 @@ final class CVUploadViewModel {
             print("[CV] poll status: \(doc.status)")
             if let normalized = doc.normalized {
                 normalizedCV = normalized
+                updateDisplayName(normalized)
             }
             applyServerStatus(doc.status)
         } catch {
@@ -208,6 +210,13 @@ final class CVUploadViewModel {
     }
 
     // MARK: - Helpers
+
+    private func updateDisplayName(_ cv: NormalizedCVData) {
+        let lang = LanguageManager.shared.appLanguage
+        if let l = cv.lang(for: lang), let name = l.fullName {
+            SessionManager.shared.displayName = name
+        }
+    }
 
     private var apiBase: String { NotificationManager.shared.apiURL }
 

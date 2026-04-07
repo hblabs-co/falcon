@@ -43,8 +43,8 @@ func (s *Service) handleMatchResult(data []byte) error {
 
 	ctx := context.Background()
 
-	var tokens []models.DeviceToken
-	if err := system.GetStorage().GetAllByField(ctx, constants.MongoDeviceTokensCollection, "user_id", event.UserID, &tokens); err != nil {
+	var tokens []models.IOSDeviceToken
+	if err := system.GetStorage().GetAllByField(ctx, constants.MongoIOSDeviceTokensCollection, "user_id", event.UserID, &tokens); err != nil {
 		log.Warnf("fetch device tokens for user %s: %v", event.UserID, err)
 		return nil
 	}
@@ -68,7 +68,7 @@ func (s *Service) handleMatchResult(data []byte) error {
 	}
 
 	if len(staleTokens) > 0 {
-		if err := system.GetStorage().DeleteManyByFieldIn(ctx, constants.MongoDeviceTokensCollection, "token", staleTokens); err != nil {
+		if err := system.GetStorage().DeleteManyByFieldIn(ctx, constants.MongoIOSDeviceTokensCollection, "token", staleTokens); err != nil {
 			log.Errorf("bulk delete stale tokens: %v", err)
 		} else {
 			log.Infof("removed %d stale token(s) for user %s", len(staleTokens), event.UserID)
@@ -121,31 +121,28 @@ func (s *Service) resolveUserLanguage(email, platform string) string {
 	return "en"
 }
 
-func (s *Service) handleRegisterToken(data []byte) error {
-	var evt models.DeviceTokenRegisterEvent
+func (s *Service) handleRegisterIOSDeviceToken(data []byte) error {
+	var evt models.IOSDeviceTokenRegisterEvent
 	if err := json.Unmarshal(data, &evt); err != nil {
 		return fmt.Errorf("unmarshal device_token.register: %w", err)
 	}
 
 	now := time.Now()
-	dt := models.DeviceToken{
+	dt := models.IOSDeviceToken{
 		ID:        gonanoid.Must(),
 		UserID:    evt.UserID,
+		DeviceID:  evt.DeviceID,
 		Token:     evt.Token,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 
 	ctx := context.Background()
-	if err := system.GetStorage().Set(
-		ctx,
-		constants.MongoDeviceTokensCollection,
-		map[string]any{"token": evt.Token},
-		dt,
-	); err != nil {
+	if err := system.GetStorage().Set(ctx, constants.MongoIOSDeviceTokensCollection,
+		map[string]any{"device_id": evt.DeviceID}, dt); err != nil {
 		return fmt.Errorf("upsert device token: %w", err)
 	}
 
-	logrus.Infof("[signal] registered token %s… for user %s", evt.Token[:8], evt.UserID)
+	logrus.Infof("[signal] registered token %s… for user %s device %s", evt.Token[:8], evt.UserID, evt.DeviceID)
 	return nil
 }

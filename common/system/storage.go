@@ -140,13 +140,17 @@ func (s *Storage) GetMany(ctx context.Context, collection string, filter bson.M,
 
 // EnsureIndex creates an index on field in collection if it does not already exist.
 // Pass unique=true to enforce uniqueness.
-func (s *Storage) EnsureIndex(ctx context.Context, spec StorageIndexSpec) error {
-	model := mongo.IndexModel{
-		Keys:    bson.D{{Key: spec.Field, Value: 1}},
-		Options: options.Index().SetUnique(spec.Unique),
+func (s *Storage) EnsureIndex(ctx context.Context, specs ...StorageIndexSpec) error {
+	for _, spec := range specs {
+		model := mongo.IndexModel{
+			Keys:    bson.D{{Key: spec.Field, Value: 1}},
+			Options: options.Index().SetUnique(spec.Unique),
+		}
+		if _, err := s.db.Collection(spec.Collection).Indexes().CreateOne(ctx, model); err != nil {
+			return err
+		}
 	}
-	_, err := s.db.Collection(spec.Collection).Indexes().CreateOne(ctx, model)
-	return err
+	return nil
 }
 
 // EnsureTTLIndex creates an index that auto-deletes documents when the date field

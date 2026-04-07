@@ -104,8 +104,10 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let deviceID = KeychainHelper.deviceID
         request.httpBody = try? JSONSerialization.data(withJSONObject: [
             "user_id": userID,
+            "device_id": deviceID,
             "token": token
         ])
 

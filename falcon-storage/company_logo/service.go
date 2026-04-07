@@ -31,7 +31,7 @@ func newService(ctx context.Context) (*service, error) {
 		Unique:     true,
 	}
 	if err := system.GetStorage().EnsureCompoundIndex(ctx, spec); err != nil {
-		logrus.Warnf("company_logo: ensure index: %v", err)
+		logrus.Fatalf("company_logo: ensure index: %v", err)
 	}
 
 	return &service{}, nil

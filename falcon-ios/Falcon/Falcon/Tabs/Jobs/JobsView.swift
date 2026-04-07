@@ -34,6 +34,7 @@ struct JobsView: View {
                     navTitle
                 }
             }
+            .withLoginToolbar()
             .task { await vm.loadInitial() }
             .refreshable { await vm.refresh() }
             .onChange(of: lm.appLanguage) { Task { await vm.loadInitial() } }

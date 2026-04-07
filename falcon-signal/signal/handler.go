@@ -8,6 +8,11 @@ import (
 	"hblabs.co/falcon/common/system"
 )
 
+var indexes = []system.StorageIndexSpec{
+	system.NewIndexSpec(constants.MongoIOSDeviceTokensCollection, "device_id", true),
+	system.NewIndexSpec(constants.MongoIOSDeviceTokensCollection, "user_id", false),
+}
+
 // Module wires the signal pipeline into falcon-signal.
 type Module struct{}
 
@@ -16,6 +21,10 @@ func NewModule() *Module { return &Module{} }
 func (m *Module) Register(ctx context.Context) error {
 	svc, err := newService()
 	if err != nil {
+		return err
+	}
+
+	if err := system.GetStorage().EnsureIndex(ctx, indexes...); err != nil {
 		return err
 	}
 
@@ -35,7 +44,7 @@ func (m *Module) Register(ctx context.Context) error {
 		constants.StreamSignal,
 		"falcon-signal-device-token",
 		constants.SubjectSignalDeviceTokenRegister,
-		svc.handleRegisterToken,
+		svc.handleRegisterIOSDeviceToken,
 	); err != nil {
 		return err
 	}

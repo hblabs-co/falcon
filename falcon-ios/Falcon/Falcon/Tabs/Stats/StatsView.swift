@@ -16,6 +16,7 @@ struct StatsView: View {
                 .padding(.bottom, 110)
             }
             .navigationTitle(lm.t(.tabStats))
+            .withLoginToolbar()
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 90) }
         }
     }

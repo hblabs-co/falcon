@@ -33,7 +33,8 @@ func newService(ctx context.Context) (*service, error) {
 		return nil, err
 	}
 
-	if err := system.GetStorage().EnsureIndex(ctx, system.NewIndexSpec(constants.MongoCVsCollection, "user_id", false)); err != nil {
+	if err := system.GetStorage().EnsureIndex(ctx,
+		system.NewIndexSpec(constants.MongoCVsCollection, "user_id", false)); err != nil {
 		return nil, fmt.Errorf("ensure cvs.user_id index: %w", err)
 	}
 

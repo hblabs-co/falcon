@@ -28,11 +28,10 @@ var indexes = []system.StorageIndexSpec{
 func Run() {
 	getLogger().Infof("starting — polling every %s (Ctrl+C to stop)", system.PollInterval())
 
-	for _, spec := range indexes {
-		if err := system.GetStorage().EnsureIndex(system.Ctx(), spec); err != nil {
-			getLogger().Errorf("ensure index %s.%s: %v", spec.Collection, spec.Field, err)
-		}
+	if err := system.GetStorage().EnsureIndex(system.Ctx(), indexes...); err != nil {
+		getLogger().Fatalf("ensure index: %v", err)
 	}
+
 	if err := getSession().Login(); err != nil {
 		getLogger().Fatalf("login failed: %v", err)
 	}

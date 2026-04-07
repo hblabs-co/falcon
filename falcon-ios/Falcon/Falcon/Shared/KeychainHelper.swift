@@ -6,6 +6,40 @@ enum KeychainHelper {
 
     private static let service = "co.hblabs.falcon"
     private static let jwtAccount = "jwt"
+    private static let deviceIDAccount = "device_id"
+
+    // MARK: - Device ID (persistent, no biometry)
+
+    /// Returns a stable device ID that survives app reinstalls.
+    /// Generated once and stored in Keychain. Never changes.
+    static var deviceID: String {
+        // Try to read existing.
+        let readQuery: [CFString: Any] = [
+            kSecClass:       kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: deviceIDAccount,
+            kSecReturnData:  true,
+            kSecMatchLimit:  kSecMatchLimitOne,
+        ]
+        var item: CFTypeRef?
+        if SecItemCopyMatching(readQuery as CFDictionary, &item) == errSecSuccess,
+           let data = item as? Data,
+           let id = String(data: data, encoding: .utf8), !id.isEmpty {
+            return id
+        }
+
+        // Generate and persist.
+        let newID = UUID().uuidString
+        let addQuery: [CFString: Any] = [
+            kSecClass:                  kSecClassGenericPassword,
+            kSecAttrService:            service,
+            kSecAttrAccount:            deviceIDAccount,
+            kSecValueData:              Data(newID.utf8),
+            kSecAttrAccessible:         kSecAttrAccessibleAfterFirstUnlock,
+        ]
+        SecItemAdd(addQuery as CFDictionary, nil)
+        return newID
+    }
 
     // MARK: - JWT (biometry-protected)
 

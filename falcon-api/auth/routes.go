@@ -45,7 +45,9 @@ func (Routes) Mount(r *gin.Engine) {
 // so that falcon-signal delivers the email.
 func handleMagic(c *gin.Context) {
 	var body struct {
-		Email string `json:"email" binding:"required,email"`
+		Email    string `json:"email"     binding:"required,email"`
+		DeviceID string `json:"device_id"`
+		Platform string `json:"platform"  binding:"required,oneof=ios"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -60,10 +62,17 @@ func handleMagic(c *gin.Context) {
 		ID:        gonanoid.Must(),
 		Type:      models.TokenTypeMagicLink,
 		Email:     body.Email,
+		DeviceID:  body.DeviceID,
+		Platform:  body.Platform,
 		TokenHash: hash,
 		ExpiresAt: now.Add(magicTokenTTL),
 		Used:      false,
 		CreatedAt: now,
+	}
+
+	if err := doc.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	ctx := c.Request.Context()
@@ -147,7 +156,12 @@ func handleVerify(c *gin.Context) {
 		return
 	}
 
-	token, err := issueJWT(ctx, userID, magic.Email)
+	magic.UserID = userID
+
+	// Revoke previous JWTs for this user+device — one session per device.
+	revokeDeviceJWTs(ctx, &magic)
+
+	token, err := issueJWT(ctx, &magic)
 	if err != nil {
 		logrus.Errorf("issue jwt for user %s: %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
@@ -185,7 +199,7 @@ func findOrCreateUser(ctx context.Context, email string) (string, error) {
 }
 
 // issueJWT signs a JWT, persists it in the tokens collection, and returns the signed string.
-func issueJWT(ctx context.Context, userID, email string) (string, error) {
+func issueJWT(ctx context.Context, magic *models.Token) (string, error) {
 	secret := system.MustEnv("JWT_SECRET")
 	tokenID := gonanoid.Must()
 	now := time.Now()
@@ -193,10 +207,13 @@ func issueJWT(ctx context.Context, userID, email string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"jti":   tokenID,
-		"sub":   userID,
-		"email": email,
+		"sub":   magic.UserID,
+		"email": magic.Email,
 		"exp":   exp.Unix(),
 		"iat":   now.Unix(),
+	}
+	if magic.DeviceID != "" {
+		claims["device_id"] = magic.DeviceID
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := t.SignedString([]byte(secret))
@@ -204,22 +221,37 @@ func issueJWT(ctx context.Context, userID, email string) (string, error) {
 		return "", err
 	}
 
-	// Persist so we can revoke later.
 	doc := models.Token{
 		ID:        tokenID,
 		Type:      models.TokenTypeJWT,
-		UserID:    userID,
-		Email:     email,
+		UserID:    magic.UserID,
+		DeviceID:  magic.DeviceID,
+		Platform:  magic.Platform,
+		Email:     magic.Email,
 		TokenHash: tokenHash(signed),
 		ExpiresAt: exp,
 		CreatedAt: now,
 	}
 	if err := system.GetStorage().Set(ctx, constants.MongoTokensCollection, bson.M{"id": tokenID}, doc); err != nil {
 		logrus.Warnf("persist jwt token: %v", err)
-		// Non-fatal — JWT still works, just can't be revoked via DB.
 	}
 
 	return signed, nil
+}
+
+// revokeDeviceJWTs deletes previous JWT tokens for a user+device combo.
+// Allows multiple sessions on different devices, but only one per device.
+func revokeDeviceJWTs(ctx context.Context, magic *models.Token) {
+	if magic.DeviceID == "" {
+		return
+	}
+	if err := system.GetStorage().DeleteMany(ctx, constants.MongoTokensCollection, bson.M{
+		"user_id":   magic.UserID,
+		"device_id": magic.DeviceID,
+		"type":      models.TokenTypeJWT,
+	}); err != nil {
+		logrus.Warnf("[auth] revoke JWTs for user=%s device=%s: %v", magic.UserID, magic.DeviceID, err)
+	}
 }
 
 // tokenHash returns the hex-encoded SHA-256 of the raw token.
