@@ -2,18 +2,13 @@ package freelancede
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/interfaces"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
 )
 
 // Inspector implements Inspector for freelance.de. Cookies are read
@@ -41,7 +36,7 @@ func (pi *Inspector) Inspect() (interfaces.Project, error) {
 	if err == ErrSessionExpired {
 		pi.GetLogger().Warn("freelance.de: session expired, attempting re-login")
 		if loginErr := getSession().Login(); loginErr != nil {
-			return nil, fmt.Errorf("re-login failed: %w", loginErr)
+			return nil, err
 		}
 		return pi.inspect()
 	}
@@ -61,71 +56,37 @@ func (pi *Inspector) inspect() (*Project, error) {
 	var project Project
 	project.URL = pi.Url
 
-	var sessionErr error
+	var scrapeErr error
 	registerHandlers(c, &project)
 
 	c.OnResponse(func(r *colly.Response) {
 		pi.HTML = string(r.Body)
 		if bytes.Contains(r.Body, []byte("für EXPERT-Mitglieder sichtbar")) {
-			sessionErr = ErrSessionExpired
+			scrapeErr = ErrSessionExpired
 		}
 	})
 
 	c.OnScraped(func(_ *colly.Response) {
-		_, err := json.Marshal(project)
-		if err != nil {
+		if _, err := json.Marshal(project); err != nil {
 			pi.GetLogger().Errorf("error marshaling project: %v", err)
-			return
 		}
-		// outputFile := pi.Config.Source + ".jsonl"
-		// f, err := os.OpenFile(outputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		// if err != nil {
-		// 	pi.GetLogger().Printf("error opening %s: %v", outputFile, err)
-		// 	return
-		// }
-		// defer f.Close()
-		// if _, err := fmt.Fprintf(f, "%s\n", data); err != nil {
-		// 	pi.GetLogger().Printf("error writing %s: %v", outputFile, err)
-		// 	return
-		// }
-		// fmt.Printf("project appended to %s\n", outputFile)
 	})
 
 	c.OnError(func(r *colly.Response, err error) {
 		pi.GetLogger().Errorf("request error: status=%d err=%v", r.StatusCode, err)
+		if r.StatusCode >= 500 {
+			scrapeErr = &ErrServerError{StatusCode: r.StatusCode, URL: pi.Url}
+		}
 	})
 
 	if err := c.Visit(pi.Url); err != nil {
 		return nil, err
 	}
-	if sessionErr != nil {
-		return nil, sessionErr
+	if scrapeErr != nil {
+		return nil, scrapeErr
 	}
 
 	return &project, nil
-}
-
-// SaveFailure persists the raw HTML and inspect error to the shared "errors" collection
-// and publishes a scrape.failed event. Call this after Inspect() returns an error.
-func (pi *Inspector) SaveFailure(ctx context.Context, inspectErr error) {
-	system.RecordError(ctx, models.ServiceError{
-		ServiceName: constants.ServiceScout,
-		ErrorName:   constants.ErrNameScrapeInspectFailed,
-		Error:       inspectErr.Error(),
-		Platform:    Source,
-		PlatformID:  pi.PlatformID,
-		URL:         pi.Url,
-		HTML:        pi.HTML,
-	})
-	evt := &models.ScrapeFailedEvent{
-		Platform:   Source,
-		PlatformID: pi.PlatformID,
-		URL:        pi.Url,
-		Error:      inspectErr.Error(),
-	}
-	if err := system.Publish(ctx, constants.SubjectScrapeFailed, evt); err != nil {
-		pi.GetLogger().Errorf("publish scrape.failed: %v", err)
-	}
 }
 
 // registerHandlers attaches all HTML parsing callbacks to c, populating project

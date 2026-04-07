@@ -13,6 +13,7 @@ const (
 
 	// falcon-scout
 	ErrNameScrapeInspectFailed = "scrape_inspect_failed"
+	ErrNameScrapeServerError   = "scrape_server_error"
 
 	// falcon-match-engine
 	ErrNameMatchLLMFailed = "match_llm_failed"

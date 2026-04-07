@@ -237,6 +237,17 @@ func (s *Storage) DeleteByField(ctx context.Context, collection, field, value st
 	return err
 }
 
+// Count returns the number of documents matching filter.
+func (s *Storage) Count(ctx context.Context, collection string, filter bson.M) (int64, error) {
+	return s.db.Collection(collection).CountDocuments(ctx, filter)
+}
+
+// DeleteMany removes all documents matching the given filter.
+func (s *Storage) DeleteMany(ctx context.Context, collection string, filter bson.M) error {
+	_, err := s.db.Collection(collection).DeleteMany(ctx, filter)
+	return err
+}
+
 // DeleteManyByFieldIn removes all documents where field is one of the given values ($in).
 func (s *Storage) DeleteManyByFieldIn(ctx context.Context, collection, field string, values []string) error {
 	_, err := s.db.Collection(collection).DeleteMany(ctx, bson.M{field: bson.M{"$in": values}})

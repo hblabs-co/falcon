@@ -8,6 +8,23 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// StartWorker launches a background goroutine that calls fn every interval.
+// Unlike Poll, it does not block the caller and does not run fn immediately.
+func StartWorker(ctx context.Context, interval time.Duration, fn func(context.Context)) {
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				fn(ctx)
+			}
+		}
+	}()
+}
+
 // Poll calls fn in a goroutine immediately, then again every interval until
 // ctx is cancelled. If the previous invocation of fn is still running when
 // the next tick fires, that tick is skipped and a warning is logged.

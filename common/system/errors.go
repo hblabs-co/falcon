@@ -5,19 +5,24 @@ import (
 	"runtime"
 	"time"
 
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/models"
 )
 
 // RecordError persists a ServiceError to the "errors" collection.
-// It automatically fills StackTrace and OccurredAt so callers only need to
+// It automatically fills ID, StackTrace, OccurredAt, and Priority so callers only need to
 // set the domain fields (ServiceName, ErrorName, Error, and any optional fields).
 func RecordError(ctx context.Context, doc models.ServiceError) {
 	buf := make([]byte, 4096)
 	n := runtime.Stack(buf, false)
+	doc.ID = gonanoid.Must()
 	doc.StackTrace = string(buf[:n])
 	doc.OccurredAt = time.Now()
+	if doc.Priority == "" {
+		doc.Priority = models.ErrorPriorityLow
+	}
 
 	log := logrus.WithFields(logrus.Fields{
 		"service":    doc.ServiceName,

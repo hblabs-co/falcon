@@ -1,6 +1,9 @@
 package freelancede
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	// ErrNullRights is returned when the JWT rights field is null,
@@ -17,6 +20,23 @@ var (
 
 	// ErrSessionExpired is returned by an inspector when the current session
 	// cookies are no longer valid (e.g. the target site demands re-authentication).
-	// Callers can assert it with errors.Is and trigger a login + retry.
 	ErrSessionExpired = errors.New("session expired or unauthenticated")
 )
+
+// ErrServerError represents a 5xx HTTP response from the platform.
+// These are retried with a longer interval since the project page
+// may take up to an hour to become available.
+type ErrServerError struct {
+	StatusCode int
+	URL        string
+}
+
+func (e *ErrServerError) Error() string {
+	return fmt.Sprintf("server error %d for %s", e.StatusCode, e.URL)
+}
+
+// IsServerError checks if an error is a 5xx server error.
+func IsServerError(err error) bool {
+	var se *ErrServerError
+	return errors.As(err, &se)
+}

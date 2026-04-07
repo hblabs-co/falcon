@@ -269,6 +269,7 @@ func StreamScrape() []jetstream.StreamConfig {
 		constants.StreamScrape,
 		constants.SubjectScrapeRequested+".>",
 		constants.SubjectScrapeFailed,
+		constants.SubjectScrapeScanToday,
 	)
 }
 

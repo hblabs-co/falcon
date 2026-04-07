@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // Request holds the options for an HTTP call.
@@ -58,30 +60,61 @@ func (c *Client) Status(ctx context.Context, path string) (int, error) {
 
 // DoRequest executes an arbitrary HTTP method. Post and Put are convenience wrappers around it.
 func (c *Client) DoRequest(ctx context.Context, method, path string, req Request) error {
-	var body io.Reader
+	var bodyBytes []byte
 	if req.Body != nil {
 		data, err := json.Marshal(req.Body)
 		if err != nil {
 			return fmt.Errorf("marshal request body: %w", err)
 		}
-		body = bytes.NewReader(data)
+		bodyBytes = data
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, method, c.BaseURL+path, body)
+	buildReq := func() (*http.Request, error) {
+		var body io.Reader
+		if bodyBytes != nil {
+			body = bytes.NewReader(bodyBytes)
+		}
+		r, err := http.NewRequestWithContext(ctx, method, c.BaseURL+path, body)
+		if err != nil {
+			return nil, err
+		}
+		if bodyBytes != nil {
+			r.Header.Set("Content-Type", "application/json")
+		}
+		c.applyHeaders(r, req.Headers)
+		for _, cookie := range req.Cookies {
+			r.AddCookie(cookie)
+		}
+		return r, nil
+	}
+
+	httpReq, err := buildReq()
 	if err != nil {
 		return err
-	}
-	if req.Body != nil {
-		httpReq.Header.Set("Content-Type", "application/json")
-	}
-	c.applyHeaders(httpReq, req.Headers)
-	for _, cookie := range req.Cookies {
-		httpReq.AddCookie(cookie)
 	}
 
 	resp, err := c.inner.Do(httpReq)
 	if err != nil {
 		return err
+	}
+
+	// Retry on 429 (rate limit) — respect Retry-After, up to 2 retries.
+	for attempt := 0; attempt < 2 && resp.StatusCode == http.StatusTooManyRequests; attempt++ {
+		wait := parseRetryAfter(resp.Header.Get("Retry-After"))
+		resp.Body.Close()
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(wait):
+		}
+		httpReq, err = buildReq()
+		if err != nil {
+			return err
+		}
+		resp, err = c.inner.Do(httpReq)
+		if err != nil {
+			return err
+		}
 	}
 	defer resp.Body.Close()
 
@@ -92,6 +125,18 @@ func (c *Client) DoRequest(ctx context.Context, method, path string, req Request
 		return json.NewDecoder(resp.Body).Decode(req.Result)
 	}
 	return nil
+}
+
+// parseRetryAfter reads the Retry-After header (seconds) and returns a duration.
+// Falls back to 30s if the header is missing or unparseable.
+func parseRetryAfter(val string) time.Duration {
+	if val == "" {
+		return 30 * time.Second
+	}
+	if secs, err := strconv.Atoi(val); err == nil && secs > 0 {
+		return time.Duration(secs) * time.Second
+	}
+	return 30 * time.Second
 }
 
 // applyHeaders sets default client headers first, then call-level headers (which win on conflict).

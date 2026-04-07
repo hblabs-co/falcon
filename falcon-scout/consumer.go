@@ -25,6 +25,17 @@ func RunScrapeConsumer() {
 		logrus.Fatalf("subscribe %s: %v", subject, err)
 	}
 	logrus.Infof("subscribed to %s (consumer: %s)", subject, consumer)
+
+	if err := system.Subscribe(system.Ctx(), constants.StreamScrape, "scout-scan-today", constants.SubjectScrapeScanToday, handleScanToday); err != nil {
+		logrus.Fatalf("subscribe %s: %v", constants.SubjectScrapeScanToday, err)
+	}
+	logrus.Infof("subscribed to %s", constants.SubjectScrapeScanToday)
+}
+
+func handleScanToday(data []byte) error {
+	logrus.Info("scan-today triggered — collecting all of today's candidates")
+	freelancede.ScanToday(context.Background())
+	return nil
 }
 
 func handleScrapeRequested(data []byte) error {
