@@ -15,6 +15,7 @@ import (
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
+	"hblabs.co/falcon/common/ownhttp"
 	"hblabs.co/falcon/common/system"
 )
 
@@ -77,6 +78,7 @@ func handleMagic(c *gin.Context) {
 	evt := models.MagicLinkRequestedEvent{
 		Email:     body.Email,
 		MagicLink: magicURL,
+		Platform:  ownhttp.DetectPlatform(c.GetHeader("User-Agent")),
 	}
 	if err := system.Publish(ctx, constants.SubjectSignalMagicLink, evt); err != nil {
 		logrus.Errorf("publish signal.magic_link: %v", err)

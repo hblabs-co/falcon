@@ -1,0 +1,131 @@
+# Email Template Framework
+#
+# To add a new email template:
+# 1. Add a new entry under "templates:" with a unique name (e.g. "password_reset")
+# 2. Define translations for each language (en, de, es) with all needed strings
+# 3. Write the HTML template using these placeholders:
+#    - {{.T.key}}      — translated string (supports HTML like <strong>)
+#    - {{.Asset.name}}  — data URI of an asset (defined in "assets:" section)
+#    - {{.Shared.key}}  — shared config value (sender_email, company_name, etc.)
+#    - {{.Var.key}}     — per-email variable passed at send time
+# 4. To add a new asset: place the base64 file in email/assets/, then reference it here
+# 5. Send from Go: client.Send(email, "template_name", lang, map[string]string{"var": "value"})
+#
+# The "fields:" list is informational only — Go reads translations dynamically.
+
+assets:
+  falcon_logo:
+    file: "assets/falcon_logo.txt"
+    mime: "image/png"
+  hblabs_logo:
+    file: "assets/hblabs_logo.txt"
+    mime: "image/svg+xml"
+
+shared:
+  sender_email: "start@falcon.hblabs.co"
+  sender_name: "Falcon Team"
+  company_name: "HB Labs SAS"
+  company_url: "https://hblabs.co"
+
+templates:
+  login:
+    fields:
+      - subject
+      - title
+      - body
+      - expiry
+      - cta
+      - disclaimer
+      - built_by
+      - text_body
+    translations:
+      en:
+        subject: "Your Falcon login link"
+        title: "Log in to Falcon"
+        body: "Tap the button below to securely access your account."
+        expiry: "This link expires in <strong>15 minutes</strong> and can only be used once."
+        cta: "Log in"
+        disclaimer: "If you didn't request this email, you can safely ignore it."
+        built_by: "Built by"
+        text_body: "Log in to Falcon\n\nTap the link below to access your account:\n%s\n\nThis link expires in 15 minutes and can only be used once.\nIf you didn't request this, just ignore this email."
+      de:
+        subject: "Dein Falcon Login-Link"
+        title: "Bei Falcon anmelden"
+        body: "Tippe auf den Button, um sicher auf dein Konto zuzugreifen."
+        expiry: "Dieser Link ist <strong>15 Minuten</strong> gültig und kann nur einmal verwendet werden."
+        cta: "Anmelden"
+        disclaimer: "Falls du diese E-Mail nicht angefordert hast, kannst du sie einfach ignorieren."
+        built_by: "Entwickelt von"
+        text_body: "Bei Falcon anmelden\n\nTippe auf den Link, um auf dein Konto zuzugreifen:\n%s\n\nDieser Link ist 15 Minuten gültig und kann nur einmal verwendet werden.\nFalls du diese E-Mail nicht angefordert hast, ignoriere sie einfach."
+      es:
+        subject: "Tu enlace de acceso a Falcon"
+        title: "Inicia sesión en Falcon"
+        body: "Toca el botón para acceder de forma segura a tu cuenta."
+        expiry: "Este enlace expira en <strong>15 minutos</strong> y solo puede usarse una vez."
+        cta: "Iniciar sesión"
+        disclaimer: "Si no solicitaste este correo, puedes ignorarlo."
+        built_by: "Desarrollado por"
+        text_body: "Inicia sesión en Falcon\n\nToca el enlace para acceder a tu cuenta:\n%s\n\nEste enlace expira en 15 minutos y solo puede usarse una vez.\nSi no solicitaste este correo, ignóralo."
+    html: |
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:48px 16px;">
+          <tr><td align="center">
+            <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.08);">
+              <tr>
+                <td align="center" style="padding:36px 40px 0;">
+                  <img src="{{.Asset.falcon_logo}}" alt="Falcon" width="56" height="56" style="display:block;border-radius:14px;">
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:20px 40px 0;">
+                  <h1 style="margin:0;font-size:24px;font-weight:700;color:#1d1d1f;letter-spacing:-0.3px;">{{.T.title}}</h1>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:12px 40px 0;">
+                  <p style="margin:0;font-size:15px;line-height:22px;color:#6e6e73;">
+                    {{.T.body}}<br>
+                    {{.T.expiry}}
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:32px 40px;">
+                  <a href="{{.Var.magic_link}}" target="_blank" style="display:inline-block;background:#0071e3;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;padding:14px 40px;border-radius:14px;letter-spacing:0.2px;">
+                    {{.T.cta}}
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:0 40px;">
+                  <hr style="border:none;border-top:1px solid #e5e5ea;margin:0;">
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:20px 40px 12px;">
+                  <p style="margin:0;font-size:12px;line-height:18px;color:#aeaeb2;">{{.T.disclaimer}}</p>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:0 40px 28px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="vertical-align:middle;padding-right:8px;">
+                        <img src="{{.Asset.hblabs_logo}}" alt="HB Labs" width="20" height="20" style="display:block;">
+                      </td>
+                      <td style="vertical-align:middle;">
+                        <span style="font-size:11px;color:#aeaeb2;">{{.T.built_by}} </span>
+                        <a href="{{.Shared.company_url}}" style="font-size:11px;color:#8e8e93;text-decoration:none;font-weight:600;">{{.Shared.company_name}}</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
+      </body>
+      </html>
