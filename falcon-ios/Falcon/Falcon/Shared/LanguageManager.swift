@@ -20,17 +20,10 @@ final class LanguageManager {
         Strings.get(key, language: appLanguage)
     }
 
-    /// Loads persisted configurations from the API and applies them.
-    /// No-op if there is no userID (anonymous session).
-    func loadFromAPI() async {
-        let userID = SessionManager.shared.userID
-        let apiURL  = NotificationManager.shared.apiURL
-        guard !userID.isEmpty,
-              let url = URL(string: "\(apiURL)/me?platform=ios&user_id=\(userID)") else { return }
-        guard let (data, _) = try? await URLSession.shared.data(from: url),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let configs = json["configs"] as? [String: Any] else { return }
-        if let raw = configs["app_language"] as? String, let lang = AppLanguage(rawValue: raw) {
+    /// Applies configs from a /me API response. Called by CVUploadViewModel.restoreFromServer().
+    func applyConfigs(_ configs: [String: AnyCodable]?) {
+        guard let configs else { return }
+        if let raw = configs["app_language"]?.value as? String, let lang = AppLanguage(rawValue: raw) {
             appLanguage = lang
         }
     }

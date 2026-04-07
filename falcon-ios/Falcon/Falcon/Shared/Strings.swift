@@ -45,6 +45,18 @@ enum StringKey {
     // Profile
     case profileAnonymous
     case profileCVTitle, profileCVNone, profileCVHint, profileCVUpload, profileCVUploadPending
+    case profileCVDropzone, profileCVFormats
+    case profileCVEmailLabel, profileCVEmailHint, profileCVEmailPlaceholder
+    case profileCVUploadStart, profileCVUploading, profileCVIndexing, profileCVNormalizing, profileCVUploadDone, profileCVUploadFailed
+    case profileCVSectionExperience, profileCVSectionTechnologies, profileCVSectionOthers, profileCVReplace
+    case profileWhyTitle, profileWhyBody
+    case profileLoginButton, profileLoginTitle, profileLoginEmailHint, profileLoginCTA
+    case authErrorTitle, authErrorTokenUsed, authErrorTokenExpired, authErrorGeneric
+    case loginSentTitle, loginSentBody, loginSentSpamHint
+    case profileHowTitle
+    case profileStep1Title, profileStep1Body
+    case profileStep2Title, profileStep2Body
+    case profileStep3Title, profileStep3Body
     case profileSkillsTitle, profileSkillsNone
 
     // About — legal & meta
@@ -65,9 +77,19 @@ enum StringKey {
 
     // No-CV warning
     case noCVWarningTitle, noCVWarningBody
+    case cvFailedAlertTitle, cvFailedAlertBody, cvFailedAlertButton
+    case profileCVProcessingFailed
+    case settingsLogout
+    case processingFact1, processingFact2, processingFact3, processingFact4, processingFact5
+    case reviewGood, reviewAcceptable, reviewBad, reviewLabel, reviewCount
 
     // No notifications permission
     case noNotifPermissionTitle, noNotifPermissionBody, noNotifPermissionButton
+
+    // Job detail
+    case detailHighlights, detailMustHave, detailShouldHave, detailNiceToHave
+    case detailResponsibilities, detailContact, detailViewOriginal, detailShowMore
+    case detailCallContact, detailCallCTA
 }
 
 enum Strings {
@@ -138,7 +160,7 @@ enum Strings {
             .tabProfile: "Profile",
             .tabStats: "Stats",
             .jobsBannerTagline: "Job Intelligence",
-            .jobsBannerMatchCount: "matches today",
+            .jobsBannerMatchCount: "job offers today",
 
             .profileAnonymous: "Anonymous",
             .profileCVTitle: "Curriculum Vitae",
@@ -146,6 +168,41 @@ enum Strings {
             .profileCVHint: "Upload your CV to start matching",
             .profileCVUpload: "Upload CV",
             .profileCVUploadPending: "Coming soon via falcon-api",
+            .profileCVDropzone: "Tap to select your CV",
+            .profileCVFormats: "Word Document (.docx)",
+            .profileCVEmailLabel: "Email",
+            .profileCVEmailHint: "We'll use this to send you match alerts",
+            .profileCVEmailPlaceholder: "your@email.com",
+            .profileCVUploadStart: "Upload CV",
+            .profileCVUploading: "Uploading…",
+            .profileCVIndexing: "Processing…",
+            .profileCVNormalizing: "Analyzing…",
+            .profileCVUploadDone: "CV uploaded successfully",
+            .profileCVUploadFailed: "Upload failed. Try again.",
+            .profileCVSectionExperience: "Experience",
+            .profileCVSectionTechnologies: "Technologies",
+            .profileCVSectionOthers: "Others",
+            .profileCVReplace: "Replace CV",
+            .profileWhyTitle: "Get matched with top projects",
+            .profileWhyBody: "Upload your CV and let Falcon match you with the most relevant freelance projects. Our AI analyzes your skills and experience to surface the best opportunities.",
+            .profileLoginButton: "Sign In",
+            .profileLoginTitle: "Sign in",
+            .profileLoginEmailHint: "We'll send a magic link to your inbox.",
+            .profileLoginCTA: "Send login link",
+            .authErrorTitle: "Login failed",
+            .authErrorTokenUsed: "This link has already been used. Please request a new one.",
+            .authErrorTokenExpired: "This link has expired. Please request a new one.",
+            .authErrorGeneric: "Something went wrong. Please try again.",
+            .loginSentTitle: "Check your email",
+            .loginSentBody: "We sent a login link to **%@**. Tap it to log in.",
+            .loginSentSpamHint: "Don't see it? Check your spam folder.",
+            .profileHowTitle: "How it works",
+            .profileStep1Title: "Upload your CV",
+            .profileStep1Body: "Share your experience and skills as a Word document.",
+            .profileStep2Title: "AI analysis",
+            .profileStep2Body: "Falcon extracts your skills, experience and tech stack automatically.",
+            .profileStep3Title: "Get matched",
+            .profileStep3Body: "Receive personalized project recommendations based on your profile.",
             .profileSkillsTitle: "Your Skills",
             .profileSkillsNone: "Skills will appear once your CV is processed",
 
@@ -160,10 +217,36 @@ enum Strings {
 
             .noCVWarningTitle: "No job alerts yet",
             .noCVWarningBody: "Upload your CV so Falcon can match you with relevant projects and send you alerts.",
+            .cvFailedAlertTitle: "CV processing failed",
+            .cvFailedAlertBody: "Something went wrong while processing your CV. Please try uploading it again.",
+            .cvFailedAlertButton: "Go to Profile",
+            .profileCVProcessingFailed: "Processing failed. Please try again.",
+            .settingsLogout: "Log out",
+            .processingFact1: "We use Mistral AI to ensure GDPR compliance",
+            .processingFact2: "Your data stays on servers located in Germany",
+            .processingFact3: "We analyze public job listings to find matches",
+            .processingFact4: "Your CV is processed securely and never shared",
+            .processingFact5: "Matching happens automatically once your profile is ready",
+            .reviewGood: "Good Recruiter",
+            .reviewAcceptable: "Acceptable Recruiter",
+            .reviewBad: "Bad Recruiter",
+            .reviewLabel: "Recruiter",
+            .reviewCount: "reviews",
 
             .noNotifPermissionTitle: "Notifications disabled",
             .noNotifPermissionBody: "Enable notifications so Falcon can alert you when a matching project is found.",
             .noNotifPermissionButton: "Enable Notifications",
+
+            .detailHighlights: "Highlights",
+            .detailMustHave: "Must Have",
+            .detailShouldHave: "Should Have",
+            .detailNiceToHave: "Nice to Have",
+            .detailResponsibilities: "Responsibilities",
+            .detailContact: "Contact",
+            .detailViewOriginal: "View Original Posting",
+            .detailShowMore: "Show more",
+            .detailCallContact: "Call",
+            .detailCallCTA: "Call Contact Person",
         ],
 
         .german: [
@@ -227,7 +310,7 @@ enum Strings {
             .tabProfile: "Profil",
             .tabStats: "Stats",
             .jobsBannerTagline: "Job-Intelligenz",
-            .jobsBannerMatchCount: "Matches heute",
+            .jobsBannerMatchCount: "Stellenangebote heute",
 
             .profileAnonymous: "Anonym",
             .profileCVTitle: "Lebenslauf",
@@ -235,6 +318,41 @@ enum Strings {
             .profileCVHint: "Lade deinen Lebenslauf hoch, um Matches zu starten",
             .profileCVUpload: "Lebenslauf hochladen",
             .profileCVUploadPending: "Demnächst via falcon-api",
+            .profileCVDropzone: "Lebenslauf auswählen",
+            .profileCVFormats: "Word Document (.docx)",
+            .profileCVEmailLabel: "E-Mail",
+            .profileCVEmailHint: "Damit schicken wir dir passende Job-Alerts",
+            .profileCVEmailPlaceholder: "deine@email.de",
+            .profileCVUploadStart: "Lebenslauf hochladen",
+            .profileCVUploading: "Wird hochgeladen…",
+            .profileCVIndexing: "Wird verarbeitet…",
+            .profileCVNormalizing: "Wird analysiert…",
+            .profileCVUploadDone: "Lebenslauf erfolgreich hochgeladen",
+            .profileCVUploadFailed: "Fehler beim Hochladen. Erneut versuchen.",
+            .profileCVSectionExperience: "Berufserfahrung",
+            .profileCVSectionTechnologies: "Technologien",
+            .profileCVSectionOthers: "Sonstige",
+            .profileCVReplace: "Lebenslauf ersetzen",
+            .profileWhyTitle: "Passende Projekte finden",
+            .profileWhyBody: "Lade deinen Lebenslauf hoch und lass Falcon dich mit den relevantesten Freelance-Projekten matchen. Unsere KI analysiert deine Fähigkeiten und Erfahrungen.",
+            .profileLoginButton: "Anmelden",
+            .profileLoginTitle: "Anmelden",
+            .profileLoginEmailHint: "Wir schicken dir einen Magic Link per E-Mail.",
+            .profileLoginCTA: "Login-Link senden",
+            .authErrorTitle: "Anmeldung fehlgeschlagen",
+            .authErrorTokenUsed: "Dieser Link wurde bereits verwendet. Bitte fordere einen neuen an.",
+            .authErrorTokenExpired: "Dieser Link ist abgelaufen. Bitte fordere einen neuen an.",
+            .authErrorGeneric: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+            .loginSentTitle: "Prüfe dein E-Mail-Postfach",
+            .loginSentBody: "Wir haben einen Login-Link an **%@** gesendet. Tippe darauf, um dich anzumelden.",
+            .loginSentSpamHint: "Nicht gefunden? Überprüfe deinen Spam-Ordner.",
+            .profileHowTitle: "So funktioniert es",
+            .profileStep1Title: "Lebenslauf hochladen",
+            .profileStep1Body: "Teile deine Erfahrung und Fähigkeiten als Word-Dokument.",
+            .profileStep2Title: "KI-Analyse",
+            .profileStep2Body: "Falcon extrahiert automatisch deine Fähigkeiten, Erfahrung und Technologien.",
+            .profileStep3Title: "Matches erhalten",
+            .profileStep3Body: "Erhalte personalisierte Projektempfehlungen passend zu deinem Profil.",
             .profileSkillsTitle: "Deine Skills",
             .profileSkillsNone: "Skills erscheinen, sobald dein Lebenslauf verarbeitet wurde",
 
@@ -249,10 +367,36 @@ enum Strings {
 
             .noCVWarningTitle: "Noch keine Job-Alerts",
             .noCVWarningBody: "Lade deinen Lebenslauf hoch, damit Falcon dich mit passenden Projekten matcht und Alerts sendet.",
+            .cvFailedAlertTitle: "Lebenslauf-Verarbeitung fehlgeschlagen",
+            .cvFailedAlertBody: "Beim Verarbeiten deines Lebenslaufs ist ein Fehler aufgetreten. Bitte lade ihn erneut hoch.",
+            .cvFailedAlertButton: "Zum Profil",
+            .profileCVProcessingFailed: "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
+            .settingsLogout: "Abmelden",
+            .processingFact1: "Wir nutzen Mistral AI für DSGVO-Konformität",
+            .processingFact2: "Deine Daten bleiben auf Servern in Deutschland",
+            .processingFact3: "Wir analysieren öffentliche Stellenangebote für Matches",
+            .processingFact4: "Dein Lebenslauf wird sicher verarbeitet und nie weitergegeben",
+            .processingFact5: "Matching startet automatisch, sobald dein Profil bereit ist",
+            .reviewGood: "Guter Vermittler",
+            .reviewAcceptable: "Akzeptabler Vermittler",
+            .reviewBad: "Schlechter Vermittler",
+            .reviewLabel: "Vermittler",
+            .reviewCount: "Bewertungen",
 
             .noNotifPermissionTitle: "Benachrichtigungen deaktiviert",
             .noNotifPermissionBody: "Aktiviere Benachrichtigungen, damit Falcon dich bei einem passenden Projekt informieren kann.",
             .noNotifPermissionButton: "Benachrichtigungen aktivieren",
+
+            .detailHighlights: "Highlights",
+            .detailMustHave: "Pflichtanforderungen",
+            .detailShouldHave: "Sollte mitbringen",
+            .detailNiceToHave: "Von Vorteil",
+            .detailResponsibilities: "Aufgaben",
+            .detailContact: "Kontakt",
+            .detailViewOriginal: "Original-Ausschreibung öffnen",
+            .detailShowMore: "Mehr anzeigen",
+            .detailCallContact: "Anrufen:",
+            .detailCallCTA: "Kontaktperson anrufen",
         ],
 
         .spanish: [
@@ -316,7 +460,7 @@ enum Strings {
             .tabProfile: "Perfil",
             .tabStats: "Stats",
             .jobsBannerTagline: "Inteligencia de empleo",
-            .jobsBannerMatchCount: "matches hoy",
+            .jobsBannerMatchCount: "ofertas laborales hoy",
 
             .profileAnonymous: "Anónimo",
             .profileCVTitle: "Currículum Vitae",
@@ -324,6 +468,41 @@ enum Strings {
             .profileCVHint: "Sube tu CV para comenzar a hacer matches",
             .profileCVUpload: "Subir CV",
             .profileCVUploadPending: "Próximamente via falcon-api",
+            .profileCVDropzone: "Toca para seleccionar tu CV",
+            .profileCVFormats: "Word Document (.docx)",
+            .profileCVEmailLabel: "Email",
+            .profileCVEmailHint: "Lo usaremos para enviarte alertas de empleo",
+            .profileCVEmailPlaceholder: "tu@email.com",
+            .profileCVUploadStart: "Subir CV",
+            .profileCVUploading: "Subiendo…",
+            .profileCVIndexing: "Procesando…",
+            .profileCVNormalizing: "Analizando…",
+            .profileCVUploadDone: "CV subido correctamente",
+            .profileCVUploadFailed: "Error al subir. Inténtalo de nuevo.",
+            .profileCVSectionExperience: "Experiencia",
+            .profileCVSectionTechnologies: "Tecnologías",
+            .profileCVSectionOthers: "Otros",
+            .profileCVReplace: "Reemplazar CV",
+            .profileWhyTitle: "Consigue proyectos a tu medida",
+            .profileWhyBody: "Sube tu CV y deja que Falcon te conecte con los proyectos freelance más relevantes. Nuestra IA analiza tus habilidades y experiencia para encontrar las mejores oportunidades.",
+            .profileLoginButton: "Iniciar sesión",
+            .profileLoginTitle: "Iniciar sesión",
+            .profileLoginEmailHint: "Te enviaremos un enlace mágico a tu correo.",
+            .profileLoginCTA: "Enviar enlace de acceso",
+            .authErrorTitle: "Error al iniciar sesión",
+            .authErrorTokenUsed: "Este enlace ya fue utilizado. Solicita uno nuevo.",
+            .authErrorTokenExpired: "Este enlace ha expirado. Solicita uno nuevo.",
+            .authErrorGeneric: "Algo salió mal. Inténtalo de nuevo.",
+            .loginSentTitle: "Revisa tu correo",
+            .loginSentBody: "Enviamos un enlace de acceso a **%@**. Tócalo para iniciar sesión.",
+            .loginSentSpamHint: "¿No lo ves? Revisa tu carpeta de spam.",
+            .profileHowTitle: "Cómo funciona",
+            .profileStep1Title: "Sube tu CV",
+            .profileStep1Body: "Comparte tu experiencia y habilidades en un documento Word.",
+            .profileStep2Title: "Análisis con IA",
+            .profileStep2Body: "Falcon extrae automáticamente tus habilidades, experiencia y stack tecnológico.",
+            .profileStep3Title: "Recibe matches",
+            .profileStep3Body: "Recibe recomendaciones de proyectos personalizadas según tu perfil.",
             .profileSkillsTitle: "Tus habilidades",
             .profileSkillsNone: "Las habilidades aparecerán cuando tu CV sea procesado",
 
@@ -338,10 +517,36 @@ enum Strings {
 
             .noCVWarningTitle: "Sin alertas de empleo",
             .noCVWarningBody: "Sube tu CV para que Falcon te conecte con proyectos relevantes y te envíe alertas.",
+            .cvFailedAlertTitle: "Error al procesar tu CV",
+            .cvFailedAlertBody: "Algo salió mal al procesar tu hoja de vida. Intenta subirla de nuevo.",
+            .cvFailedAlertButton: "Ir al Perfil",
+            .profileCVProcessingFailed: "Error al procesar. Inténtalo de nuevo.",
+            .settingsLogout: "Cerrar sesión",
+            .processingFact1: "Usamos Mistral AI para cumplir con el GDPR",
+            .processingFact2: "Tus datos permanecen en servidores en Alemania",
+            .processingFact3: "Analizamos ofertas laborales públicas para encontrar coincidencias",
+            .processingFact4: "Tu CV se procesa de forma segura y nunca se comparte",
+            .processingFact5: "El matching comienza automáticamente cuando tu perfil esté listo",
+            .reviewGood: "Buen Reclutador",
+            .reviewAcceptable: "Reclutador Aceptable",
+            .reviewBad: "Mal Reclutador",
+            .reviewLabel: "Reclutador",
+            .reviewCount: "reseñas",
 
             .noNotifPermissionTitle: "Notificaciones desactivadas",
             .noNotifPermissionBody: "Activa las notificaciones para que Falcon te avise cuando encuentre un proyecto compatible.",
             .noNotifPermissionButton: "Activar notificaciones",
+
+            .detailHighlights: "Destacados",
+            .detailMustHave: "Imprescindible",
+            .detailShouldHave: "Deseable",
+            .detailNiceToHave: "Valorable",
+            .detailResponsibilities: "Responsabilidades",
+            .detailContact: "Contacto",
+            .detailViewOriginal: "Ver publicación original",
+            .detailShowMore: "Ver más",
+            .detailCallContact: "Llamar a",
+            .detailCallCTA: "Llamar al contacto",
         ],
     ]
     // swiftlint:enable line_length

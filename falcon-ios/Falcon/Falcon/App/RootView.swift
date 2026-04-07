@@ -2,24 +2,28 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(LanguageManager.self) var lm
-    @State private var showSplash = true
+    @State private var splashDone = false
+    @State private var sessionReady = false
+
+    private var showMain: Bool { splashDone && sessionReady }
 
     var body: some View {
         Group {
-            if showSplash {
+            if showMain {
+                MainTabView()
+                    .transition(.opacity)
+            } else {
                 SplashView {
                     withAnimation(.easeOut(duration: 0.35)) {
-                        showSplash = false
+                        splashDone = true
                     }
                 }
                 .transition(.opacity)
-            } else {
-                MainTabView()
-                    .transition(.opacity)
             }
         }
-        // Loads persisted language preference from the API once the app is ready.
-        // Skipped silently when there is no userID (anonymous session).
-        .task { await lm.loadFromAPI() }
+        .task {
+            await SessionManager.shared.restore()
+            sessionReady = true
+        }
     }
 }

@@ -23,6 +23,14 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 
+    var localeIdentifier: String {
+        switch self {
+        case .english: "en_US"
+        case .german:  "de_DE"
+        case .spanish: "es_ES"
+        }
+    }
+
     /// Reads the first preferred system language and maps it to a supported language.
     /// Falls back to English if the system language is not supported.
     static var fromSystem: AppLanguage {

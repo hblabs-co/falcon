@@ -30,6 +30,9 @@ struct SettingsView: View {
                 configSection
                 #endif
                 aboutSection
+                if session.isAuthenticated {
+                    logoutSection
+                }
             }
             .navigationTitle(lm.t(.tabSettings))
             .task { await nm.refreshStatus() }
@@ -122,14 +125,14 @@ struct SettingsView: View {
     // MARK: - Config API
 
     private func saveLanguageConfig(_ lang: AppLanguage) {
-        let userID = session.userID
-        guard !userID.isEmpty,
-              let url = URL(string: "\(nm.apiURL)/me/config") else { return }
+        guard session.isAuthenticated,
+              let url = URL(string: "\(nm.apiURL)/me/config"),
+              let jwt = session.cachedJWT else { return }
         var req = URLRequest(url: url)
         req.httpMethod = "PUT"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(jwt)", forHTTPHeaderField: "Authorization")
         req.httpBody = try? JSONSerialization.data(withJSONObject: [
-            "user_id":  userID,
             "platform": "ios",
             "name":     "app_language",
             "value":    lang.rawValue
@@ -268,6 +271,28 @@ struct SettingsView: View {
                 }
             }
 
+        }
+    }
+
+    // MARK: - Logout
+
+    private var logoutSection: some View {
+        Section {
+            Button(role: .destructive) {
+                session.logout()
+            } label: {
+                HStack {
+                    Spacer()
+                    Text(lm.t(.settingsLogout))
+                        .font(.system(size: 15, weight: .medium))
+                    Spacer()
+                }
+            }
+        } footer: {
+            Text(session.email)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity)
         }
     }
 

@@ -4,6 +4,7 @@ struct NotificationsView: View {
     @Environment(NotificationManager.self) var nm
     @Environment(LanguageManager.self) var lm
     @Environment(SessionManager.self) var session
+    @Environment(CVUploadViewModel.self) var cvVM
     @Binding var selectedTab: AppTab
 
     var body: some View {
@@ -24,7 +25,9 @@ struct NotificationsView: View {
                             .padding(.horizontal, 16)
                             .padding(.top, 8)
                         Spacer()
-                        if nm.authStatus != .authorized {
+                        if isCVFailed {
+                            cvFailedView
+                        } else if nm.authStatus != .authorized {
                             notificationsDisabledView
                         } else if session.userID.isEmpty {
                             VStack(spacing: 16) {
@@ -53,6 +56,30 @@ struct NotificationsView: View {
             }
             .navigationTitle(lm.t(.tabAlerts))
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 90) }
+        }
+    }
+
+    // MARK: - CV failed
+
+    private var isCVFailed: Bool {
+        if case .failed = cvVM.state { return true }
+        return false
+    }
+
+    private var cvFailedView: some View {
+        VStack(spacing: 16) {
+            ContentUnavailableView(
+                lm.t(.cvFailedAlertTitle),
+                systemImage: "exclamationmark.triangle.fill",
+                description: Text(lm.t(.cvFailedAlertBody))
+            )
+            Button(lm.t(.cvFailedAlertButton)) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    selectedTab = .profile
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
         }
     }
 

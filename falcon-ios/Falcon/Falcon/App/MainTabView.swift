@@ -7,8 +7,11 @@ enum AppTab {
 struct MainTabView: View {
     @Environment(LanguageManager.self) var lm
     @Environment(NotificationManager.self) var nm
+    @Environment(SessionManager.self) var session
+    @Environment(\.scenePhase) var scenePhase
     @State private var selectedTab: AppTab = .jobs
     @State private var contactDrawer: ContactDrawerInfo? = nil
+    @State private var cvUploadVM = CVUploadViewModel()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -16,11 +19,12 @@ struct MainTabView: View {
                 switch selectedTab {
                 case .jobs:        JobsView()
                 case .alerts:      NotificationsView(selectedTab: $selectedTab)
-                case .stats:       StatsView()
+                case .stats:       EmptyView() // disabled for now
                 case .profile:     ProfileView()
                 case .settings:    SettingsView(contactDrawer: $contactDrawer)
                 }
             }
+            .environment(cvUploadVM)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             floatingTabBar
@@ -35,12 +39,28 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(edges: .bottom)
         .task { await nm.refreshStatus() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                Task { await nm.refreshStatus() }
+                // Retry CV restore if it failed (e.g. local network prompt not yet accepted).
+                if session.isAuthenticated, case .idle = cvUploadVM.state {
+                    Task { await cvUploadVM.restoreFromServer() }
+                }
+            }
+        }
+        .task(id: session.isAuthenticated) {
+            if session.isAuthenticated {
+                await cvUploadVM.restoreFromServer()
+            } else {
+                cvUploadVM.reset()
+            }
+        }
     }
 
     private var floatingTabBar: some View {
         HStack(spacing: 0) {
             tabItem(icon: "bell.fill",           label: lm.t(.tabAlerts),    tab: .alerts)
-            tabItem(icon: "chart.bar.fill",      label: lm.t(.tabStats),     tab: .stats)
+            // tabItem(icon: "chart.bar.fill",      label: lm.t(.tabStats),     tab: .stats)
             tabItem(icon: "briefcase.fill",      label: lm.t(.tabJobs),      tab: .jobs)
             tabItem(icon: "person.fill",         label: lm.t(.tabProfile),   tab: .profile)
             tabItem(icon: "gearshape.fill",      label: lm.t(.tabSettings),  tab: .settings)

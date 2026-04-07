@@ -5,6 +5,12 @@ import Foundation
 struct ProjectsResponse: Decodable {
     let data: [ProjectItem]
     let pagination: Pagination
+    let todayCount: Int
+
+    enum CodingKeys: String, CodingKey {
+        case data, pagination
+        case todayCount = "today_count"
+    }
 }
 
 struct Pagination: Decodable {
@@ -97,29 +103,34 @@ struct ProjectItem: Decodable, Identifiable {
         return components.url
     }
 
-    var relativeDate: String? {
+    func relativeDate(for language: AppLanguage) -> String? {
         guard !platformUpdatedAt.isEmpty else { return nil }
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let date = iso.date(from: platformUpdatedAt)
             ?? ISO8601DateFormatter().date(from: platformUpdatedAt)
         guard let date else { return nil }
-        return RelativeDateTimeFormatter().localizedString(for: date, relativeTo: .now)
+        let fmt = RelativeDateTimeFormatter()
+        fmt.locale = Locale(identifier: language.localeIdentifier)
+        return fmt.localizedString(for: date, relativeTo: .now)
     }
 }
 
 // MARK: - Normalized content (English)
 
 struct NormalizedData: Decodable {
-    let title:          ProjectTitle?
-    let company:        ProjectCompany?
-    let location:       ProjectLocation?
-    let compensation:   ProjectCompensation?
-    let status:         ProjectStatus?
-    let summary:        ProjectSummary?
-    let classification: ProjectClassification?
-    let ui:             ProjectUI?
-    let requirements:   ProjectRequirements?
+    let title:            ProjectTitle?
+    let company:          ProjectCompany?
+    let location:         ProjectLocation?
+    let compensation:     ProjectCompensation?
+    let status:           ProjectStatus?
+    let summary:          ProjectSummary?
+    let classification:   ProjectClassification?
+    let ui:               ProjectUI?
+    let requirements:     ProjectRequirements?
+    let responsibilities: [String]?
+    let source:           ProjectSource?
+    let contact:          ProjectContact?
 }
 
 struct ProjectTitle: Decodable {
@@ -278,25 +289,69 @@ struct HeroFact: Decodable {
 struct ProjectRequirements: Decodable {
     let mustHave:   [RequirementItem]?
     let shouldHave: [RequirementItem]?
+    let niceToHave: [RequirementItem]?
 
     enum CodingKeys: String, CodingKey {
         case mustHave   = "must_have"
         case shouldHave = "should_have"
+        case niceToHave = "nice_to_have"
     }
 }
 
 struct RequirementItem: Decodable {
     let name:           String?
     let normalizedName: String?
+    let category:       String?
+    let minYears:       Int?
+    let relatedTools:   [String]?
+    let required:       Bool?
 
     enum CodingKeys: String, CodingKey {
         case name
         case normalizedName = "normalized_name"
+        case category
+        case minYears       = "min_years"
+        case relatedTools   = "related_tools"
+        case required
     }
+
+    // min_years can come as Int or String from LLM
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        name           = try? c.decodeIfPresent(String.self, forKey: .name)
+        normalizedName = try? c.decodeIfPresent(String.self, forKey: .normalizedName)
+        category       = try? c.decodeIfPresent(String.self, forKey: .category)
+        required       = try? c.decodeIfPresent(Bool.self,   forKey: .required)
+        relatedTools   = try? c.decodeIfPresent([String].self, forKey: .relatedTools)
+        if let v = try? c.decodeIfPresent(Int.self, forKey: .minYears) {
+            minYears = v
+        } else if let s = try? c.decodeIfPresent(String.self, forKey: .minYears) {
+            minYears = Int(s)
+        } else {
+            minYears = nil
+        }
+    }
+}
+
+struct ProjectSource: Decodable {
+    let url:        String?
+    let platformId: String?
+    enum CodingKeys: String, CodingKey {
+        case url
+        case platformId = "platform_id"
+    }
+}
+
+struct ProjectContact: Decodable {
+    let name:    String?
+    let company: String?
+    let email:   String?
+    let phone:   String?
+    let role:    String?
 }
 
 // MARK: - Helpers
 
-private extension String {
+extension String {
     var nilIfEmpty: String? { isEmpty ? nil : self }
 }

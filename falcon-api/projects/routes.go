@@ -143,9 +143,17 @@ func handleListProjects(c *gin.Context) {
 		}
 	}
 
+	// Count projects normalized today.
+	now := time.Now().UTC()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	todayCount, _ := store.Count(ctx, constants.MongoNormalizedProjectsCollection, bson.M{
+		"normalized_at": bson.M{"$gte": startOfDay},
+	})
+
 	totalPages := int(math.Ceil(float64(total) / float64(pageSize)))
 	c.JSON(http.StatusOK, gin.H{
-		"data": items,
+		"data":        items,
+		"today_count": todayCount,
 		"pagination": paginationMeta{
 			Page:       page,
 			PageSize:   pageSize,

@@ -11,6 +11,7 @@ private struct BannerVisibilityKey: PreferenceKey {
 
 struct JobsView: View {
     @Environment(LanguageManager.self) var lm
+    @Environment(\.scenePhase) var scenePhase
     @State private var vm = JobsViewModel()
     @State private var bannerVisible = true
 
@@ -34,8 +35,13 @@ struct JobsView: View {
                 }
             }
             .task { await vm.loadInitial() }
-            .refreshable { await vm.loadInitial() }
+            .refreshable { await vm.refresh() }
             .onChange(of: lm.appLanguage) { Task { await vm.loadInitial() } }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active, vm.error != nil {
+                    Task { await vm.loadInitial() }
+                }
+            }
             .onPreferenceChange(BannerVisibilityKey.self) { minY in
                 withAnimation(.easeInOut(duration: 0.2)) {
                     bannerVisible = minY > -20
@@ -57,10 +63,10 @@ struct JobsView: View {
                 FalconIconView(size: 22, cornerRadius: 5)
                 Text(lm.t(.tabJobs))
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
-                if vm.total > 0 {
+                if vm.todayCount > 0 {
                     Text("·")
                         .foregroundStyle(.tertiary)
-                    Text("\(vm.total)")
+                    Text("\(vm.todayCount)")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                     Text(lm.t(.jobsBannerMatchCount))
@@ -89,7 +95,7 @@ struct JobsView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 2) {
-                Text(vm.total > 0 ? "\(vm.total)" : "—")
+                Text(vm.todayCount > 0 ? "\(vm.todayCount)" : "—")
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                 Text(lm.t(.jobsBannerMatchCount))
                     .font(.system(size: 10, weight: .medium))
@@ -169,9 +175,14 @@ struct JobsView: View {
 
 struct JobCard: View {
     let project: ProjectItem
+    @Environment(LanguageManager.self) var lm
+    @State private var showDetail = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
+            if let badge = reviewBadge {
+                badge
+            }
             header
             if let summary = project.data.summary?.short {
                 Text(summary)
@@ -183,6 +194,7 @@ struct JobCard: View {
                 chipRow(chips)
             }
             footer
+            showMoreButton
         }
         .padding(16)
         .background(
@@ -190,6 +202,67 @@ struct JobCard: View {
                 .fill(.background)
                 .shadow(color: .black.opacity(0.06), radius: 14, x: 0, y: 4)
         )
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .onTapGesture { showDetail = true }
+        .sheet(isPresented: $showDetail) {
+            JobDetailView(project: project)
+                .environment(lm)
+        }
+    }
+
+    private var showMoreButton: some View {
+        HStack {
+            Button { showDetail = true } label: {
+                HStack(spacing: 4) {
+                    Text(lm.t(.detailShowMore))
+                        .font(.system(size: 12, weight: .medium))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .semibold))
+                }
+                .foregroundStyle(Color.accentColor)
+            }
+            .buttonStyle(.plain)
+            Spacer()
+            if let date = project.relativeDate(for: lm.appLanguage) {
+                Text(date)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    // MARK: Review badge
+
+    @ViewBuilder
+    private var reviewBadge: (some View)? {
+        if let stats = project.recruiterRodeoStats {
+            let rating = stats.overallRating
+            let (label, icon, color): (String, String, Color) = {
+                if rating >= 3.5 { return (lm.t(.reviewGood), "hand.thumbsup.fill", .green) }
+                if rating >= 2.5 { return (lm.t(.reviewAcceptable), "hand.point.up.fill", .orange) }
+                return (lm.t(.reviewBad), "hand.thumbsdown.fill", .red)
+            }()
+
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 10, weight: .semibold))
+                Text(label)
+                    .font(.system(size: 11, weight: .semibold))
+                if stats.reviewCount > 0 {
+                    Text("·")
+                        .foregroundStyle(color.opacity(0.5))
+                    Text("\(stats.reviewCount) \(lm.t(.reviewCount))")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(color.opacity(0.7))
+                }
+            }
+            .foregroundStyle(color)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(
+                Capsule().fill(color.opacity(0.1))
+            )
+        }
     }
 
     // MARK: Header
@@ -198,18 +271,10 @@ struct JobCard: View {
         HStack(alignment: .top, spacing: 12) {
             companyLogo
             VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(project.displayTitle)
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .lineLimit(2)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    if let date = project.relativeDate {
-                        Text(date)
-                            .font(.system(size: 10))
-                            .foregroundStyle(.tertiary)
-                            .fixedSize()
-                    }
-                }
+                Text(project.displayTitle)
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 companyLocationLine
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -255,7 +320,7 @@ struct JobCard: View {
     private let logoSize: CGFloat = 53
 
     private var companyLogo: some View {
-        VStack(spacing: 6) {
+        VStack(alignment: .center, spacing: 6) {
             if let stats = project.recruiterRodeoStats {
                 starRating(for: stats.overallRating)
             }
@@ -334,7 +399,6 @@ struct JobCard: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
             }
-            Spacer()
             if let badges = project.data.ui?.badges, let first = badges.first {
                 Text(first.label ?? "")
                     .font(.system(size: 11, weight: .medium))
@@ -385,8 +449,3 @@ struct JobCardSkeleton: View {
     }
 }
 
-// MARK: - Helpers
-
-private extension String {
-    var nilIfEmpty: String? { isEmpty ? nil : self }
-}

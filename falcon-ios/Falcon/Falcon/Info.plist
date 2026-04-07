@@ -6,6 +6,25 @@
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>co.hblabs.falcon</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>falcon</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Falcon connects to your local development server for testing.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Falcon uses Face ID to securely protect your login session.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

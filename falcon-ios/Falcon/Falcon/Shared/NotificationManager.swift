@@ -54,6 +54,15 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     // MARK: - Permission
 
     func requestPermission() {
+        if authStatus == .denied {
+            // User previously denied — the OS won't show the prompt again.
+            // Open the app's notification settings directly.
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+            return
+        }
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             Task { @MainActor in
                 await self.refreshStatus()
