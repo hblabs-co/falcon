@@ -11,4 +11,5 @@ const (
 	MongoErrorsCollection              = "errors"
 	MongoUsersCollection               = "users"
 	MongoUsersConfigurationsCollection = "users_configurations"
+	MongoTokensCollection              = "tokens"
 )

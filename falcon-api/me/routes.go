@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"hblabs.co/falcon/api/server"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
@@ -16,8 +17,9 @@ import (
 type Routes struct{}
 
 func (Routes) Mount(r *gin.Engine) {
-	r.GET("/me", handleGetMe)
-	r.PUT("/me/config", handlePutConfig)
+	g := r.Group("/me", server.JWTMiddleware())
+	g.GET("", handleGetMe)
+	g.PUT("/config", handlePutConfig)
 
 	if err := system.GetStorage().EnsureCompoundIndex(system.Ctx(), system.CompoundIndexSpec{
 		Collection: constants.MongoUsersConfigurationsCollection,
@@ -28,38 +30,49 @@ func (Routes) Mount(r *gin.Engine) {
 	}
 }
 
-// handleGetMe returns all configurations for a given user+platform as a flat map.
-// Query params: user_id, platform
+// handleGetMe returns configurations and the active CV for the authenticated user.
+// Query params: platform
 func handleGetMe(c *gin.Context) {
-	userID := c.Query("user_id")
+	userID, _ := c.Get("user_id")
 	platform := c.Query("platform")
-	if userID == "" || platform == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id and platform are required"})
+	if userID == nil || userID == "" || platform == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "platform is required"})
 		return
 	}
+	uid := userID.(string)
 
 	ctx := c.Request.Context()
+
+	// Configs
 	var configs []models.UserConfig
 	err := system.GetStorage().GetMany(ctx, constants.MongoUsersConfigurationsCollection, bson.M{
-		"user_id":  userID,
+		"user_id":  uid,
 		"platform": platform,
 	}, &configs)
 	if err != nil {
-		logrus.Errorf("get configs user=%s platform=%s: %v", userID, platform, err)
+		logrus.Errorf("get configs user=%s platform=%s: %v", uid, platform, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch configurations"})
 		return
 	}
 
-	result := make(map[string]any, len(configs))
+	cfgMap := make(map[string]any, len(configs))
 	for _, cfg := range configs {
-		result[cfg.Name] = cfg.Value
+		cfgMap[cfg.Name] = cfg.Value
 	}
 
-	c.JSON(http.StatusOK, gin.H{"configs": result})
+	// Active CV (latest by user_id — there's at most one after dedup in falcon-storage)
+	var cvs []models.PersistedCV
+	_ = system.GetStorage().GetAllByField(ctx, constants.MongoCVsCollection, "user_id", uid, &cvs)
+
+	var activeCVResponse any
+	if len(cvs) > 0 {
+		activeCVResponse = cvs[0]
+	}
+
+	c.JSON(http.StatusOK, gin.H{"configs": cfgMap, "cv": activeCVResponse})
 }
 
 type putConfigRequest struct {
-	UserID   string `json:"user_id"  binding:"required"`
 	Platform string `json:"platform" binding:"required"`
 	Name     string `json:"name"     binding:"required"`
 	Value    any    `json:"value"`
@@ -67,6 +80,8 @@ type putConfigRequest struct {
 
 // handlePutConfig upserts a single configuration entry.
 func handlePutConfig(c *gin.Context) {
+	uid, _ := c.Get("user_id")
+
 	var req putConfigRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -75,7 +90,7 @@ func handlePutConfig(c *gin.Context) {
 
 	ctx := c.Request.Context()
 	cfg := models.UserConfig{
-		UserID:    req.UserID,
+		UserID:    uid.(string),
 		Platform:  req.Platform,
 		Name:      req.Name,
 		Value:     req.Value,
@@ -83,12 +98,12 @@ func handlePutConfig(c *gin.Context) {
 	}
 
 	filter := bson.M{
-		"user_id":  req.UserID,
+		"user_id":  uid.(string),
 		"platform": req.Platform,
 		"name":     req.Name,
 	}
 	if err := system.GetStorage().Set(ctx, constants.MongoUsersConfigurationsCollection, filter, cfg); err != nil {
-		logrus.Errorf("put config user=%s platform=%s name=%s: %v", req.UserID, req.Platform, req.Name, err)
+		logrus.Errorf("put config user=%s platform=%s name=%s: %v", uid, req.Platform, req.Name, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save configuration"})
 		return
 	}

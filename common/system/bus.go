@@ -268,7 +268,6 @@ func StreamScrape() []jetstream.StreamConfig {
 	return NewBusConfig(
 		constants.StreamScrape,
 		constants.SubjectScrapeRequested+".>",
-		constants.SubjectScrapeFailed,
 		constants.SubjectScrapeScanToday,
 	)
 }
@@ -280,6 +279,7 @@ func StreamStorage() []jetstream.StreamConfig {
 		constants.SubjectStorageCompanyLogoDownloaded,
 		constants.SubjectCVIndexRequested,
 		constants.SubjectCVIndexed,
+		constants.SubjectCVNormalized,
 	)
 }
 
@@ -287,5 +287,6 @@ func StreamSignal() []jetstream.StreamConfig {
 	return NewBusConfig(
 		constants.StreamSignal,
 		constants.SubjectSignalDeviceTokenRegister,
+		constants.SubjectSignalMagicLink,
 	)
 }

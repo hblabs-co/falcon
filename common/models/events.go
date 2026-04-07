@@ -62,3 +62,10 @@ type ProjectNormalizedEvent struct {
 	Platform  string `json:"platform"`
 	Title     string `json:"title"`
 }
+
+// MagicLinkRequestedEvent is published to "signal.magic_link" by falcon-api
+// so that falcon-signal can deliver the email.
+type MagicLinkRequestedEvent struct {
+	Email     string `json:"email"`
+	MagicLink string `json:"magic_link"` // full deep-link URL: falcon://auth?token=<raw>
+}

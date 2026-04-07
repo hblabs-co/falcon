@@ -7,7 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
+	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 )
 
@@ -37,7 +39,9 @@ func Run(groups ...RouteGroup) error {
 	return r.Run(":" + port)
 }
 
-// JWTMiddleware validates Bearer tokens signed with HS256 using the shared secret.
+// JWTMiddleware validates Bearer tokens signed with HS256, checks they haven't
+// been revoked in the tokens collection, and injects "user_id" and "email" into
+// the gin context for downstream handlers.
 func JWTMiddleware() gin.HandlerFunc {
 	secret := system.MustEnv("JWT_SECRET")
 	parser := jwt.NewParser(jwt.WithValidMethods([]string{"HS256"}))
@@ -48,12 +52,39 @@ func JWTMiddleware() gin.HandlerFunc {
 			return
 		}
 		raw := strings.TrimPrefix(auth, "Bearer ")
-		if _, err := parser.Parse(raw, func(t *jwt.Token) (any, error) {
+		tok, err := parser.Parse(raw, func(t *jwt.Token) (any, error) {
 			return []byte(secret), nil
-		}); err != nil {
+		})
+		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
 		}
+
+		claims, ok := tok.Claims.(jwt.MapClaims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid claims"})
+			return
+		}
+
+		// Check revocation via jti.
+		if jti, _ := claims["jti"].(string); jti != "" {
+			var stored models.Token
+			if err := system.GetStorage().GetById(c.Request.Context(), constants.MongoTokensCollection, jti, &stored); err == nil {
+				if stored.Revoked {
+					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token revoked"})
+					return
+				}
+			}
+		}
+
+		// Inject into context for downstream handlers.
+		if sub, _ := claims["sub"].(string); sub != "" {
+			c.Set("user_id", sub)
+		}
+		if email, _ := claims["email"].(string); email != "" {
+			c.Set("email", email)
+		}
+
 		c.Next()
 	}
 }

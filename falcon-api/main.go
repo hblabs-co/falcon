@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/api/admin"
+	"hblabs.co/falcon/api/auth"
 	"hblabs.co/falcon/api/cv"
 	"hblabs.co/falcon/api/me"
 	"hblabs.co/falcon/api/projects"
@@ -28,6 +30,8 @@ func main() {
 	))
 
 	if err := server.Run(
+		admin.Routes{},
+		auth.Routes{},
 		scrape.Routes{},
 		cv.Routes{},
 		signal.Routes{},

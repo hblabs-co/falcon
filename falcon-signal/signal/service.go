@@ -13,9 +13,10 @@ import (
 	"hblabs.co/falcon/common/system"
 )
 
-// Service handles push notifications and device token persistence.
+// Service handles push notifications, device token persistence, and transactional email.
 type Service struct {
 	apns *apnsClient
+	mail *mailjetClient
 }
 
 func newService() (*Service, error) {
@@ -23,7 +24,7 @@ func newService() (*Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("apns client: %w", err)
 	}
-	return &Service{apns: apns}, nil
+	return &Service{apns: apns, mail: newMailjetClient()}, nil
 }
 
 func (s *Service) handleMatchResult(data []byte) error {
@@ -72,6 +73,20 @@ func (s *Service) handleMatchResult(data []byte) error {
 		}
 	}
 
+	return nil
+}
+
+func (s *Service) handleMagicLink(data []byte) error {
+	var evt models.MagicLinkRequestedEvent
+	if err := json.Unmarshal(data, &evt); err != nil {
+		return fmt.Errorf("unmarshal signal.magic_link: %w", err)
+	}
+
+	if err := s.mail.SendMagicLink(evt.Email, evt.MagicLink); err != nil {
+		return fmt.Errorf("send magic link to %s: %w", evt.Email, err)
+	}
+
+	logrus.Infof("[signal] magic link email sent to %s", evt.Email)
 	return nil
 }
 
