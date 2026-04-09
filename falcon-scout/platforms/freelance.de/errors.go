@@ -21,6 +21,9 @@ var (
 	// ErrSessionExpired is returned by an inspector when the current session
 	// cookies are no longer valid (e.g. the target site demands re-authentication).
 	ErrSessionExpired = errors.New("session expired or unauthenticated")
+
+	// ErrGone is returned when the platform returns 410 — the project was permanently removed.
+	ErrGone = errors.New("project gone (410)")
 )
 
 // ErrServerError represents a 5xx HTTP response from the platform.

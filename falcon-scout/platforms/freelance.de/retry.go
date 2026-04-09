@@ -3,6 +3,7 @@ package freelancede
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -89,6 +90,13 @@ func retryOneError(ctx context.Context, svcErr models.ServiceError) {
 	inspector := &Inspector{Url: candidate.URL, PlatformID: candidate.PlatformID, Current: 1, Total: 1}
 	result, inspectErr := inspector.Inspect()
 	if inspectErr != nil {
+		// 410 Gone — project permanently removed, delete the error.
+		if errors.Is(inspectErr, ErrGone) {
+			log.Infof("[retry] project gone (410) — removing error")
+			_ = system.GetStorage().DeleteByField(ctx, constants.MongoErrorsCollection, "id", svcErr.ID)
+			return
+		}
+
 		newCount := svcErr.RetryCount + 1
 		update := bson.M{
 			"retry_count": newCount,

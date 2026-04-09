@@ -74,7 +74,9 @@ func (pi *Inspector) inspect() (*Project, error) {
 
 	c.OnError(func(r *colly.Response, err error) {
 		pi.GetLogger().Errorf("request error: status=%d err=%v", r.StatusCode, err)
-		if r.StatusCode >= 500 {
+		if r.StatusCode == 410 {
+			scrapeErr = ErrGone
+		} else if r.StatusCode >= 500 {
 			scrapeErr = &ErrServerError{StatusCode: r.StatusCode, URL: pi.Url}
 		}
 	})

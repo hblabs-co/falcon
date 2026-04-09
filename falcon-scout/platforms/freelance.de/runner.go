@@ -2,6 +2,10 @@ package freelancede
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -19,27 +23,40 @@ func getLogger() *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{"source": Source})
 }
 
-var indexes = []system.StorageIndexSpec{
-	system.NewIndexSpec(constants.MongoProjectsCollection, "platform_id", true),
-	system.NewIndexSpec(constants.MongoErrorsCollection, "service_name", false),
-	system.NewIndexSpec(constants.MongoErrorsCollection, "platform_id", false),
+// Runner implements the Platform interface for freelance.de.
+type Runner struct {
+	logger interfaces.Logger
 }
 
-func Run() {
-	getLogger().Infof("starting — polling every %s (Ctrl+C to stop)", system.PollInterval())
+func New() *Runner { return &Runner{} }
 
-	if err := system.GetStorage().EnsureIndex(system.Ctx(), indexes...); err != nil {
-		getLogger().Fatalf("ensure index: %v", err)
-	}
+func (r *Runner) SetLogger(logger interfaces.Logger) {
+	r.logger = logger
+}
+
+func (r *Runner) Name() string {
+	return Source
+}
+
+func (r *Runner) Init(ctx context.Context) error {
 
 	if err := getSession().Login(); err != nil {
-		getLogger().Fatalf("login failed: %v", err)
+		return fmt.Errorf("login: %w", err)
 	}
+	return nil
+}
 
-	StartRetryWorker(system.Ctx())
+func (r *Runner) StartConsumers(ctx context.Context) error {
+	return registerConsumers(ctx)
+}
 
-	system.Poll(system.Ctx(), system.PollInterval(), getLogger(), func() {
-		toFetch, err := collectNewCandidates(system.Ctx())
+func (r *Runner) StartWorkers(ctx context.Context) {
+	StartRetryWorker(ctx)
+}
+
+func (r *Runner) Poll(ctx context.Context) {
+	system.Poll(ctx, system.PollInterval(), getLogger(), func() {
+		toFetch, err := collectNewCandidates(ctx)
 		if err != nil {
 			getLogger().Errorf("collect candidates: %v", err)
 			return
@@ -58,8 +75,41 @@ func Run() {
 		}
 
 		getLogger().Infof("%d projects to fetch", total)
-		system.BatchProcess(system.Ctx(), toFetch, system.BatchCfg(), processOneCandidate)
+		system.BatchProcess(ctx, toFetch, system.BatchCfg(), processOneCandidate)
 	})
+}
+
+func registerConsumers(ctx context.Context) error {
+	platform := system.Platform()
+	subject := fmt.Sprintf("%s.%s", constants.SubjectScrapeRequested, platform)
+	consumer := fmt.Sprintf("scout-%s", strings.ReplaceAll(platform, ".", "-"))
+
+	if err := system.Subscribe(ctx, constants.StreamScrape, consumer, subject, handleScrapeRequested); err != nil {
+		return fmt.Errorf("subscribe %s: %w", subject, err)
+	}
+	getLogger().Infof("subscribed → %s", subject)
+
+	if err := system.Subscribe(ctx, constants.StreamScrape, "scout-scan-today", constants.SubjectScrapeScanToday, handleScanToday); err != nil {
+		return fmt.Errorf("subscribe %s: %w", constants.SubjectScrapeScanToday, err)
+	}
+	getLogger().Infof("subscribed → %s", constants.SubjectScrapeScanToday)
+	return nil
+}
+
+func handleScrapeRequested(data []byte) error {
+	var event models.ScrapeRequestedEvent
+	if err := json.Unmarshal(data, &event); err != nil {
+		return fmt.Errorf("unmarshal scrape.requested: %w", err)
+	}
+	getLogger().Infof("on-demand scrape: url=%s", event.URL)
+	ScrapeURL(context.Background(), event.URL)
+	return nil
+}
+
+func handleScanToday(_ []byte) error {
+	getLogger().Info("scan-today triggered")
+	ScanToday(context.Background())
+	return nil
 }
 
 // ScanToday collects and processes all of today's candidates. Triggered via admin endpoint.
@@ -115,25 +165,36 @@ func processOneCandidate(ctx context.Context, c *ProjectCandidate) {
 	inspector := &Inspector{Url: c.URL, PlatformID: c.PlatformID, Current: c.Current, Total: c.Total}
 	result, err := inspector.Inspect()
 	if err != nil {
-		errName := constants.ErrNameScrapeInspectFailed
-		if IsServerError(err) {
-			errName = constants.ErrNameScrapeServerError
-		}
-		log.Warnf("inspect failed (%s): %v — recording for retry", errName, err)
-		system.RecordError(ctx, models.ServiceError{
-			ServiceName: constants.ServiceScout,
-			ErrorName:   errName,
-			Error:       err.Error(),
-			Platform:    Source,
-			PlatformID:  c.PlatformID,
-			URL:         c.URL,
-			HTML:        inspector.HTML,
-			Candidate:   c,
-		})
+		processOneCandidateError(ctx, c, inspector, err, log)
 		return
 	}
 
 	saveProject(ctx, c, result, log)
+}
+
+// processOneCandidateError classifies the inspect error and either discards it or records it for retry.
+func processOneCandidateError(ctx context.Context, c *ProjectCandidate, inspector *Inspector, err error, log *logrus.Entry) {
+	if errors.Is(err, ErrGone) {
+		log.Infof("project gone (410) — skipping")
+		return
+	}
+
+	errName := constants.ErrNameScrapeInspectFailed
+	if IsServerError(err) {
+		errName = constants.ErrNameScrapeServerError
+	}
+
+	log.Warnf("inspect failed (%s): %v — recording for retry", errName, err)
+	system.RecordError(ctx, models.ServiceError{
+		ServiceName: constants.ServiceScout,
+		ErrorName:   errName,
+		Error:       err.Error(),
+		Platform:    Source,
+		PlatformID:  c.PlatformID,
+		URL:         c.URL,
+		HTML:        inspector.HTML,
+		Candidate:   c,
+	})
 }
 
 // saveProject persists a successfully inspected project and publishes its event.
