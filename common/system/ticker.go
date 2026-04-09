@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/common/interfaces"
 )
 
 // StartWorker launches a background goroutine that calls fn every interval.
@@ -29,7 +30,7 @@ func StartWorker(ctx context.Context, interval time.Duration, fn func(context.Co
 // ctx is cancelled. If the previous invocation of fn is still running when
 // the next tick fires, that tick is skipped and a warning is logged.
 // This means fn never runs concurrently with itself.
-func Poll(ctx context.Context, interval time.Duration, logger *logrus.Entry, fn func()) {
+func Poll(ctx context.Context, interval time.Duration, logger interfaces.Logger, fn func()) {
 	var running atomic.Bool
 
 	finalLogger := logrus.WithFields(logrus.Fields{})
