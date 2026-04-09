@@ -40,7 +40,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-scout"
+      "program": "${workspaceFolder}/falcon-scout/scout"
     },
     {
       "name": "Debug Dispatch",

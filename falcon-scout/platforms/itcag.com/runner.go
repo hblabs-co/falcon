@@ -3,7 +3,7 @@ package itcagcom
 import (
 	"context"
 
-	"hblabs.co/falcon/common/interfaces"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 const Source = "itcag.com"

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/interfaces"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 // StartWorker launches a background goroutine that calls fn every interval.

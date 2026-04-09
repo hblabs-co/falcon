@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/interfaces"
 	"hblabs.co/falcon/common/models"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 // ProjectCandidate is a single entry from the /projekte listing page.

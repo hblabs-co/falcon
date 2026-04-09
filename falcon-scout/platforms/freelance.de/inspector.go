@@ -8,7 +8,7 @@ import (
 	"github.com/gocolly/colly/v2"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/helpers"
-	"hblabs.co/falcon/common/interfaces"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 // Inspector implements Inspector for freelance.de. Cookies are read

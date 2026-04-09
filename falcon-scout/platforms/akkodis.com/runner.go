@@ -3,7 +3,7 @@ package akkodiscom
 import (
 	"context"
 
-	"hblabs.co/falcon/common/interfaces"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 // https://www.akkodis.com/de-de/karriere/jobsuche?q=

@@ -12,9 +12,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
-	"hblabs.co/falcon/common/interfaces"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 var scanRunning atomic.Bool

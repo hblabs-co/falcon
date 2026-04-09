@@ -1,0 +1,21 @@
+{
+    "@context": "http:\/\/schema.org",
+    "@type": "JobPosting",
+    "datePosted": "2026-03-19",
+    "description": "\n\nSAP O2C \/ L2O Integration Consultant - Start ASAP \nRED Global is looking for an SAP O2C \/ L2O Integration Consultant with strong expertise integrating 3rd party CRM Systems with SAP ERP Systems.Tasks\n\nConduct meetings or workshops with business users and explain the strategic guardrails to business stakeholders\nDefine Integration of data flows between SAP ECC and HubSpot\nCreate addendum for statement of work \/ project charter with estimates for the integration work to be done on the SAP ECC and Integration Suite side\nCollaborate with internal SAP-Team and CRM Systems Integrator\nFollow SAP best practices\n\nSkills \/ Requirements\n\nMinimum of 10 years' hands on experience in SAP SD O2C as techno-functional Consultant\nMinimum of 5 years' experience with integrating 3rd party CRM-Solutions (Salesforce, HubSpot, etc. \u2026) with SAP ERP Systems - Integration experience between SAP ECC and HubSpot preferred\nStrong technical knowledge integrating 3rd party Systems with SAP (Idocs, API, ALE)\nGood understanding of SAP Integration Suite\nVery good communication skills\nMust be hands on. Meaning should be able to activate change pointers in ECC or maintain ALE distribution model.\nABAP development skills are welcome for debugging\nExperience in the provision of data for data analytics is nice to have\n\nProject Details* Start: ASAP* Duration: 3 months initially (total project duration 9 months)* Capacity: 3 days\/week* Location: 100% remote - some initial travel in the US (prefer Houston based)* Language: English\n\n",
+    "employmentType": "Freiberuflich",
+    "url": "https:\/\/www.redglobal.de\/jobs\/job\/sap-o2c-l2o-integration-consultant\/d90Iv7ED",
+    "title": "SAP O2C L2O Integration Consultant",
+    "hiringOrganization": "RED Global",
+    "jobLocation": {
+        "@type": "Place",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "United States of America, Texas",
+            "addressRegion": "United States of America, Texas"
+        }
+    },
+    "validThrough": "2026-04-18T00:00:00+01:00",
+    "industry": "Oil & Gas",
+    "jobLocationType": "TELECOMMUTE"
+}

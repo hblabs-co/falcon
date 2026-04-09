@@ -4,22 +4,21 @@ import (
 	"time"
 
 	gonanoid "github.com/matoous/go-nanoid/v2"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/interfaces"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 // PersistedRate is the storage representation of interfaces.Rate.
 type PersistedRate struct {
-	Raw      string             `json:"raw"                bson:"raw"`
-	Amount   *float64           `json:"amount,omitempty"   bson:"amount,omitempty"`
-	Currency string             `json:"currency,omitempty" bson:"currency,omitempty"`
-	Type     constants.RateType `json:"type,omitempty"     bson:"type,omitempty"`
+	Raw      string              `json:"raw"                bson:"raw"`
+	Amount   *float64            `json:"amount,omitempty"   bson:"amount,omitempty"`
+	Currency string              `json:"currency,omitempty" bson:"currency,omitempty"`
+	Type     interfaces.RateType `json:"type,omitempty"     bson:"type,omitempty"`
 }
 
-func (r *PersistedRate) GetRaw() string              { return r.Raw }
-func (r *PersistedRate) GetAmount() *float64         { return r.Amount }
-func (r *PersistedRate) GetCurrency() string         { return r.Currency }
-func (r *PersistedRate) GetType() constants.RateType { return r.Type }
+func (r *PersistedRate) GetRaw() string               { return r.Raw }
+func (r *PersistedRate) GetAmount() *float64          { return r.Amount }
+func (r *PersistedRate) GetCurrency() string          { return r.Currency }
+func (r *PersistedRate) GetType() interfaces.RateType { return r.Type }
 
 // PersistedContact is the storage representation of interfaces.Contact.
 type PersistedContact struct {

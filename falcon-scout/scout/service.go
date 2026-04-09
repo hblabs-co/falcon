@@ -1,4 +1,4 @@
-package scout
+package main
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
-	"hblabs.co/falcon/common/interfaces"
 	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/modules/interfaces"
 )
 
 var indexes = []system.StorageIndexSpec{
@@ -23,7 +23,7 @@ type Platform interface {
 	// Name returns the platform identifier (e.g. "freelance.de"). Must be unique
 	Name() string
 
-	SetLogger(logger interfaces.Logger)
+	SetLogger(logger any)
 
 	// Init performs one-time setup: DB indexes, session login, etc.
 	Init(ctx context.Context) error
@@ -35,7 +35,7 @@ type Platform interface {
 	StartWorkers(ctx context.Context)
 
 	// Poll starts the main polling loop. Blocks until ctx is cancelled.
-	Poll(ctx context.Context)
+	Poll(ctx context.Context) func()
 }
 
 // Service orchestrates one or more Platform implementations.
@@ -116,11 +116,37 @@ func (s *Service) Run() {
 		}
 
 		go p.StartWorkers(ctx)
-		go p.Poll(ctx)
+		go s.Poll(logger, p.Poll(ctx))
 
 		logger.Info("platform registered and running")
 	}
 
 	system.Wait()
 	logrus.Info("all scout platforms stopped")
+}
+
+func (s *Service) Poll(logger interfaces.Logger, callback func()) {
+	system.Poll(system.Ctx(), system.PollInterval(), logger, callback)
+	// system.Poll(system.Ctx(), system.PollInterval(), logger, func() {
+	// 	toFetch, err := collectNewCandidates(ctx)
+	// 	if err != nil {
+	// 		r.logger.Errorf("collect candidates: %v", err)
+	// 		return
+	// 	}
+
+	// 	total := len(toFetch)
+	// 	if total == 0 {
+	// 		r.logger.Info("no new or updated projects")
+	// 		return
+	// 	}
+
+	// 	helpers.Reverse(&toFetch)
+	// 	for i, c := range toFetch {
+	// 		c.Total = total
+	// 		c.Current = i + 1
+	// 	}
+
+	// 	r.logger.Infof("%d projects to fetch", total)
+	// 	system.BatchProcess(ctx, toFetch, system.BatchCfg(), processOneCandidate)
+	// })
 }

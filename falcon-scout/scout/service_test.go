@@ -1,29 +1,36 @@
-package scout
+package main
 
 import (
 	"context"
 	"testing"
-
-	"hblabs.co/falcon/common/interfaces"
 )
 
 // mockPlatform implements Platform for testing.
 type mockPlatform struct {
-	name           string
-	initCalled     bool
-	initErr        error
+	name            string
+	initCalled      bool
+	initErr         error
 	subscribeCalled bool
-	subscribeErr   error
-	workersCalled  bool
-	pollCalled     bool
+	subscribeErr    error
+	workersCalled   bool
+	pollCalled      bool
 }
 
-func (m *mockPlatform) Name() string                          { return m.name }
-func (m *mockPlatform) SetLogger(_ interfaces.Logger)         {}
-func (m *mockPlatform) Init(_ context.Context) error          { m.initCalled = true; return m.initErr }
-func (m *mockPlatform) StartConsumers(_ context.Context) error { m.subscribeCalled = true; return m.subscribeErr }
-func (m *mockPlatform) StartWorkers(_ context.Context)        { m.workersCalled = true }
-func (m *mockPlatform) Poll(_ context.Context)                { m.pollCalled = true }
+func (m *mockPlatform) Name() string      { return m.name }
+func (m *mockPlatform) SetLogger(_ any)   {}
+func (m *mockPlatform) Init(_ context.Context) error {
+	m.initCalled = true
+	return m.initErr
+}
+func (m *mockPlatform) StartConsumers(_ context.Context) error {
+	m.subscribeCalled = true
+	return m.subscribeErr
+}
+func (m *mockPlatform) StartWorkers(_ context.Context) { m.workersCalled = true }
+func (m *mockPlatform) Poll(_ context.Context) func() {
+	m.pollCalled = true
+	return func() {}
+}
 
 func TestNewService(t *testing.T) {
 	svc := NewService()
