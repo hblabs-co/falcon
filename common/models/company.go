@@ -17,6 +17,22 @@ type Company struct {
 	UpdatedAt    time.Time `json:"updated_at"     bson:"updated_at"`
 
 	RecruiterRodeoStats *RecruiterRodeoStats `json:"recruiter_rodeo_stats,omitempty" bson:"recruiter_rodeo_stats,omitempty"`
+
+	// Metadata fetched periodically from the company's public web presence
+	// (robots.txt, security.txt, sitemap reference, etc.). Refreshed by the
+	// platform scout that "owns" this company on a low-frequency loop.
+	Metadata *CompanyMetadata `json:"metadata,omitempty" bson:"metadata,omitempty"`
+}
+
+// CompanyMetadata holds the snapshot of well-known files fetched from the
+// company's website. Each field is optional — files that are missing or
+// inaccessible (404, network failure) leave the field empty.
+type CompanyMetadata struct {
+	RobotsTxt   string    `json:"robots_txt,omitempty"   bson:"robots_txt,omitempty"`
+	SecurityTxt string    `json:"security_txt,omitempty" bson:"security_txt,omitempty"`
+	HumansTxt   string    `json:"humans_txt,omitempty"   bson:"humans_txt,omitempty"`
+	SitemapURL  string    `json:"sitemap_url,omitempty"  bson:"sitemap_url,omitempty"` // extracted from robots.txt "Sitemap:" directive
+	UpdatedAt   time.Time `json:"updated_at"             bson:"updated_at"`
 }
 
 func NewCompany(companyID, companyName, logoMinioURL string) *Company {

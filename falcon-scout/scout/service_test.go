@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"testing"
+
+	"hblabs.co/falcon/modules/platformkit"
 )
 
 // mockPlatform implements Platform for testing.
@@ -16,8 +18,15 @@ type mockPlatform struct {
 	pollCalled      bool
 }
 
-func (m *mockPlatform) Name() string      { return m.name }
-func (m *mockPlatform) SetLogger(_ any)   {}
+func (m *mockPlatform) Name() string                             { return m.name }
+func (m *mockPlatform) BaseURL() string                          { return "" }
+func (m *mockPlatform) CompanyID() string                        { return "" }
+func (m *mockPlatform) SetLogger(_ any)                          {}
+func (m *mockPlatform) SetSaveHandler(_ platformkit.SaveFn)      {}
+func (m *mockPlatform) SetFilterHandler(_ platformkit.FilterFn)  {}
+func (m *mockPlatform) SetWarnHandler(_ platformkit.WarnFn)      {}
+func (m *mockPlatform) SetErrHandler(_ platformkit.ErrFn)        {}
+func (m *mockPlatform) SetBatchConfig(_ platformkit.BatchConfig) {}
 func (m *mockPlatform) Init(_ context.Context) error {
 	m.initCalled = true
 	return m.initErr

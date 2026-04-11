@@ -17,8 +17,9 @@ import (
 
 // Service handles push notifications, device token persistence, and transactional email.
 type Service struct {
-	apns *apnsClient
-	mail *email.Client
+	apns  *apnsClient
+	mail  *email.Client
+	admin *AdminNotifier
 }
 
 func newService() (*Service, error) {
@@ -26,7 +27,12 @@ func newService() (*Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("apns client: %w", err)
 	}
-	return &Service{apns: apns, mail: email.NewClient()}, nil
+	mail := email.NewClient()
+	return &Service{
+		apns:  apns,
+		mail:  mail,
+		admin: NewAdminNotifier(apns, mail),
+	}, nil
 }
 
 func (s *Service) handleMatchResult(data []byte) error {
@@ -119,6 +125,30 @@ func (s *Service) resolveUserLanguage(email, platform string) string {
 		return lang
 	}
 	return "en"
+}
+
+// handleAdminAlert resolves an AdminAlertEvent (which carries only the
+// ServiceError ID) by loading the full record from the errors collection and
+// fanning it out via the AdminNotifier. The event is intentionally tiny so
+// presentation/translation logic stays here in signal.
+func (s *Service) handleAdminAlert(data []byte) error {
+	var evt models.AdminAlertEvent
+	if err := json.Unmarshal(data, &evt); err != nil {
+		return fmt.Errorf("unmarshal signal.admin_alert: %w", err)
+	}
+	if evt.ErrorID == "" {
+		return fmt.Errorf("admin_alert event missing error_id")
+	}
+
+	ctx := context.Background()
+	var errDoc models.ServiceError
+	if err := system.GetStorage().GetByField(ctx, constants.MongoErrorsCollection, "id", evt.ErrorID, &errDoc); err != nil {
+		return fmt.Errorf("load service error %s: %w", evt.ErrorID, err)
+	}
+
+	logrus.Infof("[signal] admin alert received for error %s (%s)", errDoc.ID, errDoc.ErrorName)
+	s.admin.NotifyAll(ctx, &errDoc)
+	return nil
 }
 
 func (s *Service) handleRegisterIOSDeviceToken(data []byte) error {

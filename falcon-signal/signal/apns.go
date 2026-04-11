@@ -89,6 +89,46 @@ func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *model
 	return nil
 }
 
+// SendAdminAlert delivers a high-severity operational alert to an admin device.
+// Used by AdminNotifier when a service publishes an AdminAlertEvent. The
+// payload carries enough context (error_id, source, platform, severity) for
+// the iOS app to deep-link straight into the offending error from the alert.
+func (a *apnsClient) SendAdminAlert(ctx context.Context, deviceToken string, errDoc *models.ServiceError) error {
+	title := errDoc.ErrorName
+	if errDoc.Platform != "" {
+		title = errDoc.Platform + " — " + errDoc.ErrorName
+	}
+
+	p := payload.NewPayload().
+		AlertTitle(title).
+		AlertSubtitle(strings.ToUpper(string(errDoc.Priority))).
+		AlertBody(errDoc.Error).
+		Sound("default").
+		Category("ADMIN_ALERT").
+		Custom("error_id", errDoc.ID).
+		Custom("source", errDoc.ServiceName).
+		Custom("platform", errDoc.Platform).
+		Custom("error_name", errDoc.ErrorName).
+		Custom("severity", string(errDoc.Priority))
+
+	notification := &apns2.Notification{
+		DeviceToken: deviceToken,
+		Topic:       a.bundleID,
+		Payload:     p,
+	}
+
+	resp, err := a.client.PushWithContext(ctx, notification)
+	if err != nil {
+		return fmt.Errorf("apns push: %w", err)
+	}
+	if !resp.Sent() {
+		return fmt.Errorf("apns rejected: %s (%d)", resp.Reason, resp.StatusCode)
+	}
+
+	logrus.Infof("admin apns sent — apns_id=%s device=%s…", resp.ApnsID, deviceToken[:8])
+	return nil
+}
+
 // IsStaleToken returns true when the APNs error indicates the device token is
 // no longer valid (device unregistered or token expired). The caller should
 // remove the token from the database.

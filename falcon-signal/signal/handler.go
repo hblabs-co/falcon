@@ -61,5 +61,16 @@ func (m *Module) Register(ctx context.Context) error {
 	}
 	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalMagicLink)
 
+	if err := system.Subscribe(
+		ctx,
+		constants.StreamSignal,
+		"falcon-signal-admin-alert",
+		constants.SubjectSignalAdminAlert,
+		svc.handleAdminAlert,
+	); err != nil {
+		return err
+	}
+	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalAdminAlert)
+
 	return nil
 }

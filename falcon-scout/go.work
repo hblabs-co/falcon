@@ -1,7 +1,21 @@
 go 1.26.1
 
 use (
-    ./scout
-    ./platformkit
-    ./platforms/hblabs.co
+	./platforms/actcon-gmbh.de
+	./platforms/akkodis.com
+	./platforms/computerfutures.com
+	./platforms/contractor.de
+	./platforms/ferchau.com
+	./platforms/geco-group.com
+	./platforms/hays.de
+	./platforms/hblabs.co
+	./platforms/itcag.com
+	./platforms/joyit.de
+	./platforms/mamgruppe.com
+	./platforms/peak-one.de
+	./platforms/redglobal.de
+	./platforms/solcom.de
+	./platforms/waynice.de
+	./platforms/wematch.de
+	./scout
 )

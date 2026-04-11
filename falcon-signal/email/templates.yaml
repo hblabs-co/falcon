@@ -28,6 +28,124 @@ shared:
   company_url: "https://hblabs.co"
 
 templates:
+  admin_alert:
+    fields:
+      - subject
+      - heading
+      - severity_label
+      - source_label
+      - platform_label
+      - error_name_label
+      - error_id_label
+      - body_label
+      - intro
+      - disclaimer
+      - built_by
+    translations:
+      en:
+        subject: "Falcon admin alert"
+        heading: "Operational alert"
+        severity_label: "Severity"
+        source_label: "Source"
+        platform_label: "Platform"
+        error_name_label: "Error"
+        error_id_label: "Error ID"
+        body_label: "Details"
+        intro: "A high-severity event was just recorded in Falcon. Please review and take action if needed."
+        disclaimer: "You're receiving this because your address is configured in ADMIN_EMAILS."
+        built_by: "Built by"
+    html: |
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:48px 16px;">
+          <tr><td align="center">
+            <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.08);">
+              <tr>
+                <td align="center" style="padding:36px 40px 0;">
+                  <img src="{{.Asset.falcon_logo}}" alt="Falcon" width="56" height="56" style="display:block;border-radius:14px;">
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:20px 40px 0;">
+                  <h1 style="margin:0;font-size:22px;font-weight:700;color:#1d1d1f;letter-spacing:-0.3px;">{{.T.heading}}</h1>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:8px 40px 0;">
+                  <p style="margin:0;font-size:14px;line-height:20px;color:#6e6e73;">{{.T.intro}}</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:24px 40px 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fff5f5;border:1px solid #ffd6d6;border-radius:14px;">
+                    <tr>
+                      <td style="padding:18px 22px;">
+                        <p style="margin:0 0 12px 0;font-size:13px;font-weight:700;color:#b00020;text-transform:uppercase;letter-spacing:0.4px;">{{.Var.title}}</p>
+                        <p style="margin:0;font-size:14px;line-height:21px;color:#1d1d1f;">{{.Var.body}}</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:20px 40px 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:6px 0;font-size:12px;color:#8e8e93;width:120px;">{{.T.severity_label}}</td>
+                      <td style="padding:6px 0;font-size:13px;color:#1d1d1f;font-weight:600;text-transform:uppercase;">{{.Var.severity}}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0;font-size:12px;color:#8e8e93;">{{.T.source_label}}</td>
+                      <td style="padding:6px 0;font-size:13px;color:#1d1d1f;">{{.Var.source}}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0;font-size:12px;color:#8e8e93;">{{.T.platform_label}}</td>
+                      <td style="padding:6px 0;font-size:13px;color:#1d1d1f;">{{.Var.platform}}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0;font-size:12px;color:#8e8e93;">{{.T.error_name_label}}</td>
+                      <td style="padding:6px 0;font-size:13px;color:#1d1d1f;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;">{{.Var.error_name}}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0;font-size:12px;color:#8e8e93;">{{.T.error_id_label}}</td>
+                      <td style="padding:6px 0;font-size:12px;color:#6e6e73;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;">{{.Var.error_id}}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:24px 40px 0;">
+                  <hr style="border:none;border-top:1px solid #e5e5ea;margin:0;">
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:18px 40px 12px;">
+                  <p style="margin:0;font-size:12px;line-height:18px;color:#aeaeb2;">{{.T.disclaimer}}</p>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding:0 40px 28px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="vertical-align:middle;padding-right:8px;">
+                        <img src="{{.Asset.hblabs_logo}}" alt="HB Labs" width="20" height="20" style="display:block;">
+                      </td>
+                      <td style="vertical-align:middle;">
+                        <span style="font-size:11px;color:#aeaeb2;">{{.T.built_by}} </span>
+                        <a href="{{.Shared.company_url}}" style="font-size:11px;color:#8e8e93;text-decoration:none;font-weight:600;">{{.Shared.company_name}}</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
+      </body>
+      </html>
+
   login:
     fields:
       - subject

@@ -25,4 +25,5 @@ const (
 	StreamSignal                     = "SIGNAL"
 	SubjectSignalDeviceTokenRegister = "signal.device_token.register"
 	SubjectSignalMagicLink           = "signal.magic_link"
+	SubjectSignalAdminAlert          = "signal.admin_alert"
 )

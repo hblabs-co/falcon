@@ -1,0 +1,20 @@
+{
+    "@context": "http:\/\/schema.org",
+    "@type": "JobPosting",
+    "datePosted": "2026-04-09",
+    "description": "For our client, we are currently looking for a Senior Scrum Master - Digital Workplace Modernization Program. The main task is to support the customer in delivering and coordinating the Digital Workplace modernization using Agile methodologies.\n \nTasks:\n\n\nFacilitate Scrum ceremonies and drive Agile delivery while ensuring sprint progress and quality standards\n\n\nCoordinate cross-team dependencies and proactively track, follow up, and remove blockers across all workstreams\n\n\nEnsure transparency of delivery status, manage risks, and align execution with program goals\n\n\n \nRequirements:\n\n\nStrong experience as a Scrum Master in enterprise IT environments, ideally within Digital Workplace or infrastructure programs\n\n\nSolid knowledge of technologies such as Microsoft Intune, Active Directory\/GPO, M365, and multi-device environments (Windows, Mac, Android)\n\n\nProven leadership, coordination, and communication skills with a hands-on, execution-driven mindset\n\n\n \nProject details:* Start: ASAP* Duration: 6 months* Workload: Fulltime (100%)* Location: Bulgaria* Languages: English\n \n \nTelephone interviews with our client can be arranged at short notice, followed by a quick decision.\n \nIf you are interested in this project, or can recommend someone for it, please feel free to get in touch.",
+    "employmentType": "Freiberuflich",
+    "url": "https:\/\/www.redglobal.de\/jobs\/job\/senior-scrum-master-6-months-start-asap-bulgaria\/fOmxWBe4",
+    "title": "Senior Scrum Master - 6 Months - Start ASAP - Bulgaria",
+    "hiringOrganization": "RED Global",
+    "jobLocation": {
+        "@type": "Place",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Eastern Europe, Bulgaria",
+            "addressRegion": "Eastern Europe, Bulgaria"
+        }
+    },
+    "validThrough": "2026-05-09T00:00:00+01:00",
+    "industry": "IT Service Provider"
+}

@@ -29,6 +29,13 @@ type ServiceError struct {
 	StackTrace  string    `json:"stack_trace"  bson:"stack_trace"`
 	OccurredAt  time.Time `json:"occurred_at"  bson:"occurred_at"`
 
+	// Aggregation — only populated for categorical errors (Candidate == nil at record
+	// time). OccurredAt keeps its existing meaning (first time recorded); LastSeenAt
+	// is updated on every subsequent occurrence and OccurrenceCount tracks how many
+	// times the same category has been observed. For per-item errors these stay zero.
+	LastSeenAt      time.Time `json:"last_seen_at,omitempty"     bson:"last_seen_at,omitempty"`
+	OccurrenceCount int       `json:"occurrence_count,omitempty" bson:"occurrence_count,omitempty"`
+
 	// Retry / escalation
 	Priority   ErrorPriority `json:"priority"    bson:"priority"`
 	RetryCount int           `json:"retry_count" bson:"retry_count"`

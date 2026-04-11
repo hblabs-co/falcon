@@ -211,6 +211,17 @@ func (s *Storage) Insert(ctx context.Context, collection string, doc any) error 
 	return err
 }
 
+// RawUpdate runs an arbitrary update with the given operators ($set, $inc,
+// $setOnInsert, etc.) and upserts when no document matches the filter.
+// Use this when you need atomic counters or "create or update" semantics that
+// the higher-level Set/Replace methods don't support.
+func (s *Storage) RawUpdate(ctx context.Context, collection string, filter bson.M, update bson.M) error {
+	_, err := s.db.Collection(collection).UpdateOne(
+		ctx, filter, update, options.UpdateOne().SetUpsert(true),
+	)
+	return err
+}
+
 // FindPage returns one page of documents sorted by sortField.
 // Pass sortDesc=true for newest-first. Returns total matching count alongside results.
 // results must be a pointer to a slice.

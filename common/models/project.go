@@ -4,6 +4,7 @@ import (
 	"time"
 
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/modules/interfaces"
 )
 
@@ -42,9 +43,11 @@ func (c *PersistedContact) GetAddress() string { return c.Address }
 type PersistedProject struct {
 	ID                string            `json:"id"                  bson:"id"`
 	PlatformID        string            `json:"platform_id"         bson:"platform_id"`
+	ReferenceID       string            `json:"reference_id"        bson:"reference_id"`
 	Platform          string            `json:"platform"            bson:"platform"`
 	URL               string            `json:"url"                 bson:"url"`
-	PlatformUpdatedAt string            `json:"platform_updated_at" bson:"platform_updated_at"`
+	PlatformUpdatedAt time.Time         `json:"platform_updated_at" bson:"platform_updated_at"`
+	DisplayUpdatedAt  time.Time         `json:"display_updated_at"  bson:"display_updated_at"`
 	Title             string            `json:"title"               bson:"title"`
 	Company           string            `json:"company"             bson:"company"`
 	Description       string            `json:"description"         bson:"description"`
@@ -55,42 +58,93 @@ type PersistedProject struct {
 	RequiredSkills    []string          `json:"required_skills,omitempty" bson:"required_skills,omitempty"`
 	Rate              *PersistedRate    `json:"rate,omitempty"      bson:"rate,omitempty"`
 	Contact           *PersistedContact `json:"contact,omitempty"   bson:"contact,omitempty"`
-	DirectClient      bool              `json:"is_direct_client,omitempty" bson:"is_direct_client,omitempty"`
-	Remote            bool              `json:"is_remote,omitempty" bson:"is_remote,omitempty"`
-	ANUE              bool              `json:"is_anue,omitempty"   bson:"is_anue,omitempty"`
+	DirectClient      bool              `json:"is_direct_client" bson:"is_direct_client"`
+	Remote            bool              `json:"is_remote"        bson:"is_remote"`
+	ANUE              bool              `json:"is_anue"          bson:"is_anue"`
 	ScrapedAt         time.Time         `json:"scraped_at"          bson:"scraped_at"`
 }
 
 // Implement interfaces.Project.
-func (p *PersistedProject) GetId() string                { return p.ID }
-func (p *PersistedProject) GetURL() string               { return p.URL }
-func (p *PersistedProject) GetPlatform() string          { return p.Platform }
-func (p *PersistedProject) GetPlatformId() string        { return p.PlatformID }
-func (p *PersistedProject) GetPlatformUpdatedAt() string { return p.PlatformUpdatedAt }
-func (p *PersistedProject) GetTitle() string             { return p.Title }
-func (p *PersistedProject) GetCompany() string           { return p.Company }
-func (p *PersistedProject) GetDescription() string       { return p.Description }
-func (p *PersistedProject) GetStartDate() string         { return p.StartDate }
-func (p *PersistedProject) GetEndDate() string           { return p.EndDate }
-func (p *PersistedProject) GetLocation() string          { return p.Location }
-func (p *PersistedProject) GetSkills() []string          { return p.Skills }
-func (p *PersistedProject) GetRequiredSkills() []string  { return p.RequiredSkills }
-func (p *PersistedProject) IsDirectClient() bool         { return p.DirectClient }
-func (p *PersistedProject) IsRemote() bool               { return p.Remote }
-func (p *PersistedProject) IsANUE() bool                 { return p.ANUE }
+func (p *PersistedProject) GetId() string          { return p.ID }
+func (p *PersistedProject) GetURL() string         { return p.URL }
+func (p *PersistedProject) GetPlatform() string    { return p.Platform }
+func (p *PersistedProject) GetPlatformId() string  { return p.PlatformID }
+func (p *PersistedProject) GetReferenceId() string { return p.ReferenceID }
+func (p *PersistedProject) GetPlatformUpdatedAt() string {
+	return p.PlatformUpdatedAt.Format(time.RFC3339)
+}
+func (p *PersistedProject) GetTitle() string            { return p.Title }
+func (p *PersistedProject) GetCompany() string          { return p.Company }
+func (p *PersistedProject) GetDescription() string      { return p.Description }
+func (p *PersistedProject) GetStartDate() string        { return p.StartDate }
+func (p *PersistedProject) GetEndDate() string          { return p.EndDate }
+func (p *PersistedProject) GetLocation() string         { return p.Location }
+func (p *PersistedProject) GetSkills() []string         { return p.Skills }
+func (p *PersistedProject) GetRequiredSkills() []string { return p.RequiredSkills }
+func (p *PersistedProject) IsDirectClient() bool        { return p.DirectClient }
+func (p *PersistedProject) IsRemote() bool              { return p.Remote }
+func (p *PersistedProject) IsANUE() bool                { return p.ANUE }
 
-func (p *PersistedProject) GetRate() interfaces.Rate {
+func (p *PersistedProject) GetRateRaw() string {
+	if p.Rate == nil {
+		return ""
+	}
+	return p.Rate.Raw
+}
+func (p *PersistedProject) GetRateAmount() *float64 {
 	if p.Rate == nil {
 		return nil
 	}
-	return p.Rate
+	return p.Rate.Amount
+}
+func (p *PersistedProject) GetRateCurrency() string {
+	if p.Rate == nil {
+		return ""
+	}
+	return p.Rate.Currency
+}
+func (p *PersistedProject) GetRateType() string {
+	if p.Rate == nil {
+		return ""
+	}
+	return string(p.Rate.Type)
 }
 
-func (p *PersistedProject) GetContact() interfaces.Contact {
+func (p *PersistedProject) GetContactName() string {
 	if p.Contact == nil {
-		return nil
+		return ""
 	}
-	return p.Contact
+	return p.Contact.Name
+}
+func (p *PersistedProject) GetContactCompany() string {
+	if p.Contact == nil {
+		return ""
+	}
+	return p.Contact.Company
+}
+func (p *PersistedProject) GetContactEmail() string {
+	if p.Contact == nil {
+		return ""
+	}
+	return p.Contact.Email
+}
+func (p *PersistedProject) GetContactPhone() string {
+	if p.Contact == nil {
+		return ""
+	}
+	return p.Contact.Phone
+}
+func (p *PersistedProject) GetContactRole() string {
+	if p.Contact == nil {
+		return ""
+	}
+	return p.Contact.Role
+}
+func (p *PersistedProject) GetContactAddress() string {
+	if p.Contact == nil {
+		return ""
+	}
+	return p.Contact.Address
 }
 
 func (p *PersistedProject) GetEvent() *ProjectEvent {
@@ -105,49 +159,99 @@ func (p *PersistedProject) GetEvent() *ProjectEvent {
 }
 
 // NewPersistedProject builds a PersistedProject from any interfaces.Project implementation.
-// platformID and platform identify the source; scrapedAt records when the fetch occurred.
-// existingID preserves a previously assigned nanoId across updates; pass "" to generate a new one.
-func NewPersistedProject(src interfaces.Project, platformID, platform string, scrapedAt time.Time, existingID string) *PersistedProject {
-	id := existingID
-	if id == "" {
-		id = gonanoid.Must()
-	}
+// If existing is non-nil, its ID is preserved and DisplayUpdatedAt is computed against
+// the previous record (so re-scrapes don't shift a job's position within its day).
+func NewPersistedProject(src interfaces.Project, existing *PersistedProject) *PersistedProject {
 	p := &PersistedProject{
-		ID:                id,
-		PlatformID:        platformID,
-		Platform:          platform,
+		ID:                resolveID(existing),
+		PlatformID:        src.GetPlatformId(),
+		ReferenceID:       src.GetReferenceId(),
+		Platform:          src.GetPlatform(),
 		URL:               src.GetURL(),
-		PlatformUpdatedAt: src.GetPlatformUpdatedAt(),
-		Title:             src.GetTitle(),
-		Company:           src.GetCompany(),
-		Description:       src.GetDescription(),
-		StartDate:         src.GetStartDate(),
-		EndDate:           src.GetEndDate(),
-		Location:          src.GetLocation(),
-		Skills:            src.GetSkills(),
-		RequiredSkills:    src.GetRequiredSkills(),
-		DirectClient:      src.IsDirectClient(),
-		Remote:            src.IsRemote(),
-		ANUE:              src.IsANUE(),
-		ScrapedAt:         scrapedAt,
+		PlatformUpdatedAt: helpers.ParsePlatformTime(src.GetPlatformUpdatedAt()),
+		ScrapedAt:         time.Now().UTC(),
 	}
-	if r := src.GetRate(); r != nil {
-		p.Rate = &PersistedRate{
-			Raw:      r.GetRaw(),
-			Amount:   r.GetAmount(),
-			Currency: r.GetCurrency(),
-			Type:     r.GetType(),
-		}
-	}
-	if c := src.GetContact(); c != nil {
-		p.Contact = &PersistedContact{
-			Company: c.GetCompany(),
-			Name:    c.GetName(),
-			Role:    c.GetRole(),
-			Email:   c.GetEmail(),
-			Phone:   c.GetPhone(),
-			Address: c.GetAddress(),
-		}
-	}
+	p.applySource(src)
+	p.computeDisplayUpdatedAt(existing)
 	return p
+}
+
+// resolveID returns the existing nanoid if available, otherwise generates a new one.
+func resolveID(existing *PersistedProject) string {
+	if existing != nil && existing.ID != "" {
+		return existing.ID
+	}
+	return gonanoid.Must()
+}
+
+// applySource fills the project's content fields from the platform's interfaces.Project.
+// Identity fields (ID, PlatformID, Platform, ReferenceID, URL, PlatformUpdatedAt, ScrapedAt)
+// are set by NewPersistedProject before this is called.
+func (p *PersistedProject) applySource(src interfaces.Project) {
+	p.Title = src.GetTitle()
+	p.Company = src.GetCompany()
+	p.Description = src.GetDescription()
+	p.StartDate = src.GetStartDate()
+	p.EndDate = src.GetEndDate()
+	p.Location = src.GetLocation()
+	p.Skills = src.GetSkills()
+	p.RequiredSkills = src.GetRequiredSkills()
+	p.DirectClient = src.IsDirectClient()
+	p.Remote = src.IsRemote()
+	p.ANUE = src.IsANUE()
+
+	if raw := src.GetRateRaw(); raw != "" {
+		p.Rate = &PersistedRate{
+			Raw:      raw,
+			Amount:   src.GetRateAmount(),
+			Currency: src.GetRateCurrency(),
+			Type:     interfaces.RateType(src.GetRateType()),
+		}
+	}
+	if name := src.GetContactName(); name != "" {
+		p.Contact = &PersistedContact{
+			Name:    name,
+			Company: src.GetContactCompany(),
+			Role:    src.GetContactRole(),
+			Email:   src.GetContactEmail(),
+			Phone:   src.GetContactPhone(),
+			Address: src.GetContactAddress(),
+		}
+	}
+}
+
+// computeDisplayUpdatedAt fills DisplayUpdatedAt based on PlatformUpdatedAt:
+//   - If the platform timestamp has a time component (hours/min/sec), use it as-is.
+//   - If it's date-only (00:00:00 after parsing), combine the date with the current
+//     time-of-day so the job has a stable, plausible position within its day.
+//   - If existing is non-nil and the platform date hasn't changed, preserve the
+//     existing DisplayUpdatedAt time-of-day so re-scrapes don't shift the order.
+//
+// PlatformUpdatedAt remains the honest source of truth from the publisher.
+// DisplayUpdatedAt is what the UI should sort and render on.
+func (p *PersistedProject) computeDisplayUpdatedAt(existing *PersistedProject) {
+	if p.PlatformUpdatedAt.IsZero() {
+		// Could not parse — fall back to scraped time so the job is still sortable.
+		p.DisplayUpdatedAt = p.ScrapedAt
+		return
+	}
+
+	// Re-scrape with same date → preserve previous display time-of-day.
+	if existing != nil && helpers.SameDate(existing.PlatformUpdatedAt, p.PlatformUpdatedAt) {
+		p.DisplayUpdatedAt = existing.DisplayUpdatedAt
+		return
+	}
+
+	if helpers.HasTimeComponent(p.PlatformUpdatedAt) {
+		p.DisplayUpdatedAt = p.PlatformUpdatedAt
+		return
+	}
+
+	// Date-only: combine the platform date with the current time-of-day.
+	now := time.Now().UTC()
+	p.DisplayUpdatedAt = time.Date(
+		p.PlatformUpdatedAt.Year(), p.PlatformUpdatedAt.Month(), p.PlatformUpdatedAt.Day(),
+		now.Hour(), now.Minute(), now.Second(), 0,
+		time.UTC,
+	)
 }

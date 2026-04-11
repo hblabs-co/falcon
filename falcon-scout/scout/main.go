@@ -2,7 +2,8 @@ package main
 
 import (
 	"hblabs.co/falcon/common/system"
-	hblabsco "hblabs.co/falcon/scout/platforms/hblabsco"
+	"hblabs.co/falcon/scout/platforms/hblabsco"
+	"hblabs.co/falcon/scout/platforms/redglobalde"
 )
 
 func main() {
@@ -13,6 +14,7 @@ func main() {
 		system.StreamProjects(),
 		system.StreamScrape(),
 		system.StreamStorage(),
+		system.StreamSignal(),
 	))
 
 	service := NewService()
@@ -32,6 +34,6 @@ func main() {
 		// RegisterPlatform(solcomde.New()).
 		// RegisterPlatform(waynicede.New()).
 		// RegisterPlatform(wematchde.New()).
-		// RegisterPlatform(redglobalde.New()).
+		RegisterPlatform(redglobalde.New()).
 		Run()
 }

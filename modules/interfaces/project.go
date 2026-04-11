@@ -7,6 +7,7 @@ type Project interface {
 	GetURL() string
 	GetPlatform() string
 	GetPlatformId() string
+	GetReferenceId() string
 	GetPlatformUpdatedAt() string
 
 	GetTitle() string
@@ -19,8 +20,17 @@ type Project interface {
 	GetSkills() []string
 	GetRequiredSkills() []string
 
-	GetRate() Rate
-	GetContact() Contact
+	GetRateRaw() string
+	GetRateAmount() *float64
+	GetRateCurrency() string
+	GetRateType() string
+
+	GetContactName() string
+	GetContactCompany() string
+	GetContactEmail() string
+	GetContactPhone() string
+	GetContactRole() string
+	GetContactAddress() string
 
 	IsDirectClient() bool
 	IsRemote() bool
