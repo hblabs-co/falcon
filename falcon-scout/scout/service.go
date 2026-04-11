@@ -192,29 +192,54 @@ func (s *Service) runMetadataLoop(ctx context.Context, p Platform, logger *logru
 		return
 	}
 
+	platformName := p.Name()
+
 	refresh := func() {
+		// Re-fetch the company on every cycle so the diff against the freshly
+		// downloaded files is against the latest persisted state, not against
+		// a stale startup snapshot.
+		var current models.Company
+		if err := system.GetStorage().GetByField(ctx, constants.MongoCompaniesCollection, "company_id", companyID, &current); err != nil {
+			logger.Errorf("metadata loop: re-fetch company %s failed: %v", companyID, err)
+			return
+		}
+
 		files := fetchPlatformMetadata(ctx, baseURL)
 		if len(files) == 0 {
 			logger.Warnf("metadata loop: no files fetched for %s — skipping update", baseURL)
 			return
 		}
 
-		metadata := models.CompanyMetadata{
+		next := models.CompanyMetadata{
 			RobotsTxt:   files["robots.txt"],
 			SecurityTxt: files["security.txt"],
 			HumansTxt:   files["humans.txt"],
 			SitemapURL:  files["sitemap_url"],
 			UpdatedAt:   time.Now(),
 		}
+
+		// Compare against the previously stored snapshot. The first refresh
+		// after deployment finds Metadata == nil and is treated as "no diff" —
+		// we don't fire warnings for the initial seed, only for actual drift
+		// once a baseline exists.
+		changed := diffCompanyMetadata(current.Metadata, &next)
+		for _, field := range changed {
+			s.recordMetadataChangedWarning(ctx, platformName, companyID, field, current.Metadata, &next)
+		}
+
 		update := bson.M{
-			"metadata":   metadata,
+			"metadata":   next,
 			"updated_at": time.Now(),
 		}
 		if err := system.GetStorage().Set(ctx, constants.MongoCompaniesCollection, bson.M{"company_id": companyID}, update); err != nil {
 			logger.Errorf("metadata loop: update for company %s failed: %v", companyID, err)
 			return
 		}
-		logger.Infof("metadata refreshed for company %s (%d files)", companyID, len(files))
+		if len(changed) > 0 {
+			logger.Warnf("metadata refreshed for company %s — changed: %v", companyID, changed)
+		} else {
+			logger.Infof("metadata refreshed for company %s (%d files, no changes)", companyID, len(files))
+		}
 	}
 
 	refresh() // run once at startup
@@ -350,9 +375,14 @@ func sameInstant(a, b time.Time) bool {
 
 // newWarnFn returns a WarnFn that persists warnings to the warnings collection,
 // pre-tagged with the scout service name and the platform that emitted them.
+//
+// Mirrors newErrFn: warnings with priority "high" or "critical" are also
+// published to signal.admin_alert so falcon-signal can notify the operations
+// team. The published event carries only the warning id + kind — signal loads
+// the full record from MongoDB and never sees the HTML through NATS.
 func newWarnFn(platform string) platformkit.WarnFn {
 	return func(ctx context.Context, name, message, priority, html string, candidate any) error {
-		system.RecordWarning(ctx, models.ServiceWarning{
+		warnID := system.RecordWarning(ctx, models.ServiceWarning{
 			ServiceName: constants.ServiceScout,
 			WarningName: name,
 			Message:     message,
@@ -361,6 +391,17 @@ func newWarnFn(platform string) platformkit.WarnFn {
 			HTML:        html,
 			Candidate:   candidate,
 		})
+
+		if warnID != "" && shouldEscalateToAdmins(priority) {
+			evt := models.AdminAlertEvent{
+				Kind: models.AdminAlertKindWarning,
+				ID:   warnID,
+			}
+			if pubErr := system.Publish(ctx, constants.SubjectSignalAdminAlert, evt); pubErr != nil {
+				logrus.Errorf("publish admin alert for warning %s: %v", warnID, pubErr)
+			}
+		}
+
 		return nil
 	}
 }
@@ -389,7 +430,10 @@ func newErrFn(platform string) platformkit.ErrFn {
 		})
 
 		if errID != "" && shouldEscalateToAdmins(priority) {
-			evt := models.AdminAlertEvent{ErrorID: errID}
+			evt := models.AdminAlertEvent{
+				Kind: models.AdminAlertKindError,
+				ID:   errID,
+			}
 			if pubErr := system.Publish(ctx, constants.SubjectSignalAdminAlert, evt); pubErr != nil {
 				logrus.Errorf("publish admin alert for error %s: %v", errID, pubErr)
 			}
@@ -408,4 +452,90 @@ func shouldEscalateToAdmins(priority string) bool {
 		return true
 	}
 	return false
+}
+
+// diffCompanyMetadata returns the names of fields that differ between the
+// previously stored snapshot and the freshly fetched one. Returns nil on the
+// very first refresh (prev == nil) so the initial seed of the data does not
+// fire warnings — we only care about drift from an established baseline.
+//
+// The UpdatedAt field is intentionally excluded since it changes every cycle.
+func diffCompanyMetadata(prev, next *models.CompanyMetadata) []string {
+	if prev == nil || next == nil {
+		return nil
+	}
+	var changed []string
+	if prev.RobotsTxt != next.RobotsTxt {
+		changed = append(changed, "robots.txt")
+	}
+	if prev.SecurityTxt != next.SecurityTxt {
+		changed = append(changed, "security.txt")
+	}
+	if prev.HumansTxt != next.HumansTxt {
+		changed = append(changed, "humans.txt")
+	}
+	if prev.SitemapURL != next.SitemapURL {
+		changed = append(changed, "sitemap_url")
+	}
+	return changed
+}
+
+// recordMetadataChangedWarning persists a warning per changed metadata file
+// and publishes an admin alert so the operations team is notified. The HTML
+// snapshot is the new content of the file (not the diff) so investigators can
+// see exactly what's there now; the previous version remains in the company
+// document until the upcoming Set call overwrites it.
+func (s *Service) recordMetadataChangedWarning(
+	ctx context.Context,
+	platform, companyID, field string,
+	prev *models.CompanyMetadata,
+	next *models.CompanyMetadata,
+) {
+	message := fmt.Sprintf("metadata file %q for company %s changed since last refresh", field, companyID)
+	candidate := map[string]any{
+		"company_id": companyID,
+		"field":      field,
+		"previous":   metadataFieldValue(prev, field),
+	}
+	priority := string(models.WarningPriorityHigh)
+
+	warnID := system.RecordWarning(ctx, models.ServiceWarning{
+		ServiceName: constants.ServiceScout,
+		WarningName: platformkit.WarnCompanyMetadataChanged,
+		Message:     message,
+		Priority:    models.WarningPriority(priority),
+		Platform:    platform,
+		HTML:        metadataFieldValue(next, field),
+		Candidate:   candidate,
+	})
+
+	if warnID != "" && shouldEscalateToAdmins(priority) {
+		evt := models.AdminAlertEvent{
+			Kind: models.AdminAlertKindWarning,
+			ID:   warnID,
+		}
+		if pubErr := system.Publish(ctx, constants.SubjectSignalAdminAlert, evt); pubErr != nil {
+			logrus.Errorf("publish admin alert for metadata-change warning %s: %v", warnID, pubErr)
+		}
+	}
+}
+
+// metadataFieldValue returns the string value of a CompanyMetadata field by
+// the same name used in diffCompanyMetadata. Empty string when the snapshot
+// is nil or the field name is unknown.
+func metadataFieldValue(m *models.CompanyMetadata, field string) string {
+	if m == nil {
+		return ""
+	}
+	switch field {
+	case "robots.txt":
+		return m.RobotsTxt
+	case "security.txt":
+		return m.SecurityTxt
+	case "humans.txt":
+		return m.HumansTxt
+	case "sitemap_url":
+		return m.SitemapURL
+	}
+	return ""
 }

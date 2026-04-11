@@ -9,6 +9,13 @@ const (
 	// WarnReferenceIDNotFound — the platform's external reference ID could not be
 	// extracted from the detail page. Usually means markup drift.
 	WarnReferenceIDNotFound = "reference_id_not_found"
+
+	// WarnCompanyMetadataChanged — a well-known metadata file (robots.txt,
+	// security.txt, humans.txt, sitemap reference) on the platform's site
+	// changed compared to the previously stored snapshot. Operators usually
+	// want to know about these so they can review the diff (e.g. new
+	// Disallow rules in robots.txt that affect the scraper).
+	WarnCompanyMetadataChanged = "company_metadata_changed"
 )
 
 // WarnFn is a callback injected by the service to record a non-fatal anomaly.

@@ -91,25 +91,29 @@ func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *model
 
 // SendAdminAlert delivers a high-severity operational alert to an admin device.
 // Used by AdminNotifier when a service publishes an AdminAlertEvent. The
-// payload carries enough context (error_id, source, platform, severity) for
-// the iOS app to deep-link straight into the offending error from the alert.
-func (a *apnsClient) SendAdminAlert(ctx context.Context, deviceToken string, errDoc *models.ServiceError) error {
-	title := errDoc.ErrorName
-	if errDoc.Platform != "" {
-		title = errDoc.Platform + " — " + errDoc.ErrorName
+// payload carries enough lightweight context (subject_id, subject_kind, source,
+// platform, name, severity) for the iOS app to deep-link straight into the
+// offending record from the alert. The HTML snapshot is intentionally NOT
+// included — it stays in MongoDB and is fetched on demand from the iOS app or
+// from a Studio 3T session via the subject_id.
+func (a *apnsClient) SendAdminAlert(ctx context.Context, deviceToken string, subject adminAlertSubject) error {
+	title := subject.Name
+	if subject.Platform != "" {
+		title = subject.Platform + " — " + subject.Name
 	}
 
 	p := payload.NewPayload().
 		AlertTitle(title).
-		AlertSubtitle(strings.ToUpper(string(errDoc.Priority))).
-		AlertBody(errDoc.Error).
+		AlertSubtitle(strings.ToUpper(subject.Priority)).
+		AlertBody(subject.Message).
 		Sound("default").
 		Category("ADMIN_ALERT").
-		Custom("error_id", errDoc.ID).
-		Custom("source", errDoc.ServiceName).
-		Custom("platform", errDoc.Platform).
-		Custom("error_name", errDoc.ErrorName).
-		Custom("severity", string(errDoc.Priority))
+		Custom("subject_id", subject.ID).
+		Custom("subject_kind", string(subject.Kind)).
+		Custom("source", subject.Source).
+		Custom("platform", subject.Platform).
+		Custom("name", subject.Name).
+		Custom("severity", subject.Priority)
 
 	notification := &apns2.Notification{
 		DeviceToken: deviceToken,

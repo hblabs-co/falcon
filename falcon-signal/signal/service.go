@@ -127,28 +127,44 @@ func (s *Service) resolveUserLanguage(email, platform string) string {
 	return "en"
 }
 
-// handleAdminAlert resolves an AdminAlertEvent (which carries only the
-// ServiceError ID) by loading the full record from the errors collection and
+// handleAdminAlert resolves an AdminAlertEvent (a tiny discriminated union of
+// kind + id) by loading the full record from the appropriate collection and
 // fanning it out via the AdminNotifier. The event is intentionally tiny so
-// presentation/translation logic stays here in signal.
+// presentation/translation logic stays here in signal — we never push HTML or
+// other heavy fields through NATS.
 func (s *Service) handleAdminAlert(data []byte) error {
 	var evt models.AdminAlertEvent
 	if err := json.Unmarshal(data, &evt); err != nil {
 		return fmt.Errorf("unmarshal signal.admin_alert: %w", err)
 	}
-	if evt.ErrorID == "" {
-		return fmt.Errorf("admin_alert event missing error_id")
+	if evt.ID == "" {
+		return fmt.Errorf("admin_alert event missing id")
 	}
 
 	ctx := context.Background()
-	var errDoc models.ServiceError
-	if err := system.GetStorage().GetByField(ctx, constants.MongoErrorsCollection, "id", evt.ErrorID, &errDoc); err != nil {
-		return fmt.Errorf("load service error %s: %w", evt.ErrorID, err)
-	}
 
-	logrus.Infof("[signal] admin alert received for error %s (%s)", errDoc.ID, errDoc.ErrorName)
-	s.admin.NotifyAll(ctx, &errDoc)
-	return nil
+	switch evt.Kind {
+	case models.AdminAlertKindError:
+		var errDoc models.ServiceError
+		if err := system.GetStorage().GetByField(ctx, constants.MongoErrorsCollection, "id", evt.ID, &errDoc); err != nil {
+			return fmt.Errorf("load service error %s: %w", evt.ID, err)
+		}
+		logrus.Infof("[signal] admin alert received for error %s (%s)", errDoc.ID, errDoc.ErrorName)
+		s.admin.NotifyAll(ctx, fromError(&errDoc))
+		return nil
+
+	case models.AdminAlertKindWarning:
+		var warnDoc models.ServiceWarning
+		if err := system.GetStorage().GetByField(ctx, constants.MongoWarningsCollection, "id", evt.ID, &warnDoc); err != nil {
+			return fmt.Errorf("load service warning %s: %w", evt.ID, err)
+		}
+		logrus.Infof("[signal] admin alert received for warning %s (%s)", warnDoc.ID, warnDoc.WarningName)
+		s.admin.NotifyAll(ctx, fromWarning(&warnDoc))
+		return nil
+
+	default:
+		return fmt.Errorf("admin_alert event has unknown kind %q", evt.Kind)
+	}
 }
 
 func (s *Service) handleRegisterIOSDeviceToken(data []byte) error {

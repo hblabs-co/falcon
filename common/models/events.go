@@ -72,18 +72,30 @@ type MagicLinkRequestedEvent struct {
 	Platform  string `json:"platform"`   // "ios", "android", "web" — extracted from User-Agent
 }
 
+// AdminAlertKind discriminates which collection an AdminAlertEvent points at.
+type AdminAlertKind string
+
+const (
+	// AdminAlertKindError points at a document in the errors collection.
+	AdminAlertKindError AdminAlertKind = "error"
+	// AdminAlertKindWarning points at a document in the warnings collection.
+	AdminAlertKindWarning AdminAlertKind = "warning"
+)
+
 // AdminAlertEvent is published to "signal.admin_alert" by any service that
 // needs to escalate a high-severity issue to the operations team.
 //
-// The event carries only the persisted ServiceError ID. falcon-signal loads
-// the full record from the errors collection, builds the email/push payload
-// (translation, formatting, severity routing) and fans it out to every email
-// in ADMIN_EMAILS via mail and — when the admin has the iOS app installed —
-// push notification. Keeping the event tiny avoids duplicating ServiceError
-// fields here and centralizes presentation logic in signal where templates live.
+// The event is a tiny discriminated union: Kind tells signal which collection
+// to look in (errors or warnings) and ID is the document id. falcon-signal
+// loads the full record, builds the email/push payload (translation,
+// formatting, severity routing) and fans it out to every email in ADMIN_EMAILS
+// via mail and — when the admin has the iOS app installed — push notification.
+// Keeping the event tiny avoids duplicating ServiceError/ServiceWarning fields
+// here and centralizes presentation logic in signal where templates live.
 //
-// Publishers should only emit this for high or critical errors — there is no
+// Publishers should only emit this for high or critical events — there is no
 // dedup yet, so flooding will reach the admins.
 type AdminAlertEvent struct {
-	ErrorID string `json:"error_id"`
+	Kind AdminAlertKind `json:"kind"`
+	ID   string         `json:"id"`
 }

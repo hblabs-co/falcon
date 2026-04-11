@@ -10,10 +10,14 @@ import (
 	"hblabs.co/falcon/common/models"
 )
 
-// RecordWarning persists a ServiceWarning to the "warnings" collection.
-// It automatically fills ID, OccurredAt, and Priority so callers only need to set
-// the domain fields (ServiceName, WarningName, Message, Platform, Candidate).
-func RecordWarning(ctx context.Context, doc models.ServiceWarning) {
+// RecordWarning persists a ServiceWarning to the "warnings" collection and
+// returns the ID of the inserted document so callers can reference it (e.g.
+// when publishing an admin alert event that points back at the record).
+//
+// It automatically fills ID, OccurredAt, and Priority so callers only need to
+// set the domain fields (ServiceName, WarningName, Message, Platform, Candidate).
+// Returns "" if persistence failed.
+func RecordWarning(ctx context.Context, doc models.ServiceWarning) string {
 	doc.ID = gonanoid.Must()
 	doc.OccurredAt = time.Now()
 	if doc.Priority == "" {
@@ -30,7 +34,8 @@ func RecordWarning(ctx context.Context, doc models.ServiceWarning) {
 
 	if err := GetStorage().Insert(ctx, constants.MongoWarningsCollection, doc); err != nil {
 		log.Errorf("failed to persist service warning: %v — original: %s", err, doc.Message)
-		return
+		return ""
 	}
 	log.Warnf("service warning recorded: %s", doc.Message)
+	return doc.ID
 }

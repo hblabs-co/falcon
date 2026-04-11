@@ -10,8 +10,6 @@ import (
 
 // implemnt retry
 // capsulate more the logic so it gets more reusable
-// rtrigger event if this changes
-// ADMIN_EMAIL env var for emmiting push notifictaions and sending emails with critical errors
 
 type Runner struct {
 	logger  platformkit.Logger
