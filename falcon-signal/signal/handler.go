@@ -72,5 +72,11 @@ func (m *Module) Register(ctx context.Context) error {
 	}
 	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalAdminAlert)
 
+	// Start the background flush loop that delivers buffered admin alerts.
+	// Events arriving via handleAdminAlert are deduped in the buffer; the
+	// loop flushes every ADMIN_ALERT_WINDOW (default 2m) and sends the
+	// consolidated notifications via the AdminNotifier.
+	go runAlertFlushLoop(ctx, svc.alertBuf, svc.admin)
+
 	return nil
 }

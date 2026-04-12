@@ -17,9 +17,10 @@ import (
 
 // Service handles push notifications, device token persistence, and transactional email.
 type Service struct {
-	apns  *apnsClient
-	mail  *email.Client
-	admin *AdminNotifier
+	apns     *apnsClient
+	mail     *email.Client
+	admin    *AdminNotifier
+	alertBuf *alertBuffer
 }
 
 func newService() (*Service, error) {
@@ -29,9 +30,10 @@ func newService() (*Service, error) {
 	}
 	mail := email.NewClient()
 	return &Service{
-		apns:  apns,
-		mail:  mail,
-		admin: NewAdminNotifier(apns, mail),
+		apns:     apns,
+		mail:     mail,
+		admin:    NewAdminNotifier(apns, mail),
+		alertBuf: newAlertBuffer(),
 	}, nil
 }
 
@@ -129,9 +131,13 @@ func (s *Service) resolveUserLanguage(email, platform string) string {
 
 // handleAdminAlert resolves an AdminAlertEvent (a tiny discriminated union of
 // kind + id) by loading the full record from the appropriate collection and
-// fanning it out via the AdminNotifier. The event is intentionally tiny so
-// presentation/translation logic stays here in signal — we never push HTML or
-// other heavy fields through NATS.
+// pushing it into the alert buffer. The buffer deduplicates identical alerts
+// within the flush window (ADMIN_ALERT_WINDOW, default 2m) and the flush loop
+// delivers them via the AdminNotifier — so 50 identical events in a burst
+// become 1 notification that says "[x50]".
+//
+// We never push HTML or other heavy fields through NATS — the event carries
+// only kind + id; the full record is loaded from MongoDB here in signal.
 func (s *Service) handleAdminAlert(data []byte) error {
 	var evt models.AdminAlertEvent
 	if err := json.Unmarshal(data, &evt); err != nil {
@@ -149,8 +155,8 @@ func (s *Service) handleAdminAlert(data []byte) error {
 		if err := system.GetStorage().GetByField(ctx, constants.MongoErrorsCollection, "id", evt.ID, &errDoc); err != nil {
 			return fmt.Errorf("load service error %s: %w", evt.ID, err)
 		}
-		logrus.Infof("[signal] admin alert received for error %s (%s)", errDoc.ID, errDoc.ErrorName)
-		s.admin.NotifyAll(ctx, fromError(&errDoc))
+		logrus.Infof("[signal] admin alert buffered for error %s (%s)", errDoc.ID, errDoc.ErrorName)
+		s.alertBuf.Add(fromError(&errDoc))
 		return nil
 
 	case models.AdminAlertKindWarning:
@@ -158,8 +164,8 @@ func (s *Service) handleAdminAlert(data []byte) error {
 		if err := system.GetStorage().GetByField(ctx, constants.MongoWarningsCollection, "id", evt.ID, &warnDoc); err != nil {
 			return fmt.Errorf("load service warning %s: %w", evt.ID, err)
 		}
-		logrus.Infof("[signal] admin alert received for warning %s (%s)", warnDoc.ID, warnDoc.WarningName)
-		s.admin.NotifyAll(ctx, fromWarning(&warnDoc))
+		logrus.Infof("[signal] admin alert buffered for warning %s (%s)", warnDoc.ID, warnDoc.WarningName)
+		s.alertBuf.Add(fromWarning(&warnDoc))
 		return nil
 
 	default:
