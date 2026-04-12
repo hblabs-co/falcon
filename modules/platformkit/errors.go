@@ -62,16 +62,30 @@ func IsServerError(err error) bool {
 }
 
 // ErrEmptyListing represents a categorical failure where a listing page that
-// is expected to contain candidates returned zero — typically because the
-// source platform changed its markup and the existing selectors no longer
-// match. The HTML snapshot is preserved so engineers can diagnose the drift.
+// is expected to contain candidates returned zero parseable items.
+//
+// CardsSeen tracks how many raw card elements the outer selector matched
+// BEFORE parseJobCard tried to extract data from each one. This lets the
+// caller distinguish two very different situations:
+//
+//   - CardsSeen > 0, 0 parsed: definite internal markup drift — the card
+//     containers exist but their inner structure changed (href missing,
+//     URL format different, etc.). Strongest signal.
+//
+//   - CardsSeen == 0: ambiguous — the outer selector itself may have broken,
+//     or the platform is genuinely empty, or a challenge/block page was served.
+//     Check the HTML size for a secondary clue (tiny = blocked, large = selector broken).
 type ErrEmptyListing struct {
-	Page int
-	HTML string
+	Page      int
+	HTML      string
+	CardsSeen int
 }
 
 func (e *ErrEmptyListing) Error() string {
-	return fmt.Sprintf("listing page %d returned no candidates — possible markup drift", e.Page)
+	if e.CardsSeen > 0 {
+		return fmt.Sprintf("listing page %d found %d job cards but none could be parsed — internal markup changed", e.Page, e.CardsSeen)
+	}
+	return fmt.Sprintf("listing page %d returned no job cards — possible outer selector drift or blocking", e.Page)
 }
 
 // IsEmptyListing reports whether err is (or wraps) an ErrEmptyListing.
@@ -127,24 +141,32 @@ func ErrorFromStatus(statusCode int, url string, cause error) error {
 // Classification — for callers reporting errors via ErrFn
 // ============================================================================
 
-// ClassifyError inspects err and returns the appropriate ErrorName + priority
-// for persistence. Centralizes the mapping so every platform reports the same
-// shape for the same kind of failure.
+// ClassifyError inspects err and returns the appropriate ErrorName, priority,
+// and any CallOptions that should accompany the recording (notably Categorical
+// for system-wide failures). Centralizes the mapping so every platform reports
+// the same shape for the same kind of failure.
 //
 // Returned priority strings ("low" | "medium" | "high" | "critical") match the
 // values used by ServiceError.Priority and the WarnFn priority field.
-func ClassifyError(err error) (name, priority string) {
+//
+// Categorical opts are returned for failures that affect a shared resource:
+//   - ErrEmptyListing → markup of the listing page is broken
+//   - ErrUnauthorized → session/auth dead at the connection layer
+//
+// Per-item failures (5xx, generic inspect errors) get no opts; the runner can
+// still pass extra opts on its own if it knows something the classifier doesn't.
+func ClassifyError(err error) (name, priority string, opts []CallOption) {
 	switch {
 	case IsGone(err):
-		return ErrNameScrapeGone, "low"
+		return ErrNameScrapeGone, "low", nil
 	case IsUnauthorized(err):
-		return ErrNameScrapeUnauthorized, "high"
+		return ErrNameScrapeUnauthorized, "high", []CallOption{Categorical()}
 	case IsServerError(err):
-		return ErrNameScrapeServerError, "medium"
+		return ErrNameScrapeServerError, "medium", nil
 	case IsEmptyListing(err):
-		return ErrNameScrapeListingEmpty, "critical"
+		return ErrNameScrapeListingEmpty, "critical", []CallOption{Categorical()}
 	default:
-		return ErrNameScrapeInspectFailed, "high"
+		return ErrNameScrapeInspectFailed, "high", nil
 	}
 }
 
@@ -162,4 +184,7 @@ func ClassifyError(err error) (name, priority string) {
 //   - priority:  "low" | "medium" | "high" | "critical" — typically from ClassifyError
 //   - html:      HTML snapshot at the moment of failure (pass "" if not available)
 //   - candidate: opaque payload (the candidate that failed, for retry reconstruction)
-type ErrFn func(ctx context.Context, name, message, priority, html string, candidate any) error
+//   - opts:      functional options (e.g. Categorical()) that change how the
+//                service persists the record. Spread the slice returned by
+//                ClassifyError to inherit its category-aware defaults.
+type ErrFn func(ctx context.Context, name, message, priority, html string, candidate any, opts ...CallOption) error

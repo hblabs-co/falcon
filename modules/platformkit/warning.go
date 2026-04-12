@@ -29,4 +29,6 @@ const (
 //   - priority:  "low" | "medium" | "high" | "critical"
 //   - html:      HTML snapshot for markup-drift warnings (pass "" if not relevant)
 //   - candidate: opaque payload (the candidate that triggered the warning, or any other context)
-type WarnFn func(ctx context.Context, name, message, priority, html string, candidate any) error
+//   - opts:      functional options (e.g. Categorical()) that change how the
+//                service persists the record.
+type WarnFn func(ctx context.Context, name, message, priority, html string, candidate any, opts ...CallOption) error

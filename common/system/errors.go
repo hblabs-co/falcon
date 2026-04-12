@@ -13,50 +13,20 @@ import (
 	"hblabs.co/falcon/common/models"
 )
 
-// RecordError persists a ServiceError to the "errors" collection and returns
-// the ID of the resulting document so callers can reference it (e.g. when
-// publishing an admin alert event that points back at the record).
+// RecordError persists a per-item ServiceError to the "errors" collection and
+// returns the ID of the inserted document. Each call creates a fresh document
+// with a new nanoid — useful for retry workers and per-job traceability.
 //
-// It distinguishes between two kinds of errors based on whether doc.Candidate
-// is nil:
+// Use this when the failure is local to a specific item (a single job's
+// inspect 5xx-ed; one CV failed to parse). Use RecordCategoricalError instead
+// when the failure is system-wide and should be aggregated into a single
+// document with an occurrence counter.
 //
-//   - Per-item error (Candidate != nil): inserted as a brand-new document with
-//     a fresh nanoid. Multiple occurrences of the same error against different
-//     items produce separate records — useful for retry workers and traceability.
-//
-//   - Categorical error (Candidate == nil): represents a system-level anomaly
-//     that affects ALL items (markup drift, repeated infrastructure failure).
-//     These are deduped via a deterministic ID (service:platform:error_name)
-//     and upserted: subsequent occurrences update LastSeenAt, refresh the latest
-//     Error/HTML/Priority, and atomically increment OccurrenceCount. This avoids
-//     flooding the errors collection with one record per poll cycle.
-//
-// In both cases OccurredAt, StackTrace, and a sensible default Priority are
-// auto-filled so callers only need to set the domain fields. Returns "" if
-// persistence failed.
+// OccurredAt, StackTrace, and a sensible default Priority are auto-filled.
+// Returns "" if persistence failed.
 func RecordError(ctx context.Context, doc models.ServiceError) string {
-	buf := make([]byte, 4096)
-	n := runtime.Stack(buf, false)
-	doc.StackTrace = string(buf[:n])
-	doc.OccurredAt = time.Now()
-	if doc.Priority == "" {
-		doc.Priority = models.ErrorPriorityLow
-	}
-
-	log := logrus.WithFields(logrus.Fields{
-		"service":    doc.ServiceName,
-		"error_name": doc.ErrorName,
-	})
-	if doc.ProjectID != "" {
-		log = log.WithField("project_id", doc.ProjectID)
-	}
-	if doc.PlatformID != "" {
-		log = log.WithField("platform_id", doc.PlatformID)
-	}
-
-	if doc.Candidate == nil {
-		return recordCategoricalError(ctx, doc, log)
-	}
+	prepareError(&doc)
+	log := errorLogger(&doc)
 
 	doc.ID = gonanoid.Must()
 	if err := GetStorage().Insert(ctx, constants.MongoErrorsCollection, doc); err != nil {
@@ -67,35 +37,47 @@ func RecordError(ctx context.Context, doc models.ServiceError) string {
 	return doc.ID
 }
 
-// recordCategoricalError upserts a system-level (non-per-item) error keyed by a
-// deterministic ID so that recurrent failures only produce ONE document with a
-// counter, instead of one document per poll cycle. Returns the deterministic ID
-// (or "" on failure) so callers can reference it from downstream events.
+// RecordCategoricalError persists a system-level ServiceError as a single
+// deduped document keyed by a deterministic ID (service:platform:error_name).
+// Subsequent occurrences of the same category increment OccurrenceCount and
+// refresh the latest message/HTML/priority instead of creating new records.
+// Returns the deterministic ID (or "" on failure).
 //
-// On first occurrence:
+// On the FIRST occurrence:
 //   - Creates the document with OccurredAt = LastSeenAt = now
 //   - OccurrenceCount = 1
+//   - Candidate (if provided) is preserved as a permanent "first observed
+//     example" via $setOnInsert and is never overwritten on later occurrences.
 //
-// On subsequent occurrences:
+// On SUBSEQUENT occurrences:
 //   - LastSeenAt = now
 //   - OccurrenceCount += 1
-//   - Error / HTML / Priority refreshed to the latest
+//   - Error / HTML / StackTrace / Priority refreshed to the latest snapshot
 //   - Resolved reset to false (re-opened) so the incident is visible again
-//   - OccurredAt is preserved (it represents when this category first started)
-func recordCategoricalError(ctx context.Context, doc models.ServiceError, log *logrus.Entry) string {
+//   - OccurredAt and Candidate are preserved (they represent when this
+//     category first started and which item first triggered it)
+func RecordCategoricalError(ctx context.Context, doc models.ServiceError) string {
+	prepareError(&doc)
+	log := errorLogger(&doc)
+
 	deterministicID := fmt.Sprintf("%s:%s:%s", doc.ServiceName, doc.Platform, doc.ErrorName)
 	now := doc.OccurredAt
 
+	setOnInsert := bson.M{
+		"id":           deterministicID,
+		"service_name": doc.ServiceName,
+		"error_name":   doc.ErrorName,
+		"platform":     doc.Platform,
+		"occurred_at":  now,
+		"retry_count":  0,
+	}
+	if doc.Candidate != nil {
+		setOnInsert["candidate"] = doc.Candidate
+	}
+
 	filter := bson.M{"id": deterministicID}
 	update := bson.M{
-		"$setOnInsert": bson.M{
-			"id":           deterministicID,
-			"service_name": doc.ServiceName,
-			"error_name":   doc.ErrorName,
-			"platform":     doc.Platform,
-			"occurred_at":  now,
-			"retry_count":  0,
-		},
+		"$setOnInsert": setOnInsert,
 		"$set": bson.M{
 			"error":        doc.Error,
 			"stack_trace":  doc.StackTrace,
@@ -115,4 +97,33 @@ func recordCategoricalError(ctx context.Context, doc models.ServiceError, log *l
 	}
 	log.Warnf("categorical error recorded: %s", doc.Error)
 	return deterministicID
+}
+
+// prepareError fills the auto-managed fields (StackTrace, OccurredAt, default
+// Priority) on a ServiceError. Shared by both record paths so callers stay
+// minimal.
+func prepareError(doc *models.ServiceError) {
+	buf := make([]byte, 4096)
+	n := runtime.Stack(buf, false)
+	doc.StackTrace = string(buf[:n])
+	doc.OccurredAt = time.Now()
+	if doc.Priority == "" {
+		doc.Priority = models.ErrorPriorityLow
+	}
+}
+
+// errorLogger returns a contextual logger pre-tagged with the salient
+// identifiers from a ServiceError.
+func errorLogger(doc *models.ServiceError) *logrus.Entry {
+	log := logrus.WithFields(logrus.Fields{
+		"service":    doc.ServiceName,
+		"error_name": doc.ErrorName,
+	})
+	if doc.ProjectID != "" {
+		log = log.WithField("project_id", doc.ProjectID)
+	}
+	if doc.PlatformID != "" {
+		log = log.WithField("platform_id", doc.PlatformID)
+	}
+	return log
 }

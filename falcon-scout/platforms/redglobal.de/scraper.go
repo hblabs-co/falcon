@@ -74,13 +74,13 @@ func (s *Scraper) scrapeLoop(startPage int, handler pageHandlerFn) ([]*ProjectCa
 	page := startPage
 
 	for {
-		candidates, hasNext, html, err := s.scrapePage(page)
+		candidates, hasNext, html, cardsSeen, err := s.scrapePage(page)
 		if err != nil {
 			return all, fmt.Errorf("scrape page %d: %w", page, err)
 		}
 		if len(candidates) == 0 {
 			if page == startPage {
-				return all, &platformkit.ErrEmptyListing{Page: page, HTML: html}
+				return all, &platformkit.ErrEmptyListing{Page: page, HTML: html, CardsSeen: cardsSeen}
 			}
 			break
 		}
@@ -100,12 +100,8 @@ func (s *Scraper) scrapeLoop(startPage int, handler pageHandlerFn) ([]*ProjectCa
 // Returns the candidates, whether a "next" pagination link exists, the raw
 // HTML body (so callers can attach it to a categorical error if the page is
 // unexpectedly empty), and any HTTP error.
-func (s *Scraper) scrapePage(page int) ([]*ProjectCandidate, bool, string, error) {
+func (s *Scraper) scrapePage(page int) (candidates []*ProjectCandidate, hasNext bool, html string, cardsSeen int, err error) {
 	c := newCollector()
-
-	var candidates []*ProjectCandidate
-	var html string
-	hasNext := false
 	var scrapeErr error
 
 	c.OnResponse(func(r *colly.Response) {
@@ -113,6 +109,7 @@ func (s *Scraper) scrapePage(page int) ([]*ProjectCandidate, bool, string, error
 	})
 
 	c.OnHTML(".c-card-job", func(e *colly.HTMLElement) {
+		cardsSeen++
 		candidate := s.parseJobCard(e)
 		if candidate != nil {
 			candidates = append(candidates, candidate)
@@ -128,14 +125,15 @@ func (s *Scraper) scrapePage(page int) ([]*ProjectCandidate, bool, string, error
 	})
 
 	url := fmt.Sprintf("%s&page=%d", searchURL, page)
-	if err := c.Visit(url); err != nil {
-		return nil, false, html, err
+	if visitErr := c.Visit(url); visitErr != nil {
+		err = visitErr
+		return
 	}
 	if scrapeErr != nil {
-		return nil, false, html, scrapeErr
+		err = scrapeErr
+		return
 	}
-
-	return candidates, hasNext, html, nil
+	return
 }
 
 // parseJobCard extracts a ProjectCandidate from a single c-card-job div.

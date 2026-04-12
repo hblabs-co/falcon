@@ -169,8 +169,8 @@ func (r *Runner) collectCandidates(ctx context.Context) ([]*ProjectCandidate, ma
 	if empty := platformkit.AsEmptyListing(err); empty != nil {
 		r.logger.Errorf("listing page %d returned no candidates — possible markup drift", empty.Page)
 		if r.err != nil {
-			name, priority := platformkit.ClassifyError(err)
-			_ = r.err(ctx, name, err.Error(), priority, empty.HTML, nil)
+			name, priority, opts := platformkit.ClassifyError(err)
+			_ = r.err(ctx, name, err.Error(), priority, empty.HTML, nil, opts...)
 		}
 		// Treat the empty listing as "nothing to do this cycle" so the poll
 		// loop continues. The categorical error stays in the DB until resolved.
@@ -203,10 +203,10 @@ func (r *Runner) process(ctx context.Context, c *ProjectCandidate, existing any)
 			return
 		}
 		// Everything else: classify and record for the retry worker.
-		name, priority := platformkit.ClassifyError(err)
+		name, priority, opts := platformkit.ClassifyError(err)
 		log.Warnf("inspect failed (%s): %v — recording for retry", name, err)
 		if r.err != nil {
-			_ = r.err(ctx, name, err.Error(), priority, scraper.HTML, c)
+			_ = r.err(ctx, name, err.Error(), priority, scraper.HTML, c, opts...)
 		}
 		return
 	}
@@ -216,7 +216,7 @@ func (r *Runner) process(ctx context.Context, c *ProjectCandidate, existing any)
 	// markup drift before it silently corrupts the dataset.
 	if result.Project.ReferenceID == "" && r.warn != nil {
 		message := "reference id not found on detail page — markup may have changed"
-		_ = r.warn(ctx, platformkit.WarnReferenceIDNotFound, message, "high", result.HTML, c)
+		_ = r.warn(ctx, platformkit.WarnReferenceIDNotFound, message, "high", result.HTML, c, platformkit.Categorical())
 	}
 
 	if r.save != nil {

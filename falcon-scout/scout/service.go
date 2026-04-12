@@ -381,8 +381,9 @@ func sameInstant(a, b time.Time) bool {
 // team. The published event carries only the warning id + kind — signal loads
 // the full record from MongoDB and never sees the HTML through NATS.
 func newWarnFn(platform string) platformkit.WarnFn {
-	return func(ctx context.Context, name, message, priority, html string, candidate any) error {
-		warnID := system.RecordWarning(ctx, models.ServiceWarning{
+	return func(ctx context.Context, name, message, priority, html string, candidate any, opts ...platformkit.CallOption) error {
+		o := platformkit.ResolveOptions(opts)
+		doc := models.ServiceWarning{
 			ServiceName: constants.ServiceScout,
 			WarningName: name,
 			Message:     message,
@@ -390,7 +391,14 @@ func newWarnFn(platform string) platformkit.WarnFn {
 			Platform:    platform,
 			HTML:        html,
 			Candidate:   candidate,
-		})
+		}
+
+		var warnID string
+		if o.Categorical {
+			warnID = system.RecordCategoricalWarning(ctx, doc)
+		} else {
+			warnID = system.RecordWarning(ctx, doc)
+		}
 
 		if warnID != "" && shouldEscalateToAdmins(priority) {
 			evt := models.AdminAlertEvent{
@@ -418,8 +426,9 @@ func newWarnFn(platform string) platformkit.WarnFn {
 // error ID — signal loads the full record from MongoDB. There is no dedup
 // here yet, so high/critical events MUST be rare for this to be sustainable.
 func newErrFn(platform string) platformkit.ErrFn {
-	return func(ctx context.Context, name, message, priority, html string, candidate any) error {
-		errID := system.RecordError(ctx, models.ServiceError{
+	return func(ctx context.Context, name, message, priority, html string, candidate any, opts ...platformkit.CallOption) error {
+		o := platformkit.ResolveOptions(opts)
+		doc := models.ServiceError{
 			ServiceName: constants.ServiceScout,
 			ErrorName:   name,
 			Error:       message,
@@ -427,7 +436,14 @@ func newErrFn(platform string) platformkit.ErrFn {
 			Platform:    platform,
 			HTML:        html,
 			Candidate:   candidate,
-		})
+		}
+
+		var errID string
+		if o.Categorical {
+			errID = system.RecordCategoricalError(ctx, doc)
+		} else {
+			errID = system.RecordError(ctx, doc)
+		}
 
 		if errID != "" && shouldEscalateToAdmins(priority) {
 			evt := models.AdminAlertEvent{
