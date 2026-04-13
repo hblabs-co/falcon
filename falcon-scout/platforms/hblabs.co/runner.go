@@ -41,6 +41,10 @@ func (r *Runner) SetErrHandler(fn platformkit.ErrFn) {
 func (r *Runner) SetBatchConfig(cfg platformkit.BatchConfig) {
 }
 
+func (r *Runner) Retry(_ context.Context, _ any, _ any) error {
+	return nil
+}
+
 func (r *Runner) Init(ctx context.Context) error {
 	return nil
 }

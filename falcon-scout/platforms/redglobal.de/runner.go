@@ -2,6 +2,8 @@ package redglobalde
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"maps"
 	"time"
 
@@ -184,7 +186,6 @@ func (r *Runner) collectCandidates(ctx context.Context) ([]*ProjectCandidate, ma
 // ###############################################################################################
 
 func (r *Runner) process(ctx context.Context, c *ProjectCandidate, existing any) {
-	// process logic
 	r.logger.Infof("processing %s", c.PlatformID)
 
 	log := r.logger.WithFields(map[string]any{
@@ -193,6 +194,18 @@ func (r *Runner) process(ctx context.Context, c *ProjectCandidate, existing any)
 		"total":       c.Total,
 		"url":         c.URL,
 	})
+
+	// // TEST_RETRY: simulate a 500 on the first item so the retry worker can
+	// // pick it up. Fires once per process start — the env var is cleared after
+	// // the first simulated failure. Remove the var to disable.
+	// if os.Getenv("TEST_RETRY") != "" {
+	// 	os.Unsetenv("TEST_RETRY")
+	// 	log.Warnf("TEST_RETRY: simulating server error for %s", c.PlatformID)
+	// 	if r.err != nil {
+	// 		_ = r.err(ctx, platformkit.ErrNameScrapeServerError, "TEST_RETRY simulated 500", "medium", "", c)
+	// 	}
+	// 	return
+	// }
 
 	scraper := NewCandidateScraper(c)
 	result, err := scraper.Inspect()
@@ -224,4 +237,46 @@ func (r *Runner) process(ctx context.Context, c *ProjectCandidate, existing any)
 			log.Errorf("save failed: %v", err)
 		}
 	}
+}
+
+// Retry re-processes a previously failed candidate from the errors collection.
+// The retry worker in the service calls this after loading the error record and
+// (optionally) the existing PersistedProject for the same platform_id.
+func (r *Runner) Retry(ctx context.Context, rawCandidate any, existing any) error {
+	c, err := decodeCandidate(rawCandidate)
+	if err != nil {
+		return fmt.Errorf("decode candidate: %w", err)
+	}
+
+	r.logger.Infof("[retry] re-inspecting %s (%s)", c.PlatformID, c.URL)
+
+	scraper := NewCandidateScraper(c)
+	result, err := scraper.Inspect()
+	if err != nil {
+		return err // retry worker handles retry_count / escalation
+	}
+
+	if r.save != nil {
+		if err := r.save(ctx, result.Project, existing); err != nil {
+			return fmt.Errorf("save after retry: %w", err)
+		}
+	}
+
+	r.logger.Infof("[retry] successfully re-scraped %s", c.PlatformID)
+	return nil
+}
+
+// decodeCandidate converts the opaque candidate field stored in a ServiceError
+// back into a typed ProjectCandidate. The field is stored as any → BSON maps
+// it to bson.M on read → json round-trip converts it to our struct.
+func decodeCandidate(raw any) (*ProjectCandidate, error) {
+	data, err := json.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+	var c ProjectCandidate
+	if err := json.Unmarshal(data, &c); err != nil {
+		return nil, err
+	}
+	return &c, nil
 }

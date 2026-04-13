@@ -27,6 +27,7 @@ func (m *mockPlatform) SetFilterHandler(_ platformkit.FilterFn)  {}
 func (m *mockPlatform) SetWarnHandler(_ platformkit.WarnFn)      {}
 func (m *mockPlatform) SetErrHandler(_ platformkit.ErrFn)        {}
 func (m *mockPlatform) SetBatchConfig(_ platformkit.BatchConfig) {}
+func (m *mockPlatform) Retry(_ context.Context, _ any, _ any) error { return nil }
 func (m *mockPlatform) Init(_ context.Context) error {
 	m.initCalled = true
 	return m.initErr

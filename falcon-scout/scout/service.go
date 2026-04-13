@@ -37,6 +37,14 @@ type Platform interface {
 	SetErrHandler(fn platformkit.ErrFn)
 	SetBatchConfig(cfg platformkit.BatchConfig)
 
+	// Retry re-processes a previously failed candidate. The candidate is the
+	// opaque value originally passed to ErrFn when the failure was recorded;
+	// the runner decodes it to its platform-specific type, re-inspects, and
+	// saves via the injected SaveFn. existing is the current PersistedProject
+	// (may be nil if the project was never saved). Returns the underlying
+	// inspect error if it fails again (the retry worker manages retry_count).
+	Retry(ctx context.Context, candidate any, existing any) error
+
 	// BaseURL returns the platform's root URL (e.g. "https://www.redglobal.de")
 	// used by the service to fetch well-known metadata files (robots.txt, etc.).
 	// Return "" to opt out of metadata refresh.
@@ -158,6 +166,8 @@ func (s *Service) Run() {
 		if p.BaseURL() != "" && p.CompanyID() != "" {
 			go s.runMetadataLoop(ctx, p, logger)
 		}
+
+		startRetryWorkers(ctx, p, logger)
 
 		logger.Info("platform registered and running")
 	}
@@ -328,12 +338,19 @@ func newFilterFn(_ *logrus.Entry) platformkit.FilterFn {
 			return nil, nil, err
 		}
 
-		// Check which candidates have pending scrape errors.
+		// Check which candidates have pending scrape errors. The platform_id
+		// may live at top-level OR inside the candidate sub-document depending
+		// on how the error was recorded — match either.
 		var pendingErrors []models.ServiceError
 		if err := system.GetStorage().GetMany(ctx, constants.MongoErrorsCollection, bson.M{
 			"service_name": constants.ServiceScout,
 			"platform":     platform,
-			"platform_id":  bson.M{"$in": platformIDs},
+			"resolved":     bson.M{"$ne": true},
+			"$or": bson.A{
+				bson.M{"platform_id": bson.M{"$in": platformIDs}},
+				bson.M{"candidate.platform_id": bson.M{"$in": platformIDs}},
+			},
+			// probably not usable
 			// "error_name": bson.M{"$in": []string{
 			// 	constants.ErrNameScrapeInspectFailed,
 			// 	constants.ErrNameScrapeServerError,
@@ -345,9 +362,9 @@ func newFilterFn(_ *logrus.Entry) platformkit.FilterFn {
 		skip := make(map[string]bool, len(existing)+len(pendingErrors))
 		existingByID := make(map[string]any, len(existing))
 
-		// Skip candidates with pending errors.
+		// Skip candidates with pending errors — the retry worker handles them.
 		for _, e := range pendingErrors {
-			skip[e.PlatformID] = true
+			skip[extractPlatformID(e)] = true
 		}
 
 		// Skip candidates that exist and haven't changed.
@@ -401,13 +418,7 @@ func newWarnFn(platform string) platformkit.WarnFn {
 		}
 
 		if warnID != "" && shouldEscalateToAdmins(priority) {
-			evt := models.AdminAlertEvent{
-				Kind: models.AdminAlertKindWarning,
-				ID:   warnID,
-			}
-			if pubErr := system.Publish(ctx, constants.SubjectSignalAdminAlert, evt); pubErr != nil {
-				logrus.Errorf("publish admin alert for warning %s: %v", warnID, pubErr)
-			}
+			publishAdminAlert(ctx, models.AdminAlertKindWarning, warnID)
 		}
 
 		return nil
@@ -446,13 +457,7 @@ func newErrFn(platform string) platformkit.ErrFn {
 		}
 
 		if errID != "" && shouldEscalateToAdmins(priority) {
-			evt := models.AdminAlertEvent{
-				Kind: models.AdminAlertKindError,
-				ID:   errID,
-			}
-			if pubErr := system.Publish(ctx, constants.SubjectSignalAdminAlert, evt); pubErr != nil {
-				logrus.Errorf("publish admin alert for error %s: %v", errID, pubErr)
-			}
+			publishAdminAlert(ctx, models.AdminAlertKindError, errID)
 		}
 
 		return nil
