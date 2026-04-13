@@ -2,7 +2,6 @@ package redglobalde
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"maps"
 	"time"
@@ -264,19 +263,4 @@ func (r *Runner) Retry(ctx context.Context, rawCandidate any, existing any) erro
 
 	r.logger.Infof("[retry] successfully re-scraped %s", c.PlatformID)
 	return nil
-}
-
-// decodeCandidate converts the opaque candidate field stored in a ServiceError
-// back into a typed ProjectCandidate. The field is stored as any → BSON maps
-// it to bson.M on read → json round-trip converts it to our struct.
-func decodeCandidate(raw any) (*ProjectCandidate, error) {
-	data, err := json.Marshal(raw)
-	if err != nil {
-		return nil, err
-	}
-	var c ProjectCandidate
-	if err := json.Unmarshal(data, &c); err != nil {
-		return nil, err
-	}
-	return &c, nil
 }

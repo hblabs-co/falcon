@@ -1,6 +1,7 @@
 package redglobalde
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 )
@@ -23,6 +24,21 @@ type ProjectCandidate struct {
 
 func (c *ProjectCandidate) SetTotal(n int)   { c.Total = n }
 func (c *ProjectCandidate) SetCurrent(n int) { c.Current = n }
+
+// decodeCandidate converts the opaque candidate field stored in a ServiceError
+// back into a typed ProjectCandidate. The field is stored as any → BSON maps
+// it to bson.M on read → json round-trip converts it to our struct.
+func decodeCandidate(raw any) (*ProjectCandidate, error) {
+	data, err := json.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+	var c ProjectCandidate
+	if err := json.Unmarshal(data, &c); err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
 
 // // UpdateFromResult enriches the candidate with data from the detail page.
 // func (c *ProjectCandidate) UpdateFromResult(result interfaces.Project) {
@@ -106,9 +122,9 @@ func (p *Project) IsRemote() bool {
 func (p *Project) IsANUE() bool { return false }
 
 func (p *Project) GetRateRaw() string      { return p.Rate }
-func (p *Project) GetRateAmount() *float64  { return nil }
-func (p *Project) GetRateCurrency() string  { return "" }
-func (p *Project) GetRateType() string      { return "" }
+func (p *Project) GetRateAmount() *float64 { return nil }
+func (p *Project) GetRateCurrency() string { return "" }
+func (p *Project) GetRateType() string     { return "" }
 
 func (p *Project) GetContactName() string    { return "" }
 func (p *Project) GetContactCompany() string { return "" }
