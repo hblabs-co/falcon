@@ -67,6 +67,7 @@ func (p *Project) GetCompany() string           { return "SOLCOM" }
 func (p *Project) GetDescription() string       { return p.Description }
 func (p *Project) GetStartDate() string         { return p.StartDate }
 func (p *Project) GetEndDate() string           { return "" }
+func (p *Project) GetDuration() string          { return p.Duration }
 func (p *Project) GetLocation() string          { return p.Location }
 func (p *Project) GetSkills() []string          { return nil }
 func (p *Project) GetRequiredSkills() []string   { return nil }

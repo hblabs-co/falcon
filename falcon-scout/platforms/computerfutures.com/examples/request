@@ -1,0 +1,15 @@
+curl --location 'https://api.websites.sthree.com/api/services/v2/app/Search/Search' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: Abp.Localization.CultureName=en' \
+--data '{   "keywords":"",
+    "type":["Freelance"],
+    "industry":"",
+    "city":"",
+    "country":["Deutschland","Schweiz","Österreich"],
+    "remoteWorking":false,
+    "resultFrom":0,
+    "resultPage":0,
+    "resultSize":10,
+    "language":"de-de",
+    "brandCode":"CF"
+    }'

@@ -1,5 +1,7 @@
 module hblabs.co/falcon/scout/platforms/computerfuturescom
 
+replace hblabs.co/falcon/modules/platformkit => ../../../modules/platformkit
+
 go 1.26.1
 
-replace hblabs.co/falcon/scout/platformkit => ../../platformkit
+require hblabs.co/falcon/modules/platformkit v0.0.0-00010101000000-000000000000

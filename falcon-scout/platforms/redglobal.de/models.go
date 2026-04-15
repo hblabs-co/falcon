@@ -107,6 +107,7 @@ func (p *Project) GetCompany() string     { return p.Company }
 func (p *Project) GetDescription() string { return p.Description }
 func (p *Project) GetStartDate() string   { return p.DatePosted }
 func (p *Project) GetEndDate() string     { return p.EndDate }
+func (p *Project) GetDuration() string    { return "" }
 
 func (p *Project) GetLocation() string {
 	return p.Location

@@ -105,6 +105,12 @@ type FilterFn func(
 	updatedAt map[string]time.Time,
 ) (skip map[string]bool, existing map[string]any, err error)
 
+// FalconUserAgent is the User-Agent string used by non-colly HTTP clients
+// (RSS feeds, JSON APIs, metadata fetchers) that don't rotate UAs. Platforms
+// using colly with extensions.RandomUserAgent do NOT use this — they get a
+// random browser UA per request instead.
+const FalconUserAgent = "Mozilla/5.0 (compatible; FalconBot/1.0)"
+
 func ResolveConsumerName(source string) string {
 	consumer := fmt.Sprintf("scout-%s", strings.ReplaceAll(source, ".", "-"))
 	return consumer

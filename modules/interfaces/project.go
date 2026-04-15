@@ -15,6 +15,7 @@ type Project interface {
 	GetDescription() string
 	GetStartDate() string
 	GetEndDate() string
+	GetDuration() string
 	GetLocation() string
 
 	GetSkills() []string

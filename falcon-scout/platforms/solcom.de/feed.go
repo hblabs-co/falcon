@@ -35,7 +35,7 @@ func fetchFeed(ctx context.Context) ([]rssItem, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; FalconBot/1.0; +rss-reader)")
+	req.Header.Set("User-Agent", platformkit.FalconUserAgent)
 
 	resp, err := feedClient.Do(req)
 	if err != nil {

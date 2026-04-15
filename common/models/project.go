@@ -51,9 +51,10 @@ type PersistedProject struct {
 	Title             string            `json:"title"               bson:"title"`
 	Company           string            `json:"company"             bson:"company"`
 	Description       string            `json:"description"         bson:"description"`
-	StartDate         string            `json:"start_date,omitempty" bson:"start_date,omitempty"`
-	EndDate           string            `json:"end_date,omitempty"   bson:"end_date,omitempty"`
-	Location          string            `json:"location,omitempty"   bson:"location,omitempty"`
+	StartDate         string            `json:"start_date,omitempty"  bson:"start_date,omitempty"`
+	EndDate           string            `json:"end_date,omitempty"    bson:"end_date,omitempty"`
+	Duration          string            `json:"duration,omitempty"    bson:"duration,omitempty"`
+	Location          string            `json:"location,omitempty"    bson:"location,omitempty"`
 	Skills            []string          `json:"skills,omitempty"         bson:"skills,omitempty"`
 	RequiredSkills    []string          `json:"required_skills,omitempty" bson:"required_skills,omitempty"`
 	Rate              *PersistedRate    `json:"rate,omitempty"      bson:"rate,omitempty"`
@@ -78,6 +79,7 @@ func (p *PersistedProject) GetCompany() string          { return p.Company }
 func (p *PersistedProject) GetDescription() string      { return p.Description }
 func (p *PersistedProject) GetStartDate() string        { return p.StartDate }
 func (p *PersistedProject) GetEndDate() string          { return p.EndDate }
+func (p *PersistedProject) GetDuration() string         { return p.Duration }
 func (p *PersistedProject) GetLocation() string         { return p.Location }
 func (p *PersistedProject) GetSkills() []string         { return p.Skills }
 func (p *PersistedProject) GetRequiredSkills() []string { return p.RequiredSkills }
@@ -193,6 +195,7 @@ func (p *PersistedProject) applySource(src interfaces.Project) {
 	p.Description = src.GetDescription()
 	p.StartDate = src.GetStartDate()
 	p.EndDate = src.GetEndDate()
+	p.Duration = src.GetDuration()
 	p.Location = src.GetLocation()
 	p.Skills = src.GetSkills()
 	p.RequiredSkills = src.GetRequiredSkills()

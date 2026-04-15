@@ -2,6 +2,7 @@ package main
 
 import (
 	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/scout/platforms/computerfuturescom"
 	"hblabs.co/falcon/scout/platforms/contractorde"
 	"hblabs.co/falcon/scout/platforms/hblabsco"
 	"hblabs.co/falcon/scout/platforms/redglobalde"
@@ -23,7 +24,7 @@ func main() {
 	service.
 		// RegisterPlatform(actcongmbhde.New()).
 		// RegisterPlatform(akkodiscom.New()).
-		// RegisterPlatform(computerfuturescom.New()).
+		RegisterPlatform(computerfuturescom.New()).
 		RegisterPlatform(contractorde.New()).
 		// RegisterPlatform(freelancede.New()).
 		// RegisterPlatform(gecogroupcom.New()).

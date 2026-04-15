@@ -18,16 +18,20 @@ import (
 //
 // Both scrapePage and Inspect use this so listing and detail requests share the
 // same anti-bot posture and rate budget.
+var collectorCfg = platformkit.DefaultCollectorConfig(
+	[]string{hostWWW, hostBare}, hostGlob,
+)
+
 func newCollector() *colly.Collector {
 	c := colly.NewCollector(
-		colly.AllowedDomains(hostWWW, hostBare),
+		colly.AllowedDomains(collectorCfg.AllowedDomains...),
 	)
 	extensions.RandomUserAgent(c)
 	_ = c.Limit(&colly.LimitRule{
-		DomainGlob:  hostGlob,
-		Parallelism: 1,
-		Delay:       2 * time.Second,
-		RandomDelay: 2 * time.Second,
+		DomainGlob:  collectorCfg.DomainGlob,
+		Parallelism: collectorCfg.Parallelism,
+		Delay:       collectorCfg.Delay,
+		RandomDelay: collectorCfg.RandomDelay,
 	})
 	return c
 }
