@@ -154,7 +154,7 @@ func resultToCandidate(r apiResult) *ProjectCandidate {
 		City:             r.City,
 		Country:          r.Country,
 		Remote:           r.RemoteAvailable,
-		StartDate:        r.StartDate,
+		StartDate:        parseStartDate(r.StartDate),
 		EndDate:          parseAPIDate(r.ExpiryDate),
 		Duration:         orDefault(r.Duration, ""),
 		Industry:         r.Industry,
@@ -182,6 +182,43 @@ func parseAPIDate(s string) string {
 		return s[:10] // "2026-04-14"
 	}
 	return s
+}
+
+// parseStartDate normalizes the computerfutures startDate into one of
+// a closed set of canonical shapes:
+//
+//   - ""            — empty or unparseable
+//   - "ab sofort"   — ASAP / immediate variants (see platformkit.IsImmediateStart)
+//   - "YYYY-MM-DD"  — calendar date
+//
+// Supported inputs observed in the real feed:
+//
+//	""              → ""
+//	"ASAP"          → "ab sofort"
+//	"01.03.2026"    → "2026-03-01"   (DD.MM.YYYY)
+//	"01/06/2026"    → "2026-06-01"   (DD/MM/YYYY)
+//	"15/03/2026"    → "2026-03-15"
+//	"1.7.2026"      → "2026-07-01"   (D.M.YYYY lenient)
+//	"1/7/2026"      → "2026-07-01"   (D/M/YYYY lenient)
+//
+// Calendar-invalid dates ("31.04.2026", "31/04/2026") are recovered by
+// clamping the day to the last valid day of the month. Keyword
+// normalization and European-date parsing are shared across platforms
+// via platformkit.
+func parseStartDate(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return ""
+	}
+	if platformkit.IsImmediateStart(s) {
+		return platformkit.CanonicalImmediateStart
+	}
+	for _, sep := range []string{".", "/"} {
+		if out, ok := platformkit.ParseEuropeanDate(s, sep); ok {
+			return out
+		}
+	}
+	return ""
 }
 
 // parseSkills splits a comma-or-semicolon-separated skills string into a

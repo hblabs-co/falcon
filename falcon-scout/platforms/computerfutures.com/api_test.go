@@ -139,3 +139,62 @@ func absDuration(d time.Duration) time.Duration {
 	}
 	return d
 }
+
+func TestParseStartDate(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		// --- empty / nothing to parse ---
+		{name: "empty", input: "", want: ""},
+		{name: "whitespace only", input: "   ", want: ""},
+
+		// --- ASAP / immediate variants → canonical "ab sofort" ---
+		{name: "ASAP uppercase", input: "ASAP", want: "ab sofort"},
+		{name: "asap lowercase", input: "asap", want: "ab sofort"},
+		{name: "Asap mixed case", input: "Asap", want: "ab sofort"},
+		{name: "immediate", input: "immediate", want: "ab sofort"},
+		{name: "sofort", input: "sofort", want: "ab sofort"},
+		{name: "ab sofort (already canonical)", input: "ab sofort", want: "ab sofort"},
+		{name: "Ab Sofort capitalized", input: "Ab Sofort", want: "ab sofort"},
+		{name: "nächstmöglich", input: "nächstmöglich", want: "ab sofort"},
+		{name: "trimmed ASAP", input: "  ASAP  ", want: "ab sofort"},
+
+		// --- DD.MM.YYYY (dot) → canonical YYYY-MM-DD ---
+		{name: "dot DD.MM.YYYY", input: "01.03.2026", want: "2026-03-01"},
+		{name: "dot D.M.YYYY lenient", input: "1.7.2026", want: "2026-07-01"},
+		{name: "dot D.MM.YYYY lenient", input: "1.07.2026", want: "2026-07-01"},
+		{name: "dot DD.M.YYYY lenient", input: "01.7.2026", want: "2026-07-01"},
+		{name: "dot trimmed", input: "  01.03.2026  ", want: "2026-03-01"},
+
+		// --- DD/MM/YYYY (slash) → canonical YYYY-MM-DD ---
+		{name: "slash DD/MM/YYYY", input: "15/03/2026", want: "2026-03-15"},
+		{name: "slash 01/06/2026", input: "01/06/2026", want: "2026-06-01"},
+		{name: "slash D/M/YYYY lenient", input: "1/7/2026", want: "2026-07-01"},
+		{name: "slash trimmed", input: "  15/03/2026  ", want: "2026-03-15"},
+
+		// --- calendar-invalid day → clamp to last day of month ---
+		{name: "dot april 31 → clamped to 30", input: "31.04.2026", want: "2026-04-30"},
+		{name: "slash april 31 → clamped to 30", input: "31/04/2026", want: "2026-04-30"},
+		{name: "slash feb 30 non-leap → clamped to 28", input: "30/02/2025", want: "2025-02-28"},
+		{name: "dot feb 30 leap → clamped to 29", input: "30.02.2024", want: "2024-02-29"},
+		{name: "slash nov 31 → clamped to 30", input: "31/11/2026", want: "2026-11-30"},
+
+		// --- unrecoverable garbage → drop ---
+		{name: "month 13", input: "15.13.2026", want: ""},
+		{name: "day 00", input: "00.01.2026", want: ""},
+		{name: "month 00", input: "15.00.2026", want: ""},
+		{name: "garbage text", input: "next month", want: ""},
+		{name: "partial year only", input: "2026", want: ""},
+		{name: "random number", input: "12345", want: ""},
+		{name: "ISO date (wrong format for this platform)", input: "2026-03-01", want: ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := parseStartDate(tt.input); got != tt.want {
+				t.Errorf("parseStartDate(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}

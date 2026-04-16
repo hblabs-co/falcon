@@ -578,32 +578,8 @@ func getContactField(c *apiContact, field string) string {
 	return ""
 }
 
-// canonicalImmediateStart is the single value we store whenever the API
-// expresses an "as soon as possible" start. The source uses many variants
-// ("asap", "Ab Sofort", "nächstmöglich", etc.) — we collapse them here so
-// downstream (DB, UI, LLM) only ever sees one.
-const canonicalImmediateStart = "ab sofort"
-
-// immediateStartKeywords lists every lowercased/trimmed variant we treat
-// as "immediate start". Match is exact equality after ToLower + TrimSpace.
-var immediateStartKeywords = map[string]struct{}{
-	"asap":                         {},
-	"sofort":                       {},
-	"ab sofort":                    {},
-	"nächstmöglich":                {},
-	"nächstmöglichst":              {},
-	"naechstmoeglich":              {},
-	"naechstmoeglichst":            {},
-	"nächstmöglicher zeitpunkt":    {},
-	"zum nächstmöglichen zeitpunkt": {},
-}
-
-// isImmediateStart returns true if s (after trim + lowercase) is one of
-// the known "start immediately" keywords used by somi.de.
-func isImmediateStart(s string) bool {
-	_, ok := immediateStartKeywords[strings.ToLower(strings.TrimSpace(s))]
-	return ok
-}
+// Immediate-start keyword normalization is shared across platforms via
+// platformkit.CanonicalImmediateStart / platformkit.IsImmediateStart.
 
 // datePrefixes are leading German phrases we strip before parsing so the
 // inner value can be recognized. Order matters: longer prefixes first.
@@ -664,28 +640,19 @@ func parseSomiDate(s string) string {
 		return ""
 	}
 	// Immediate-start keywords → canonical "ab sofort".
-	if isImmediateStart(s) {
-		return canonicalImmediateStart
+	if platformkit.IsImmediateStart(s) {
+		return platformkit.CanonicalImmediateStart
 	}
 	// Strip German date-wrapping prefixes ("Ab dem …", "ab …").
 	if stripped, ok := stripDatePrefix(s); ok {
 		s = stripped
 		// Defensive: a keyword could surface after stripping.
-		if isImmediateStart(s) {
-			return canonicalImmediateStart
+		if platformkit.IsImmediateStart(s) {
+			return platformkit.CanonicalImmediateStart
 		}
 	}
-	// DD.MM.YYYY (strict, zero-padded).
-	if t, err := time.Parse("02.01.2006", s); err == nil {
-		return t.Format("2006-01-02")
-	}
-	// D.M.YYYY / D.MM.YYYY / DD.M.YYYY (lenient single-digit padding).
-	if t, err := time.Parse("2.1.2006", s); err == nil {
-		return t.Format("2006-01-02")
-	}
-	// Looks like a dotted date but calendar-invalid (e.g. "31.04.2027",
-	// "32.02.2024") → clamp the day to the last valid day of the month.
-	if out, ok := recoverCalendarInvalidDate(s); ok {
+	// European dotted date (strict, lenient, day-clamp recovery).
+	if out, ok := platformkit.ParseEuropeanDate(s, "."); ok {
 		return out
 	}
 	// ISO timestamp → canonical date.
@@ -700,15 +667,15 @@ func parseSomiDate(s string) string {
 	}
 	// YYYY-MM (ISO month) → last day of month.
 	if t, err := time.Parse("2006-01", s); err == nil {
-		return lastDayOfMonth(t).Format("2006-01-02")
+		return platformkit.LastDayOfMonth(t).Format("2006-01-02")
 	}
 	// MM/YYYY or M/YYYY → last day of month.
 	if t, err := time.Parse("1/2006", s); err == nil {
-		return lastDayOfMonth(t).Format("2006-01-02")
+		return platformkit.LastDayOfMonth(t).Format("2006-01-02")
 	}
 	// MM.YYYY or M.YYYY → last day of month.
 	if t, err := time.Parse("1.2006", s); err == nil {
-		return lastDayOfMonth(t).Format("2006-01-02")
+		return platformkit.LastDayOfMonth(t).Format("2006-01-02")
 	}
 	// YYYY → last day of year (Dec 31).
 	if len(s) == 4 {
@@ -722,13 +689,6 @@ func parseSomiDate(s string) string {
 	}
 	// Durations, vague German text, anything else → drop.
 	return ""
-}
-
-// lastDayOfMonth returns the final day of t's calendar month. Implemented
-// via "day 0 of next month", which Go's time package normalizes to the
-// last day of the current month (handles 28/29/30/31 automatically).
-func lastDayOfMonth(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, time.UTC)
 }
 
 // nowFunc returns the current time. Package-level variable so tests can
@@ -808,57 +768,11 @@ func parseMonthPhrase(s string) (string, bool) {
 
 	var t time.Time
 	if day == 0 {
-		t = lastDayOfMonth(time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC))
+		t = platformkit.LastDayOfMonth(time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC))
 	} else {
 		t = time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 	}
 	return t.Format("2006-01-02"), true
-}
-
-// recoverCalendarInvalidDate attempts to recover a dotted date string
-// (D*.M*.YYYY) whose day exceeds the month's length, by clamping the
-// day to the last valid day of that month. This handles common upstream
-// typos/off-by-ones like:
-//
-//   - "31.04.2027"  → "2027-04-30" (April has 30 days)
-//   - "32.02.2024"  → "2024-02-29" (leap year)
-//   - "32.02.2025"  → "2025-02-28" (non-leap)
-//   - "29.02.2025"  → "2025-02-28" (Feb 29 in non-leap)
-//   - "31.11.2026"  → "2026-11-30" (November has 30 days)
-//
-// Returns ("", false) when:
-//   - the shape isn't dotted D.M.YYYY (no recovery attempted)
-//   - the month is outside 1..12 (we can't guess which month was meant)
-//   - the day is <1 (no natural "previous day" recovery)
-//   - the year is unreasonable (<1900 or >9999)
-//
-// Called after the strict and lenient parses have already failed, so
-// valid dates never reach this path.
-func recoverCalendarInvalidDate(s string) (string, bool) {
-	parts := strings.Split(s, ".")
-	if len(parts) != 3 {
-		return "", false
-	}
-	day, errD := strconv.Atoi(parts[0])
-	month, errM := strconv.Atoi(parts[1])
-	year, errY := strconv.Atoi(parts[2])
-	if errD != nil || errM != nil || errY != nil {
-		return "", false
-	}
-	if month < 1 || month > 12 {
-		return "", false
-	}
-	if year < 1900 || year > 9999 {
-		return "", false
-	}
-	if day < 1 {
-		return "", false
-	}
-	last := lastDayOfMonth(time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)).Day()
-	if day > last {
-		day = last
-	}
-	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).Format("2006-01-02"), true
 }
 
 // unescapeTitle handles the HTML entities somi.de encodes in job titles,
