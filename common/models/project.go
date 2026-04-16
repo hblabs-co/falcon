@@ -29,6 +29,7 @@ type PersistedContact struct {
 	Email   string `json:"email,omitempty"   bson:"email,omitempty"`
 	Phone   string `json:"phone,omitempty"   bson:"phone,omitempty"`
 	Address string `json:"address,omitempty" bson:"address,omitempty"`
+	Image   string `json:"image,omitempty"   bson:"image,omitempty"`
 }
 
 func (c *PersistedContact) GetCompany() string { return c.Company }
@@ -148,6 +149,12 @@ func (p *PersistedProject) GetContactAddress() string {
 	}
 	return p.Contact.Address
 }
+func (p *PersistedProject) GetContactImage() string {
+	if p.Contact == nil {
+		return ""
+	}
+	return p.Contact.Image
+}
 
 func (p *PersistedProject) GetEvent() *ProjectEvent {
 	event := &ProjectEvent{
@@ -219,6 +226,7 @@ func (p *PersistedProject) applySource(src interfaces.Project) {
 			Email:   src.GetContactEmail(),
 			Phone:   src.GetContactPhone(),
 			Address: src.GetContactAddress(),
+			Image:   src.GetContactImage(),
 		}
 	}
 }

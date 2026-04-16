@@ -1,0 +1,1 @@
+curl --location 'https://somi.de/api/jobs?requestart=%5B1%5D&page=0'

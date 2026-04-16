@@ -91,3 +91,4 @@ func (p *Project) GetContactEmail() string   { return p.ContactEmail }
 func (p *Project) GetContactPhone() string   { return p.ContactPhone }
 func (p *Project) GetContactRole() string    { return "" }
 func (p *Project) GetContactAddress() string { return "" }
+func (p *Project) GetContactImage() string   { return "" }

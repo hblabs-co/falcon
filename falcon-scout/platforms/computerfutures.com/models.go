@@ -119,6 +119,7 @@ func (p *Project) GetContactEmail() string   { return p.ContactEmail }
 func (p *Project) GetContactPhone() string   { return "" }
 func (p *Project) GetContactRole() string    { return "" }
 func (p *Project) GetContactAddress() string { return "" }
+func (p *Project) GetContactImage() string   { return "" }
 
 // candidateToProject builds a Project from a candidate — no detail page needed.
 func candidateToProject(c *ProjectCandidate) *Project {

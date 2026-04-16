@@ -15,6 +15,7 @@ use (
 	./platforms/peak-one.de
 	./platforms/redglobal.de
 	./platforms/solcom.de
+	./platforms/somi.de
 	./platforms/waynice.de
 	./platforms/wematch.de
 	./scout

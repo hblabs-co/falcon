@@ -7,6 +7,7 @@ import (
 	"hblabs.co/falcon/scout/platforms/hblabsco"
 	"hblabs.co/falcon/scout/platforms/redglobalde"
 	"hblabs.co/falcon/scout/platforms/solcomde"
+	"hblabs.co/falcon/scout/platforms/somide"
 )
 
 func main() {
@@ -35,6 +36,7 @@ func main() {
 		// RegisterPlatform(mamgruppecom.New()).
 		// RegisterPlatform(peakonede.New()).
 		RegisterPlatform(solcomde.New()).
+		RegisterPlatform(somide.New()).
 		// RegisterPlatform(waynicede.New()).
 		// RegisterPlatform(wematchde.New()).
 		RegisterPlatform(redglobalde.New()).

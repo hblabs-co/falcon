@@ -1,0 +1,1262 @@
+{
+    "data": {
+        "jobs": [
+            {
+                "id": "2971198",
+                "url": "/jobs/2971198-fullstack-entwickler-java-amp-angular-mwd-frankfurt-am-main",
+                "title": "Fullstack-Entwickler Java &amp; Angular (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Projekt & Tätigkeiten",
+                        "content": "<p>Für ein innovatives FinTech-Unternehmen mit Sitz in Frankfurt, das digitale Investmentlösungen für Privatkunden und Banken entwickelt, suchen wir ab April&nbsp;erfahrene&nbsp;Full-Stack-Entwickler (m/w/d) zur Unterstützung der&nbsp;Entwicklungsteams.</p><p>&nbsp;</p><p>Das Projekt bietet eine langfristige Perspektive bis mindestens Anfang 2027 &ndash; eine Verlängerung ist sehr wahrscheinlich.</p><p>&nbsp;</p><p>Scope:</p><ul type=\"disc\">\t<li>Weiterentwicklung und Wartung einer modernen Web-Plattform im Investmentumfeld</li>\t<li>Arbeiten in einem agilen Full-Stack-Team mit Fokus auf Clean Code, Qualität und Automatisierung</li>\t<li>Umsetzung neuer Features mit Angular im Frontend sowie Java EE und WildFly im Backend</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li>Mindestens<strong> 5 Jahre Berufserfahrung in der Full-Stack-Entwicklung</strong></li>\t<li>Sehr gute Kenntnisse in<strong> Java EE, JPA/Hibernate, PostgreSQL, Maven, WildFly, ActiveMQ Artemis, TestContainer</strong></li>\t<li>Sicher im Frontend mit Angular, NGXS, RxJS, CSS/SCSS, Storybook, ES-Lint, Jest</li>\t<li>Erfahrung mit modernen DevOps- und Tooling-Stacks: Git/GitLab, Jenkins, SonarQube, Keycloak, IntelliJ, VSCode, Playwright, Liquibase, Python/Rundeck, etcd</li></ul><p data-end=\"1786\" data-start=\"1725\">Nice to have:</p><ul>\t<li data-end=\"1896\" data-start=\"1803\">\t<p data-end=\"1896\" data-start=\"1805\">Atruvia-Erfahrung</p>\t</li>\t<li data-end=\"1978\" data-start=\"1897\">\t<p data-end=\"1978\" data-start=\"1899\">Erfahrung in komplexen Systemlandschaften mit mehreren parallelen Scrum-Teams (SAFe)</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Frankfurt am Main",
+                            "region": "Hessen",
+                            "country": "DE",
+                            "lat": 50.1109221,
+                            "lng": 8.6821267
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "01.05.2026",
+                    "end": "31.04.2027",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Lisa Nauen",
+                    "position": "Recruiting Manager",
+                    "phone": "+49211950756-59",
+                    "email": "lisa.nauen@somi.de",
+                    "image": "https://public.somi.de/img/signatur/ln.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "hybrid",
+                    "description": "Kontinuierliche Vorortpräsenz (wöchentlich), 40% On Site"
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-14T16:06:38",
+                "company": "experts",
+                "payment": {
+                    "onsite": {
+                        "from": "65",
+                        "to": 0,
+                        "type": "hourly",
+                        "description": null
+                    },
+                    "remote": {
+                        "from": "60",
+                        "to": 0,
+                        "type": "hourly",
+                        "description": null
+                    }
+                }
+            },
+            {
+                "id": "2970675",
+                "url": "/jobs/2970675-qualitatsingenieur-elektrotechnik-maschinenbau-mwd-bulle-martigny-villeneuve-vd",
+                "title": "Qualitätsingenieur Elektrotechnik / Maschinenbau (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"489\" data-start=\"424\">\t<p data-end=\"489\" data-start=\"426\">Prüfung und Bewertung von Produktions- und Kabelverlegeplänen</p>\t</li>\t<li data-end=\"555\" data-start=\"490\">\t<p data-end=\"555\" data-start=\"492\">Durchführung von Detailprüfungen nach technischen Zeichnungen</p>\t</li>\t<li data-end=\"628\" data-start=\"556\">\t<p data-end=\"628\" data-start=\"558\">Dokumentation und Nachverfolgung von Abweichungen&nbsp;</p>\t</li>\t<li data-end=\"704\" data-start=\"629\">\t<p data-end=\"704\" data-start=\"631\">Mitarbeit im Qualitätsprozess gemäß deutschem Qualitätsmanagementsystem</p>\t</li>\t<li data-end=\"775\" data-start=\"705\">\t<p data-end=\"775\" data-start=\"707\">Enge Abstimmung mit Engineering, Produktion und Projektbeteiligten</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li>Studium der Elektrotechnik oder Kommunikationstechnik</li>\t<li data-end=\"1082\" data-start=\"999\">\t<p data-end=\"1082\" data-start=\"1001\">Qualitätsverständnis und Erfahrung im Umgang mit Prüf- und Fertigungsunterlagen</p>\t</li>\t<li data-end=\"1122\" data-start=\"1083\">\t<p data-end=\"1122\" data-start=\"1085\">Vertrautheit mit Kabelverlegeplänen</p>\t</li>\t<li data-end=\"1196\" data-start=\"1123\">\t<p data-end=\"1196\" data-start=\"1125\">Erfahrung mit Detailprüfungen nach Zeichnung und Abweichungsmeldungen</p>\t</li>\t<li data-end=\"1247\" data-start=\"1197\">\t<p data-end=\"1247\" data-start=\"1199\">Deutsch <strong data-end=\"1214\" data-start=\"1207\">und</strong> Englisch zwingend erforderlich</p>\t</li>\t<li data-end=\"1247\" data-start=\"1197\">\t<p data-end=\"1247\" data-start=\"1199\">NICE TO HAVE: Kenntnisse mit ETCS</p>\t</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Bulle",
+                            "region": "Freiburg",
+                            "country": "CH",
+                            "lat": 46.6154512,
+                            "lng": 7.057726799999999
+                        },
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Martigny",
+                            "region": "Wallis",
+                            "country": "CH",
+                            "lat": 46.1049798,
+                            "lng": 7.075533399999999
+                        },
+                        {
+                            "street": "",
+                            "zip": "1844",
+                            "city": "Villeneuve (VD)",
+                            "region": "Vaud",
+                            "country": "CH",
+                            "lat": 46.396608,
+                            "lng": 6.928768400000001
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "18.05.2026",
+                    "end": "01.2027",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Chiara Braatz",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075644",
+                    "email": "chiara.braatz@somi.de",
+                    "image": "https://public.somi.de/img/signatur/cb.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "onsite",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-14T15:46:40",
+                "company": "experts",
+                "payment": {
+                    "onsite": {
+                        "from": "60",
+                        "to": "65",
+                        "type": "hourly",
+                        "description": null
+                    },
+                    "remote": {
+                        "from": 0,
+                        "to": 0,
+                        "type": null,
+                        "description": null
+                    }
+                }
+            },
+            {
+                "id": "2971196",
+                "url": "/jobs/2971196-it-business-analyst-mwd-frankfurt-am-main",
+                "title": "IT Business Analyst (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Stellenanzeige",
+                        "content": "<p data-end=\"601\" data-start=\"244\">Für ein renommiertes Fintech-Unternehmen mit mehreren parallel arbeitenden Scrum-Teams suchen wir einen erfahrenen Business Analysten / Business Developer (m/w/d). Der Einsatz erfolgt in einem agilen, internationalen IT-Umfeld mit hoher technischer Durchdringung und enger Zusammenarbeit zwischen Fachbereichen, IT und Nearshore-Teams.</p><p data-end=\"800\" data-start=\"603\">Der Schwerpunkt der Rolle liegt im professionellen Anforderungsmanagement sowie in der strukturierten Übersetzung fachlicher Anforderungen in umsetzbare Spezifikationen für agile Entwicklungsteams.</p>"
+                    },
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"911\" data-start=\"817\">\t<p data-end=\"911\" data-start=\"819\">Aufnahme, Analyse, Validierung und Strukturierung fachlicher und technischer Anforderungen</p>\t</li>\t<li data-end=\"991\" data-start=\"912\">\t<p data-end=\"991\" data-start=\"914\">Enge Zusammenarbeit mit Product Ownern, Scrum-Teams und Nearshore-Einheiten</p>\t</li>\t<li data-end=\"1091\" data-start=\"992\">\t<p data-end=\"1091\" data-start=\"994\">Übersetzung von Business-Anforderungen in klare, umsetzbare User Stories und fachliche Konzepte</p>\t</li>\t<li data-end=\"1162\" data-start=\"1092\">\t<p data-end=\"1162\" data-start=\"1094\">Moderation von Workshops und Abstimmungen mit Fachbereichen und IT</p>\t</li>\t<li data-end=\"1254\" data-start=\"1163\">\t<p data-end=\"1254\" data-start=\"1165\">Sicherstellung einer einheitlichen Anforderungsqualität über mehrere Scrum-Teams hinweg</p>\t</li>\t<li data-end=\"1339\" data-start=\"1255\">\t<p data-end=\"1339\" data-start=\"1257\">Unterstützung bei fachlichen Abstimmungen im regulierten Finance-/Fintech-Umfeld</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<p data-end=\"1440\" data-start=\"1368\">Must have:</p><ul>\t<li data-end=\"1440\" data-start=\"1366\">\t<p data-end=\"1440\" data-start=\"1368\">Mehrjährige Erfahrung im Anforderungsmanagement in agilen IT-Projekten</p>\t</li>\t<li data-end=\"1517\" data-start=\"1441\">\t<p data-end=\"1517\" data-start=\"1443\">Mindestens <strong>6 Jahre Erfahrung in Scrum- oder vergleichbaren agilen Setups</strong></p>\t</li>\t<li data-end=\"1592\" data-start=\"1518\">\t<p data-end=\"1592\" data-start=\"1520\">Fundierte<strong> Kenntnisse im Finance-Umfeld</strong>, idealerweise<strong> Bank oder Fintech</strong></p>\t</li>\t<li data-end=\"1649\" data-start=\"1593\">\t<p data-end=\"1649\" data-start=\"1595\">Sehr gute Kommunikations- und Moderationsfähigkeiten</p>\t</li>\t<li data-end=\"1722\" data-start=\"1650\">\t<p data-end=\"1722\" data-start=\"1652\">Sehr gute Deutsch- und Englischkenntnisse (Nearshore-Zusammenarbeit)</p>\t</li>\t<li data-end=\"1786\" data-start=\"1723\">\t<p data-end=\"1786\" data-start=\"1725\">Ausgeprägte Teamorientierung und strukturierte Arbeitsweise</p>\t</li></ul><p data-end=\"1786\" data-start=\"1725\">&nbsp;</p><p data-end=\"1786\" data-start=\"1725\">Nice to have:</p><ul>\t<li data-end=\"1896\" data-start=\"1803\">\t<p data-end=\"1896\" data-start=\"1805\">Hohe technische Affinität, idealerweise Erfahrung als Entwickler oder IT-naher Consultant</p>\t</li>\t<li data-end=\"1978\" data-start=\"1897\">\t<p data-end=\"1978\" data-start=\"1899\">Erfahrung in komplexen Systemlandschaften mit mehreren parallelen Scrum-Teams (SAFe)</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Bitte beachte die folgenden Anforderungen",
+                        "content": "<ul>\t<li>Start: Mai 2026</li>\t<li>Laufzeit: zunächst 1 Jahr,&nbsp;mit hoher Wahrscheinlichkeit auf Verlängerung</li>\t<li>Einsatzort: 60% Remote &amp; 2 Tage/Woche vor Ort in Frankfurt am Main</li>\t<li>Auslastung: Vollzeit</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Frankfurt am Main",
+                            "region": "Hessen",
+                            "country": "DE",
+                            "lat": 50.1109221,
+                            "lng": 8.6821267
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "ab sofort",
+                    "end": "31.04.2027",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Lisa Nauen",
+                    "position": "Recruiting Manager",
+                    "phone": "+49211950756-59",
+                    "email": "lisa.nauen@somi.de",
+                    "image": "https://public.somi.de/img/signatur/ln.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "hybrid",
+                    "description": "Kontinuierliche Vorortpräsenz (wöchentlich), 40% On Site"
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-14T15:32:35",
+                "company": "experts"
+            },
+            {
+                "id": "2971188",
+                "url": "/jobs/2971188-junior-macos-support-engineer-onsite-hannover-mwd-hannover",
+                "title": "Junior MacOS Support Engineer – Onsite Hannover (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"127\" data-section-id=\"scr26o\" data-start=\"0\">Unterstützung bei der Einrichtung, Konfiguration und Bereitstellung von MacOS-Geräten (MacBook, iMac) im Unternehmensumfeld</li>\t<li data-end=\"269\" data-section-id=\"1lb52bv\" data-start=\"128\">First-Level- und Onsite-Support für MacOS-Anwender inkl. Analyse und Behebung typischer Apple-spezifischer Hardware- und Softwareprobleme</li>\t<li data-end=\"397\" data-section-id=\"1ha6hs0\" data-start=\"270\">Durchführung von Patch-Management und Testing von MacOS-Updates sowie Applikations-Updates in Test- und Produktivumgebungen</li>\t<li data-end=\"503\" data-is-last-node=\"\" data-section-id=\"14mezjh\" data-start=\"398\">Grundlegendes Troubleshooting im MacOS-/UNIX-Umfeld (z. B. Log-Analyse, Terminal-Befehle, Systemchecks)</li></ul><p>&nbsp;</p>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li>Die Person sollte im Apple Umfeld Erfahrungen mitbringen&nbsp;</li>\t<li>Berufserfahrung 1 Jahr +&nbsp;</li>\t<li>Erfahrungen mit&nbsp;Bereichen Mac, Genius, Apple Certified Engineer, UNIX.</li>\t<li>Kommunikativ&nbsp;</li></ul><p>&nbsp;</p>"
+                    },
+                    {
+                        "title": "Bitte beachte die folgenden Anforderungen",
+                        "content": "<ul>\t<li>Selbstständiges Arbeiten</li>\t<li>Teamfähigkeit</li>\t<li>Zuverlässigkeit</li>\t<li>Motivation/Leistungsbereitschaft</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul>\t<li>Deutsch: Verhandlungssicher</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "30",
+                            "city": "Hannover",
+                            "region": "Niedersachsen",
+                            "country": "DE",
+                            "lat": 52.3758916,
+                            "lng": 9.732010400000002
+                        }
+                    ],
+                    "description": "Kunde ist in der Nähe ZAG Arena (Spielarena)"
+                },
+                "date": {
+                    "start": "Ab Sofort",
+                    "end": "31.12.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Eleni Triantafyllidou",
+                    "position": "Ressourcenmanager",
+                    "phone": " +49211950756-62",
+                    "email": "eleni.triantafyllidou@somi.de",
+                    "image": "https://public.somi.de/img/signatur/et.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-14T09:12:49",
+                "company": "experts"
+            },
+            {
+                "id": "2971182",
+                "url": "/jobs/2971182-senior-softwareentwickler-bitmarck-21cng-mwd-90-95-remote-essen",
+                "title": "Senior Softwareentwickler BITMARCK 21c|ng (m/w/d) - 90-95% Remote",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"280\" data-section-id=\"9id4tp\" data-start=\"179\">Entwicklung, Wartung und Optimierung von Backend- und Systemkomponenten im BITMARCK 21c|ng-Umfeld</li>\t<li data-end=\"369\" data-section-id=\"w2gxse\" data-start=\"281\">Umsetzung und Weiterentwicklung komplexer Fachlogiken (u. a. EEL, Krankengeld, AUFM)</li>\t<li data-end=\"465\" data-section-id=\"15fan5d\" data-start=\"370\">Analyse und Optimierung bestehender Systeme sowie Fehlerbehebung in produktiven Anwendungen</li>\t<li data-end=\"544\" data-section-id=\"11z62rm\" data-start=\"466\">Konzeption und Entwicklung von Datenbankstrukturen und -skripten (IBM Db2)</li>\t<li data-end=\"635\" data-section-id=\"20olu3\" data-start=\"545\">Entwicklung und Pflege von REST-APIs sowie Mitarbeit an modernen Softwarearchitekturen</li>\t<li data-end=\"711\" data-section-id=\"jwdhq7\" data-start=\"636\">Erstellung technischer Spezifikationen und Abstimmung mit Fachbereichen</li>\t<li data-end=\"799\" data-section-id=\"yofrx5\" data-start=\"712\">Mitarbeit in agilen Projekten (Scrum) inklusive Qualitätssicherung und Code Reviews</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"915\" data-section-id=\"12e3n8m\" data-start=\"815\">Mehrjährige Erfahrung in der Softwareentwicklung im GKV-Umfeld, insbesondere mit BITMARCK 21c|ng</li>\t<li data-end=\"1000\" data-section-id=\"1tk84xc\" data-start=\"916\">Fundierte Kenntnisse in Java sowie gängigen Frameworks (z. B. Spring Boot, J2EE)</li>\t<li data-end=\"1071\" data-section-id=\"t9mhwy\" data-start=\"1001\">Erfahrung mit Datenbanken (insb. Db2) und modernen Webtechnologien</li>\t<li data-end=\"1147\" data-section-id=\"q3vcnm\" data-start=\"1072\">Kenntnisse in Softwarearchitektur, Analyse, Testing und CI/CD-Prozessen</li>\t<li data-end=\"1231\" data-section-id=\"7bz4xw\" data-start=\"1148\">Sicherer Umgang mit gängigen Tools (z. B. Git, Jira, Jenkins, IntelliJ/Eclipse)</li>\t<li data-end=\"1312\" data-section-id=\"1qzrd78\" data-start=\"1232\">Erfahrung mit agilen Methoden (Scrum) und strukturiertem Entwicklungsprozess</li>\t<li data-end=\"1379\" data-section-id=\"2jvzru\" data-start=\"1313\">Sehr gute Deutschkenntnisse (C2) sowie gute Englischkenntnisse</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "45",
+                            "city": "Essen",
+                            "region": "Nordrhein-Westfalen",
+                            "country": "DE",
+                            "lat": 51.4575573,
+                            "lng": 7.0224632
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "nächstmöglich",
+                    "end": "31.12.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Marie-Claire Mas",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075627",
+                    "email": "marie-claire.mas@somi.de",
+                    "image": "https://public.somi.de/img/signatur/mcm.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": "162 Projekttage"
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": "90-95% Remote-Anteil"
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-13T14:27:47",
+                "company": "experts"
+            },
+            {
+                "id": "2971174",
+                "url": "/jobs/2971174-senior-network-engineer-mwd",
+                "title": "Senior Network Engineer (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<h4 data-end=\"389\" data-start=\"367\">Deine Aufgaben</h4><ul data-end=\"657\" data-start=\"390\">\t<li data-end=\"479\" data-section-id=\"7we5kq\" data-start=\"390\">Planung, Implementierung und Optimierung moderner <strong data-end=\"479\" data-start=\"442\">Data-Center-Netzwerkarchitekturen</strong></li>\t<li data-end=\"537\" data-section-id=\"1cmk5yp\" data-start=\"480\">Design und Betrieb von <strong data-end=\"537\" data-start=\"505\">Overlay-/Underlay-Netzwerken</strong></li>\t<li data-end=\"596\" data-section-id=\"1bh7skc\" data-start=\"538\">Analyse und Troubleshooting komplexer Netzwerkumgebungen</li>\t<li data-end=\"657\" data-section-id=\"zfb3qg\" data-start=\"597\">Zusammenarbeit mit Architektur-, Security- und Cloud-Teams</li></ul><h4 data-end=\"679\" data-start=\"659\">&nbsp;</h4>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<h4 data-end=\"679\" data-start=\"659\">Dein Profil</h4><ul data-end=\"1214\" data-start=\"680\">\t<li data-end=\"741\" data-section-id=\"7j2lq8\" data-start=\"680\">Mehrjährige Erfahrung im Bereich <strong data-end=\"741\" data-start=\"715\">Data Center Networking</strong></li>\t<li data-end=\"1054\" data-section-id=\"1il1tgq\" data-start=\"742\">Sehr gute Kenntnisse in folgenden Technologien:\t<ul data-end=\"1054\" data-start=\"794\">\t\t<li data-end=\"845\" data-section-id=\"earzvf\" data-start=\"794\"><strong data-end=\"806\" data-start=\"796\">MACsec</strong> (Absicherung von Layer-2-Verbindungen)</li>\t\t<li data-end=\"911\" data-section-id=\"1rjdyzg\" data-start=\"848\"><strong data-end=\"880\" data-start=\"850\">VPC (Virtual Port Channel)</strong> &ndash; insbesondere im Cisco-Umfeld</li>\t\t<li data-end=\"965\" data-section-id=\"s8ez3e\" data-start=\"914\"><strong data-end=\"923\" data-start=\"916\">BGP</strong> (Routing, Policy Design, Troubleshooting)</li>\t\t<li data-end=\"997\" data-section-id=\"2zos60\" data-start=\"968\"><strong data-end=\"978\" data-start=\"970\">OSPF</strong> (Design &amp; Betrieb)</li>\t\t<li data-end=\"1054\" data-section-id=\"g7t9s9\" data-start=\"1000\"><strong data-end=\"1011\" data-start=\"1002\">VXLAN</strong> (idealerweise auf Cisco Nexus Plattformen)</li>\t</ul>\t</li>\t<li data-end=\"1129\" data-section-id=\"1ctsye2\" data-start=\"1055\">Erfahrung mit <strong data-end=\"1096\" data-start=\"1071\">Cisco Nexus Switching</strong> und modernen Fabric-Technologien</li>\t<li data-end=\"1214\" data-section-id=\"1y3gxl7\" data-start=\"1130\">Sicher im Umgang mit komplexen Netzwerk-Topologien und Hochverfügbarkeitskonzepten</li></ul>"
+                    },
+                    {
+                        "title": "Bitte beachte die folgenden Anforderungen",
+                        "content": "<ul>\t<li>Selbstständiges Arbeiten</li>\t<li>Zuverlässigkeit</li>\t<li>Motivation/Leistungsbereitschaft</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul>\t<li>Deutsch: Verhandlungssicher</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [],
+                    "description": null
+                },
+                "date": {
+                    "start": "asap",
+                    "end": "29.05.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Dominik Lehmhecker",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075692",
+                    "email": "dominik.lehmhecker@somi.de",
+                    "image": "https://public.somi.de/img/signatur/dl.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": "Montag bis Sonntag \nWochenende + Abendeinsätze auch vorhanden \n40 Stunden sind Fix sollte aber mehr werden"
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-13T09:43:26",
+                "company": "experts"
+            },
+            {
+                "id": "2971172",
+                "url": "/jobs/2971172-it-supporter-mwd-berlin",
+                "title": "IT Supporter (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li>\t<p>Sicherstellung der telefonischen Erreichbarkeit am Standort als zentrale Anlaufstelle für technische und organisatorische Anliegen</p>\t</li>\t<li>\t<p>Hotlinesupport und Störungsannahme</p>\t</li>\t<li>\t<p>Einarbeitung in allgemeines sowie standortspezifisches Know-how im technischen und medizinischen Umfeld</p>\t</li>\t<li>\t<p>Erfassung, Bearbeitung und Nachverfolgung von Incidents und Service Requests im Ticketsystem</p>\t</li>\t<li>\t<p>Strukturierte Dokumentation von Themen, Problemen, Ansprechpartnern sowie Lösungsansätzen (technisch und organisatorisch)</p>\t</li>\t<li>\t<p>Erstellung und Pflege von Knowledge-Artikeln zur nachhaltigen Sicherstellung des Wissenstransfers</p>\t</li>\t<li>\t<p>Vorbereitung und Abstimmung von transitionsrelevanten Anforderungen in Richtung Kunde und Zentrale Unterstützung der Übergabephase durch systematische Wissensaufnahme und -weitergabe</p>\t</li></ul><p>&nbsp;</p><p>Einsatz von zwei FTE pro Standort im Rahmen eines zeitlich befristeten Dienstleistungsprojekts (3&ndash;6 Monate)</p>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li>\t<p>Abgeschlossene IT-Ausbildung oder vergleichbare Erfahrung im IT-Support</p>\t</li>\t<li>\t<p>Erfahrung mit Ticketsystemen und Service Desk Prozessen</p>\t</li>\t<li>\t<p>Grundlegendes IT-Infrastrukturverständnis sowie Lernbereitschaft im medizinischen Umfeld</p>\t</li>\t<li>\t<p>Erfahrung in strukturierter Dokumentation und Erstellung von Knowledge-Artikeln</p>\t</li>\t<li>\t<p>Kommunikationsstärke und sicheres Auftreten am Telefon</p>\t</li>\t<li>\t<p>Strukturierte, eigenständige und lösungsorientierte Arbeitsweise</p>\t</li>\t<li>\t<p>Teamfähigkeit und Abstimmung mit Kunden sowie internen Schnittstellen</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Berlin",
+                            "region": "Berlin",
+                            "country": "DE",
+                            "lat": 52.52000659999999,
+                            "lng": 13.404954
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "Ab Sofort",
+                    "end": "3-6 Monate",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Dennis Handke",
+                    "position": "Delivery Manager",
+                    "phone": "+496947891890-33",
+                    "email": "dennis.handke@somi.de",
+                    "image": "https://public.somi.de/img/signatur/dh.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "onsite",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-10T13:47:20",
+                "company": "experts"
+            },
+            {
+                "id": "2971158",
+                "url": "/jobs/2971158-penetration-tester-it-security-consultant-mwd-remote-remote-kassel",
+                "title": "Penetration Tester / IT-Security Consultant (m/w/d) Remote",
+                "descriptions": [
+                    {
+                        "title": "Projektbeschreibung",
+                        "content": "<p>Zur Unterstützung unserer IT-Sicherheitsmaßnahmen suchen wir einen erfahrenen Penetration Tester (m/w/d). Der Schwerpunkt liegt auf der Planung, Durchführung und Auswertung von Penetrationstests sowie der Erstellung prüffähiger Berichte. Sie arbeiten eng mit internen Ansprechpartnern sowie externen Sicherheitsdienstleistern zusammen.</p>"
+                    },
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-list=\"bullet\">Planung, Abstimmung und Durchführung von Penetrationstests (intern &amp; extern)</li>\t<li data-list=\"bullet\">Durchführung regelmäßiger Sicherheitstests (monatlich für Portal/App, jährlich für Infrastruktur)</li>\t<li data-list=\"bullet\">Mitarbeit bei Purple-Teaming-Aktivitäten gemeinsam mit SOC-Dienstleistern</li>\t<li data-list=\"bullet\">Identifikation, Analyse und Verifikation von Schwachstellen</li>\t<li data-list=\"bullet\">Anwendung von Exploitation- und Post-Exploitation-Techniken</li>\t<li data-list=\"bullet\">Durchführung von Web-, Infrastruktur- und Quellcodeanalysen</li>\t<li data-list=\"bullet\">Risikobewertung identifizierter Schwachstellen</li>\t<li data-list=\"bullet\">Erstellung strukturierter, prüffähiger Abschlussberichte mit Handlungsempfehlungen</li>\t<li data-list=\"bullet\">Unterstützung bei Angriffssimulationen und Red-Team-Übungen</li>\t<li data-list=\"bullet\">Analyse komplexer Sicherheitsarchitektur</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-list=\"bullet\">Zertifizierungen wie OSCP, CEH oder vergleichbar</li>\t<li data-list=\"bullet\">Fundierte Erfahrung im Bereich Penetration Testing</li>\t<li data-list=\"bullet\">Kenntnisse in OWASP und MITRE ATT&amp;CK</li>\t<li data-list=\"bullet\">Erfahrung in Web-, Infrastruktur- und Codeanalysen</li>\t<li data-list=\"bullet\">Fähigkeit zur selbstständigen Durchführung strukturierter Pentests</li>\t<li data-list=\"bullet\">Erfahrung in der Erstellung technischer und Management-Reports</li>\t<li data-list=\"bullet\">Kenntnisse in Exploitation- und Post-Exploitation-Techniken</li>\t<li data-list=\"bullet\">Analytisches Denkvermögen und strukturierte Arbeitsweise</li>\t<li data-list=\"bullet\">Idealerweise Erfahrung in Red Teaming und Angriffssimulationen</li>\t<li data-list=\"bullet\">Fähigkeit zur Bewertung von Risiken und Ableitung von Maßnahmen</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        },
+                        {
+                            "street": "",
+                            "zip": "34",
+                            "city": "Kassel",
+                            "region": "Hessen",
+                            "country": "DE",
+                            "lat": 51.3118828,
+                            "lng": 9.4915751
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "30.04.2026",
+                    "end": "31.12.2027",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Sinan Uçan",
+                    "position": "Recruiting Manager",
+                    "phone": "+496947891890-84",
+                    "email": "sinan.ucan@somi.de",
+                    "image": "https://public.somi.de/img/signatur/so.jpg"
+                },
+                "workSchedule": {
+                    "type": "partTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-08T15:59:11",
+                "company": "experts",
+                "payment": {
+                    "onsite": {
+                        "from": "70",
+                        "to": "75",
+                        "type": "hourly",
+                        "description": null
+                    },
+                    "remote": {
+                        "from": 0,
+                        "to": 0,
+                        "type": null,
+                        "description": null
+                    }
+                }
+            },
+            {
+                "id": "2971136",
+                "url": "/jobs/2971136-sap-fs-cd-modulberater-s4hana-migration-consultant-mwd-remote-hamburg",
+                "title": "SAP FS-CD Modulberater & S/4HANA Migration Consultant  (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"222\" data-start=\"150\">Fachliche Konzeption und Erweiterung des SAP-Moduls FS-CD in S/4HANA</li>\t<li data-end=\"299\" data-start=\"223\">Pflege und Weiterentwicklung bestehender kundeneigener Implementierungen</li>\t<li data-end=\"380\" data-start=\"300\">Durchführung der Migration des SAP-Moduls FS-CD auf S/4HANA und in die Cloud</li>\t<li data-end=\"477\" data-start=\"381\">Unterstützung bei der Fehlersuche und Beseitigung von Störungen bei implementierten Lösungen</li>\t<li data-end=\"573\" data-start=\"478\">Durchführung von Schulungen für IT-Fachbereiche und Erstellung entsprechender Dokumentation</li>\t<li data-end=\"689\" data-start=\"574\">Teilnahme an Teambesprechungen zu Anforderungsmanagement, Konzeption und Implementierung von Modulerweiterungen</li>\t<li data-end=\"801\" data-start=\"690\">Abstimmung mit projektverantwortlichen Mitarbeitern und zeitnahe Berichterstattung über Arbeitsfortschritte</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"913\" data-start=\"829\">Fundierte Kenntnisse im SAP-Modul FS-CD und dessen Prozessabbildungen in S/4HANA</li>\t<li data-end=\"957\" data-start=\"914\">Erfahrung mit SPRO-Customizing im FS-CD</li>\t<li data-end=\"1031\" data-start=\"958\">Kenntnisse der Buchungsstoffüberleitung vom FS-CD in das FI-Hauptbuch</li>\t<li data-end=\"1072\" data-start=\"1032\">SAP Fiori Anwendererfahrung im FS-CD</li>\t<li data-end=\"1118\" data-start=\"1073\">Erfahrung mit S/4HANA Migrationsprojekten</li>\t<li data-end=\"1179\" data-start=\"1119\">Fähigkeit zur eigenständigen, projektorientierten Arbeit</li>\t<li data-end=\"1241\" data-start=\"1180\">Erfahrung in Schulung und Dokumentation von Fachprozessen</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        },
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Hamburg",
+                            "region": "Hamburg",
+                            "country": "DE",
+                            "lat": 53.5488282,
+                            "lng": 9.987170299999999
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "ab sofort",
+                    "end": "31.12.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Paula Walc",
+                    "position": "Senior Recruiting Manager",
+                    "phone": "+4921195075623",
+                    "email": "paula.walc@somi.de",
+                    "image": "https://public.somi.de/img/signatur/pw.jpg"
+                },
+                "workSchedule": {
+                    "type": "partTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-08T09:24:04",
+                "company": "experts"
+            },
+            {
+                "id": "2971142",
+                "url": "/jobs/2971142-sap-user-administrator-mwd-sandbox-systeme-bankenumfeld-remote-teilzeitprojekt-remote",
+                "title": "SAP User Administrator (m/w/d) (Sandbox-Systeme) – Bankenumfeld | Remote | Teilzeitprojekt",
+                "descriptions": [
+                    {
+                        "title": null,
+                        "content": "<p>Unterstützung für ein langfristiges Projekt im Bankenumfeld gesucht. Im Rahmen verschiedener IT-Projekte werden regelmäßig SAP-Sandbox- und Testsysteme genutzt. Hierfür wird ein Berater bzw. Administrator benötigt, der die Verwaltung von Benutzerkonten und Zugriffsrechten unterstützt.</p>"
+                    },
+                    {
+                        "title": "Aufgaben",
+                        "content": "<ul>\n\t<li data-end=\"980\" data-section-id=\"7jr3jn\" data-start=\"914\">Verwaltung von Benutzerkonten in SAP-Sandbox- und Testsystemen</li>\n\t<li data-end=\"1043\" data-section-id=\"uhuc4m\" data-start=\"981\">Anlage, Änderung und Entfernung von Benutzerberechtigungen</li>\n\t<li data-end=\"1118\" data-section-id=\"ocdfer\" data-start=\"1044\">Unterstützung bei der Bereitstellung von Testzugängen für Projektteams</li>\n\t<li data-end=\"1168\" data-section-id=\"2n0iy4\" data-start=\"1119\">Pflege und Dokumentation von Benutzerzugängen</li>\n\t<li data-end=\"1242\" data-section-id=\"6kn66r\" data-start=\"1169\">Zusammenarbeit mit Projektteams bei Test- und Entwicklungsaktivitäten</li>\n</ul>"
+                    },
+                    {
+                        "title": "Anforderungen",
+                        "content": "<ul>\n\t<li data-end=\"1306\" data-section-id=\"gw18wo\" data-start=\"1260\">Grundkenntnisse im Umgang mit SAP-Systemen</li>\n\t<li data-end=\"1397\" data-section-id=\"1owcuiq\" data-start=\"1307\">Erste Erfahrung im Bereich SAP User Administration oder Benutzerverwaltung von Vorteil</li>\n\t<li data-end=\"1444\" data-section-id=\"119bju7\" data-start=\"1398\">Strukturierte und sorgfältige Arbeitsweise</li>\n\t<li data-end=\"1521\" data-section-id=\"ncf7m0\" data-start=\"1445\">Fähigkeit, wiederkehrende administrative Aufgaben zuverlässig umzusetzen</li>\n</ul>"
+                    },
+                    {
+                        "title": "Rahmenbedingungen",
+                        "content": "<ul>\n\t<li data-end=\"1566\" data-section-id=\"xeqz4a\" data-start=\"1543\">100% Remote möglich</li>\n\t<li data-end=\"1625\" data-section-id=\"1vcuwdc\" data-start=\"1567\">Flexible Projektstruktur mit wiederkehrenden Einsätzen</li>\n\t<li data-end=\"1682\" data-section-id=\"1wptthj\" data-start=\"1626\">Fachliche Einarbeitung erfolgt durch das Projektteam</li>\n</ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "01.06.2026",
+                    "end": "31.05.2029",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Uladlen / Vlad Burunou",
+                    "position": "Senior Recruiting Manager",
+                    "phone": "+496947891890-32",
+                    "email": "uladlen.burunou@somi.de",
+                    "image": "https://public.somi.de/img/signatur/ub.jpg"
+                },
+                "workSchedule": {
+                    "type": "partTime",
+                    "description": "Auslastung: ca. 20–60%"
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-07T15:54:08",
+                "company": "experts"
+            },
+            {
+                "id": "2971135",
+                "url": "/jobs/2971135-netzwerkadministrator-cisco-aci-amp-nexus-mwd-bewerbungsfrist-08042026-hamburg",
+                "title": "Netzwerkadministrator Cisco ACI &amp; Nexus (m/w/d) - Bewerbungsfrist 08.04.2026",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li>Unterstützung bei der Konfiguration von Cisco ACI-Systemen</li>\t<li>Konfiguration und Betrieb von Cisco Netzwerkkomponenten (inkl. Nexus)</li>\t<li>Mitarbeit im Tagesbetrieb u.a. an mehreren Standorten in Hamburg</li>\t<li>Durchführung von Vor-Ort-Einsätzen in Rechenzentren</li>\t<li>IP- und Namensvergabe (Zuweisung, Dokumentation, Rückbau)</li>\t<li>Analyse und Optimierung der Netzwerkarchitektur</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li>Mindestens 5 Jahre Berufserfahrung in einem vergleichbaren Aufgabenfeld</li>\t<li>Fundierte Kenntnisse in Netzwerkarchitektur Erfahrung mit Cisco Netzwerkkomponenten</li>\t<li>Erfahrung in der Konfiguration von Cisco ACI und Cisco Nexus</li>\t<li>Sehr gute Deutschkenntnisse in Wort und Schrift</li>\t<li>Bereitschaft zu Vor-Ort-Einsätzen</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Hamburg",
+                            "region": "Hamburg",
+                            "country": "DE",
+                            "lat": 53.5488282,
+                            "lng": 9.987170299999999
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "nächstmöglich",
+                    "end": "30.10.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Marie-Claire Mas",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075627",
+                    "email": "marie-claire.mas@somi.de",
+                    "image": "https://public.somi.de/img/signatur/mcm.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "hybrid",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-04-07T09:22:08",
+                "company": "experts"
+            },
+            {
+                "id": "2971110",
+                "url": "/jobs/2971110-it-onsite-supporter-mwd-hof",
+                "title": "IT Onsite Supporter (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"81\" data-start=\"18\">\t<p data-end=\"81\" data-start=\"20\">Onsite-Support im 1st- und 2nd-Level für Hard- und Software</p>\t</li>\t<li data-end=\"181\" data-start=\"82\">\t<p data-end=\"181\" data-start=\"84\">Installation, Konfiguration und Wartung von Clients, Notebooks, Druckern und mobilen Endgeräten</p>\t</li>\t<li data-end=\"234\" data-start=\"182\">\t<p data-end=\"234\" data-start=\"184\">Administration und Betreuung von Windows-Servern</p>\t</li>\t<li data-end=\"289\" data-start=\"235\">\t<p data-end=\"289\" data-start=\"237\">Benutzer- und Rechteverwaltung im Active Directory</p>\t</li>\t<li data-end=\"371\" data-start=\"290\">\t<p data-end=\"371\" data-start=\"292\">Betreuung und Überwachung der Netzwerk-Infrastruktur (Switches, Router, WLAN)</p>\t</li>\t<li data-end=\"438\" data-start=\"372\">\t<p data-end=\"438\" data-start=\"374\">Analyse und Behebung von Netzwerkstörungen (TCP/IP, DNS, DHCP)</p>\t</li>\t<li data-end=\"497\" data-start=\"439\">\t<p data-end=\"497\" data-start=\"441\">Unterstützung bei Serverwartungen, Backups und Updates</p>\t</li>\t<li data-end=\"564\" data-start=\"498\">\t<p data-end=\"564\" data-start=\"500\">Durchführung von Rollouts, Migrationen und Arbeitsplatzumzügen</p>\t</li>\t<li data-end=\"633\" data-start=\"565\">\t<p data-end=\"633\" data-start=\"567\">Dokumentation von IT-Prozessen und Supportfällen im Ticketsystem</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"760\" data-start=\"661\">\t<p data-end=\"760\" data-start=\"663\">Abgeschlossene IT-Ausbildung (z. B. Fachinformatiker Systemintegration) &ndash; zwingend erforderlich</p>\t</li>\t<li data-end=\"840\" data-start=\"761\">\t<p data-end=\"840\" data-start=\"763\">Mehrjährige Erfahrung im Onsite-Support sowie im Server- und Netzwerkumfeld</p>\t</li>\t<li data-end=\"912\" data-start=\"841\">\t<p data-end=\"912\" data-start=\"843\">Fundierte Kenntnisse in Windows-Client- und Windows-Server-Systemen</p>\t</li>\t<li data-end=\"993\" data-start=\"913\">\t<p data-end=\"993\" data-start=\"915\">Gute Kenntnisse in Netzwerktechnologien (Routing, Switching, VLAN, Firewall)</p>\t</li>\t<li data-end=\"1067\" data-start=\"994\">\t<p data-end=\"1067\" data-start=\"996\">Erfahrung im Umgang mit Active Directory und gängigen Backup-Lösungen</p>\t</li>\t<li data-end=\"1117\" data-start=\"1068\">\t<p data-end=\"1117\" data-start=\"1070\">Cisco-Zertifizierung (z. B. CCNA) von Vorteil</p>\t</li>\t<li data-end=\"1163\" data-start=\"1118\">\t<p data-end=\"1163\" data-start=\"1120\">Strukturierte, eigenständige Arbeitsweise</p>\t</li>\t<li data-end=\"1163\" data-start=\"1118\">\t<p data-end=\"1163\" data-start=\"1120\">Führerschein Klasse B von Vorteil</p>\t</li>\t<li data-end=\"1235\" data-is-last-node=\"\" data-start=\"1164\">\t<p data-end=\"1235\" data-is-last-node=\"\" data-start=\"1166\">Serviceorientiertes Auftreten und ausgeprägte Kommunikationsfähigkeit</p>\t</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "95",
+                            "city": "Hof",
+                            "region": "Bayern",
+                            "country": "DE",
+                            "lat": 50.3135391,
+                            "lng": 11.9127814
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "Ab Sofort",
+                    "end": "6 Monate + Verlängerung",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Mostafa Ben Ramdane",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075672",
+                    "email": "mostafa.ben-ramdane@somi.de",
+                    "image": "https://public.somi.de/img/signatur/mra.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "onsite",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-31T14:51:14",
+                "company": "experts"
+            },
+            {
+                "id": "2971108",
+                "url": "/jobs/2971108-service-operator-sap-mwd-90-95-remote-frankfurt-am-main-remote",
+                "title": "Service Operator SAP (m/w/d) - 90-95% Remote",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"240\" data-section-id=\"vex2c9\" data-start=\"117\">Du bist Teil eines 3-köpfigen Projektteams und übernimmst den <strong data-end=\"204\" data-start=\"181\">First Level Support</strong> für ein SAP-Instandhaltungssystem</li>\t<li data-end=\"384\" data-section-id=\"qjj8jp\" data-start=\"241\">Du bearbeitest Anfragen und Störungen über <strong data-end=\"317\" data-start=\"286\">Hotline und Gruppenpostfach</strong> und stellst eine strukturierte Weiterverarbeitung im Team sicher</li>\t<li data-end=\"538\" data-section-id=\"1bdh0dh\" data-start=\"386\">Du unterstützt Anwender und Kunden <strong data-end=\"449\" data-start=\"423\">fachlich und technisch</strong> im SAP S/4HANA-System sowie in Anwendungen auf der SAP BTP (z. B. Workzone, Mobile Apps)</li>\t<li data-end=\"667\" data-section-id=\"1zsyww\" data-start=\"540\">Du analysierst gemeldete Probleme, führst eine <strong data-end=\"609\" data-start=\"589\">Voranalyse durch</strong> und ermittelst Reproduktionsschritte zur Fehlerbehebung</li>\t<li data-end=\"945\" data-section-id=\"1nlqxds\" data-start=\"806\">Du erstellst <strong data-end=\"845\" data-start=\"821\">Reports und Analysen</strong>, um Trends zu erkennen und die Qualität von Anwendungen und Systemen kontinuierlich zu verbessern</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"449\" data-section-id=\"7i6n74\" data-start=\"213\">Du verfügst über fundierte Kenntnisse in mindestens einem SAP-Modul (PM, MM oder HCM) aus Endanwender- oder Key-User-Sicht und verstehst typische Prozessketten wie Wartungsplanung oder Disposition (MRS)</li>\t<li data-end=\"603\" data-section-id=\"19kfs1o\" data-start=\"451\">Du verfügst über nachweisbare Erfahrung in der Implementierung von SAP-Berechtigungen, idealerweise mit Tools wie XAMS</li>\t<li data-end=\"755\" data-section-id=\"1dctgyi\" data-start=\"605\">Du verfügst über sehr gute Erfahrung im SAP First Level Support in produktiven Umgebungen (Hotline und Mail-Support)</li>\t<li data-end=\"866\" data-section-id=\"16u5yv4\" data-start=\"757\">Du verfügst über Erfahrung im qualifizierten Incident- und Request-Handling</li></ul><p>Wünschenswert:</p><ul>\t<li data-end=\"866\" data-section-id=\"16u5yv4\" data-start=\"757\">Ein gutes Systemverständnis zur Diagnose und Reproduktion von Fehlern im SAP S/4-System</li>\t<li data-end=\"1169\" data-section-id=\"s67ouy\" data-start=\"1035\">Ein&nbsp;sicherer&nbsp;Umgang mit Ticketing- und ITSM-Systemen (z. B. ServiceNow oder JIRA)</li>\t<li data-end=\"1319\" data-section-id=\"4ghx0n\" data-start=\"1171\">Erfahrung im Betrieb, in der fachlichen Konfiguration sowie in der Fehlerdiagnose von SAP S/4HANA</li>\t<li data-end=\"1428\" data-section-id=\"2lmid3\" data-start=\"1321\">Projekterfahrung mit agilen Methoden, insbesondere SCRUM</li>\t<li data-end=\"1571\" data-section-id=\"jxk8hi\" data-start=\"1430\">Erfahrung im Betrieb, in der Konfiguration sowie in der Fehleranalyse des Fiori Launchpads</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Frankfurt am Main",
+                            "region": "Hessen",
+                            "country": "DE",
+                            "lat": 50.1109221,
+                            "lng": 8.6821267
+                        },
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "ab sofort",
+                    "end": "2028",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Marie-Claire Mas",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075627",
+                    "email": "marie-claire.mas@somi.de",
+                    "image": "https://public.somi.de/img/signatur/mcm.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-31T13:03:56",
+                "company": "experts"
+            },
+            {
+                "id": "2971087",
+                "url": "/jobs/2971087-security-admin-mwd-munchen-remote",
+                "title": "Security Admin (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"349\" data-section-id=\"pad9tr\" data-start=\"237\">Planung, Implementierung und Betrieb von <strong data-end=\"310\" data-start=\"280\">Palo Alto NGFW, XDR, XSIAM</strong>, Cisco ASA und Check Point Firewalls</li>\t<li data-end=\"448\" data-section-id=\"1w7j991\" data-start=\"350\">Betreuung von <strong data-end=\"395\" data-start=\"366\">Multimandanten-Umgebungen</strong> und sicherheitskritischen Infrastrukturen (KRITIS)</li>\t<li data-end=\"532\" data-section-id=\"1b6n2lx\" data-start=\"449\">Überwachung, Analyse und Reaktion auf Sicherheitsvorfälle, inkl. <strong data-end=\"530\" data-start=\"516\">SIEM/XSIAM</strong></li>\t<li data-end=\"647\" data-section-id=\"1sg07to\" data-start=\"533\">Erstellung von Dokumentationen, Teilnahme an Audits und Unterstützung bei <strong data-end=\"645\" data-start=\"609\">Compliance &amp; Business Continuity</strong></li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"91\" data-section-id=\"1iqbfir\" data-start=\"53\">Senior Network &amp; Security Engineer</li>\t<li data-end=\"162\" data-section-id=\"evc5r2\" data-start=\"92\">Erfahrung mit <strong data-end=\"160\" data-start=\"108\">Palo Alto NGFW/XDR/XSIAM, Cisco ASA, Check Point</strong></li>\t<li data-end=\"216\" data-section-id=\"342xq8\" data-start=\"163\">Praxis in <strong data-end=\"214\" data-start=\"175\">Multi-Tenant- und KRITIS-Umgebungen</strong></li>\t<li data-end=\"268\" data-section-id=\"z9psn5\" data-start=\"217\"><strong data-end=\"242\" data-start=\"219\">Security Monitoring</strong> &amp; <strong data-end=\"266\" data-is-only-node=\"\" data-start=\"245\">Incident Response</strong></li>\t<li data-end=\"318\" data-section-id=\"12v0726\" data-start=\"269\">Kenntnisse in <strong data-end=\"316\" data-start=\"285\">Compliance (BSI, ISO 27001)</strong></li>\t<li data-end=\"367\" data-section-id=\"1qbrbt2\" data-start=\"319\"><strong data-end=\"350\" data-start=\"321\">Scripting/Automatisierung</strong> (Python, Bash)</li>\t<li data-end=\"440\" data-is-last-node=\"\" data-section-id=\"1c2gba5\" data-start=\"368\">Zertifizierungen von Vorteil: <strong data-end=\"440\" data-is-last-node=\"\" data-start=\"400\">PCNSE, CCNP/CCIE Security, CCSA/CCSE</strong></li></ul>"
+                    },
+                    {
+                        "title": "Bitte beachte die folgenden Anforderungen",
+                        "content": "<ul>\t<li data-end=\"768\" data-section-id=\"1zdn30\" data-start=\"683\">Fundierte Erfahrung mit <strong data-end=\"766\" data-start=\"709\">Palo Alto, Cisco ASA/Firewalllösungen und Check Point</strong></li>\t<li data-end=\"840\" data-section-id=\"49hsd5\" data-start=\"769\">Praxis in <strong data-end=\"808\" data-start=\"781\">Multi-Tenant-Umgebungen</strong> und KRITIS-konformen Systemen</li>\t<li data-end=\"931\" data-section-id=\"1q202zq\" data-start=\"841\">Kenntnisse in <strong data-end=\"929\" data-start=\"857\">IT-Sicherheitsstandards, Incident Management und Security Monitoring</strong></li>\t<li data-end=\"1024\" data-section-id=\"uvl3f\" data-start=\"932\">Erfahrung in <strong data-end=\"976\" data-start=\"947\">Scripting/Automatisierung</strong> von Sicherheitsprozessen (z. B. Python, Bash)</li>\t<li data-end=\"1110\" data-section-id=\"1jt3hqt\" data-start=\"1048\">Zertifizierungen: <strong data-end=\"1108\" data-start=\"1068\">PCNSE, CCNP/CCIE Security, CCSA/CCSE</strong></li>\t<li data-end=\"1160\" data-section-id=\"z14d08\" data-start=\"1111\">Erfahrung mit <strong data-end=\"1158\" data-start=\"1127\">Cloud Security (AWS, Azure)</strong></li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "München",
+                            "region": "Bayern",
+                            "country": "DE",
+                            "lat": 48.1351253,
+                            "lng": 11.5819806
+                        },
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        }
+                    ],
+                    "description": "90-95% Remote"
+                },
+                "date": {
+                    "start": "01.04.2026",
+                    "end": "30.09.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Mostafa Ben Ramdane",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075672",
+                    "email": "mostafa.ben-ramdane@somi.de",
+                    "image": "https://public.somi.de/img/signatur/mra.jpg"
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-30T08:56:43",
+                "company": "experts"
+            },
+            {
+                "id": "2971075",
+                "url": "/jobs/2971075-supporter-mwd-im-citrix-bzw-terminalserver-umfeld-munchen-remote",
+                "title": "Supporter (m/w/d) im Citrix- bzw. Terminalserver-Umfeld",
+                "descriptions": [
+                    {
+                        "title": "Projektbeschreibung",
+                        "content": "<section data-scroll-anchor=\"true\" data-testid=\"conversation-turn-8\" data-turn=\"assistant\" data-turn-id=\"request-WEB:aa1739cd-5f45-4be8-b3dc-f03b8b5bac8e-3\" dir=\"auto\"><p data-end=\"428\" data-is-last-node=\"\" data-is-only-node=\"\" data-start=\"66\">Sicherstellung des reibungslosen Betriebs im Tagesgeschäft innerhalb der Terminalserver-Umgebung. Dazu gehören die Bearbeitung von Störungen, Serviceanfragen und Changes sowie die Installation, Konfiguration und der Betrieb von Citrix Virtual Apps. Ergänzend werden Performanceanalysen durchgeführt und Optimierungsmaßnahmen umgesetzt.</p></section>"
+                    },
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"193\" data-section-id=\"6xsmbr\" data-start=\"131\">Unterstützung im Betrieb der Citrix-Umgebung (Team MWS TS)</li>\t<li data-end=\"252\" data-section-id=\"djejd1\" data-start=\"194\">Bearbeitung von Incidents, Serviceanfragen und Changes</li>\t<li data-end=\"320\" data-section-id=\"1i119t5\" data-start=\"253\">Installation, Konfiguration und Betrieb von Citrix Virtual Apps</li>\t<li data-end=\"377\" data-section-id=\"3wwqkk\" data-start=\"321\">Betrieb und Weiterentwicklung von Citrix VDA und VDI</li>\t<li data-end=\"436\" data-section-id=\"zqklnt\" data-start=\"378\">Durchführung von Performanceanalysen und Optimierungen</li>\t<li data-end=\"476\" data-section-id=\"1mn34iy\" data-start=\"437\">Überwachung und Einhaltung von SLAs</li>\t<li data-end=\"524\" data-section-id=\"1kcd1qm\" data-start=\"477\">Dokumentation und Optimierung von Prozessen</li>\t<li data-end=\"562\" data-section-id=\"sf9qr5\" data-start=\"525\">Ansprechpartner für Citrix-Themen</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"641\" data-section-id=\"tl7axf\" data-start=\"590\">Erfahrung im Betrieb von Citrix-Infrastrukturen</li>\t<li data-end=\"716\" data-section-id=\"rcu41\" data-start=\"642\">Kenntnisse in Netscaler (ADC), PVS, StoreFront und Delivery Controller</li>\t<li data-end=\"768\" data-section-id=\"15r6yo0\" data-start=\"717\">Erfahrung mit Citrix Virtual Apps sowie VDA/VDI</li>\t<li data-end=\"808\" data-section-id=\"5opb5p\" data-start=\"769\">Gute Kenntnisse im Microsoft-Umfeld</li>\t<li data-end=\"857\" data-section-id=\"a3vw12\" data-start=\"809\">Erfahrung im Incident- und Change-Management</li>\t<li data-end=\"907\" data-section-id=\"4g122y\" data-start=\"858\">Strukturierte und selbstständige Arbeitsweise</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "München",
+                            "region": "Bayern",
+                            "country": "DE",
+                            "lat": 48.1351253,
+                            "lng": 11.5819806
+                        },
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "ab sofort",
+                    "end": null,
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Paula Walc",
+                    "position": "Senior Recruiting Manager",
+                    "phone": "+4921195075623",
+                    "email": "paula.walc@somi.de",
+                    "image": "https://public.somi.de/img/signatur/pw.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-27T10:49:19",
+                "company": "experts"
+            },
+            {
+                "id": "2971074",
+                "url": "/jobs/2971074-aws-engineerdevops-engineer-mwd-remote-remote-frankfurt-am-main",
+                "title": "AWS Engineer/DevOps Engineer (m/w/d) Remote",
+                "descriptions": [
+                    {
+                        "title": "Projektbeschreibung",
+                        "content": "<p>Ziel des Projekts ist es, das bestehende Entwicklungsteam technisch zu stärken, die Delivery‑Pipelines nachhaltig zu optimieren und die im PET identifizierten Impulse konsequent in die Umsetzung zu bringen. Durch gezieltes Coaching, moderne AWS‑Architekturen und die Einführung aktueller DevEx‑Standards soll eine robuste, skalierbare und automatisierte Cloud‑ und Delivery‑Landschaft geschaffen werden.</p>"
+                    },
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li>\t<p>Technisches Coaching des Projektteams in den Bereichen AWS, CI/CD, Automatisierung und Cloud‑Architektur</p>\t</li>\t<li>\t<p>Durchführung von Pair‑ und Mob‑Programming‑Sessions zur Wissensverteilung und Qualitätssteigerung</p>\t</li>\t<li>\t<p>Analyse und Optimierung der bestehenden GitLab‑CI‑Pipelines</p>\t</li>\t<li>\t<p>Modernisierung der Deployment‑Prozesse unter Berücksichtigung aktueller DevEx‑Standards</p>\t</li>\t<li>\t<p>Implementierung von Infrastructure‑as‑Code mit AWS CDK (TypeScript)</p>\t</li>\t<li>\t<p>Aufbau und Automatisierung von Windows‑basierten EC2‑Workloads inkl. Image Baking via Systems Manager Documents</p>\t</li>\t<li>\t<p>Unterstützung bei der Provisionierung und dem Betrieb von RDS‑Instanzen mit MS SQL</p>\t</li>\t<li>\t<p>Entwicklung von Automatisierungs- und Integrationsskripten mit Python und PowerShell</p>\t</li>\t<li>\t<p>Enge Zusammenarbeit mit dem DevEx‑Team zur konsistenten Umsetzung der Plattformstandards</p>\t</li>\t<li>\t<p>Der Remote Anteil liegt bei fast 100%. Aktuell sind 3 Vor-Ort Tage in diesem Jahr geplant.</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li>\t<p><strong>AWS</strong>: CDK (TypeScript), EC2, Systems Manager Documents, RDS (MS SQL), AWS Python SDK</p>\t</li>\t<li>\t<p><strong>Programmierung &amp; Automatisierung</strong>: Python, PowerShell</p>\t</li>\t<li>\t<p><strong>Systeme</strong>: Windows Server</p>\t</li>\t<li>\t<p><strong>CI/CD</strong>: GitLab CI</p>\t</li>\t<li>\t<p><strong>Arbeitsmethoden</strong>: Pair‑Programming, Mob‑Programming</p>\t</li>\t<li>\t<p>Mehrjährige Erfahrung in Cloud‑Architekturen, Infrastrukturautomatisierung und modernen Delivery‑Pipelines</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Bitte beachte die folgenden Anforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        },
+                        {
+                            "street": "",
+                            "zip": "60329",
+                            "city": "Frankfurt am Main",
+                            "region": "Hessen",
+                            "country": "DE",
+                            "lat": 50.10600059999999,
+                            "lng": 8.6677324
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "01.04.2026",
+                    "end": "31.12.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Sinan Uçan",
+                    "position": "Recruiting Manager",
+                    "phone": "+496947891890-84",
+                    "email": "sinan.ucan@somi.de",
+                    "image": "https://public.somi.de/img/signatur/so.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": "min. 4 Tage / Woche"
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": "Der Remote Anteil liegt bei fast 100%. Aktuell sind 3 Vor-Ort Tage in diesem Jahr geplant."
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-27T09:52:52",
+                "company": "experts"
+            },
+            {
+                "id": "2971073",
+                "url": "/jobs/2971073-uiux-designer-90-95-remote-bewerbungsfrist-31032026-mwd-essen-hamburg",
+                "title": "UI/UX-Designer 90-95% Remote - Bewerbungsfrist 31.03.2026 (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"190\" data-section-id=\"15vnncd\" data-start=\"95\">Du entwickelst bestehende App-Module kontinuierlich weiter und setzt neue Designvorgaben um</li>\t<li data-end=\"284\" data-section-id=\"1ff246t\" data-start=\"191\">Du gestaltest und optimierst UI-Komponenten sowie Navigationsstrukturen innerhalb der App</li>\t<li data-end=\"374\" data-section-id=\"14zrfb7\" data-start=\"285\">Du sorgst für eine konsistente, nutzerzentrierte Weiterentwicklung der App-Erlebnisse</li>\t<li data-end=\"487\" data-section-id=\"1jx6mii\" data-start=\"375\">Du arbeitest eng mit relevanten Stakeholdern zusammen, um Anforderungen in hochwertige Designs zu übersetzen</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"203\" data-section-id=\"2nb5iq\" data-start=\"97\">Du verfügst über Erfahrung in UX Research sowie in der Analyse und Spezifikation von Nutzungskontexten</li>\t<li data-end=\"309\" data-section-id=\"1ne4k91\" data-start=\"204\">Du bist sicher darin, Anforderungen abzuleiten und nutzerzentrierte Gestaltungslösungen zu entwickeln</li>\t<li data-end=\"405\" data-section-id=\"nzvnwj\" data-start=\"310\">Du erstellst Mockups, UI-Prototypen und Spezifikationen (inkl. Handoff) routiniert in Figma</li>\t<li data-end=\"489\" data-section-id=\"89xwdy\" data-start=\"406\">Du entwickelst User-Flows, User-Journeys und arbeitest aktiv an Design Systemen</li>\t<li data-end=\"578\" data-section-id=\"1wksg3w\" data-start=\"490\">Du berücksichtigst Barrierefreiheit (z. B. WCAG, BITV, EN 301 549) in deinen Designs</li>\t<li data-end=\"674\" data-section-id=\"w118s9\" data-start=\"579\">Du arbeitest strukturiert mit Tools wie Figma, Jira, Confluence und idealerweise ZeroHeight</li>\t<li data-end=\"765\" data-section-id=\"nmphdj\" data-start=\"675\">Du kennst gängige Design Guidelines (iOS, Material Design) und wendest diese sicher an</li>\t<li data-end=\"857\" data-section-id=\"wdpt8q\" data-start=\"766\">Du arbeitest nach den Prinzipien der menschzentrierten Gestaltung (DIN EN ISO 9241-210)</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "45",
+                            "city": "Essen",
+                            "region": "Nordrhein-Westfalen",
+                            "country": "DE",
+                            "lat": 51.4575573,
+                            "lng": 7.0224632
+                        },
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Hamburg",
+                            "region": "Hamburg",
+                            "country": "DE",
+                            "lat": 53.5488282,
+                            "lng": 9.987170299999999
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "01.04.2026",
+                    "end": "31.12.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Marie-Claire Mas",
+                    "position": "Recruiting Manager",
+                    "phone": "+4921195075627",
+                    "email": "marie-claire.mas@somi.de",
+                    "image": "https://public.somi.de/img/signatur/mcm.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-27T09:43:53",
+                "company": "experts"
+            },
+            {
+                "id": "2971069",
+                "url": "/jobs/2971069-berater-it-lieferorganisation-mwd-frankfurt-am-main-remote",
+                "title": "Berater IT-Lieferorganisation (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "",
+                        "content": "<h3 data-end=\"204\" data-start=\"195\">Start: 01.06.2026</h3><h3 data-end=\"231\" data-start=\"219\">Laufzeit: 31.12.2026</h3><h3 data-end=\"258\" data-start=\"246\">Standort: Frankfurt, Hybrid</h3><p>&nbsp;</p><h2 data-end=\"15\" data-start=\"0\">Projektziel:</h2><p>ist der Wandel von einer klassisch, wasserfallgetriebenen IT-Organisation hin zu einer produkt- und plattformzentrierten Lieferorganisation mit crossfunktionalen Teams.</p><p>Im Fokus stehen die nachhaltige Verbesserung der Lieferfähigkeit, Reduktion von Durchlaufzeiten sowie eine deutliche Steigerung der Softwarequalität und Time-to-Market &ndash; insbesondere im Bereich Lebensversicherung.</p>"
+                    },
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li>Analyse der bestehenden IT- und Lieferorganisation im Versicherungsumfeld</li>\t<li>Entwicklung eines Zielbilds für eine agile IT-Lieferorganisation (Operating Model, Struktur, Rollen, Governance)</li>\t<li>Konzeption eines crossfunktionalen Team-Modells (IT &amp; Fachbereich integriert)</li>\t<li>Definition von Rollen- und Verantwortlichkeitsmodellen (z. B. Produktteams, technische Verantwortungen)</li>\t<li>Gestaltung eines modernen IT-Governance- und Entscheidungsmodells</li>\t<li>Einführung flussorientierter Steuerungsansätze (z. B. Kanban, Flight Levels)</li>\t<li>Entwicklung eines Transformations- und Umsetzungsfahrplans (Roadmap)</li>\t<li>Begleitung eines Piloten in der Kernplattform Lebensversicherung</li>\t<li>Durchführung von Workshops mit IT, Fachbereichen und Management</li>\t<li>Coaching und Enablement von Teams und Führungskräften in agilen Arbeitsweisen</li>\t<li>Stakeholder-Management auf Bereichs- und Führungsebene</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul style=\"list-style-type:square;\">\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Mehrjährige Erfahrung in IT-Transformationen im Versicherungsumfeld</p>\t</li>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Nachweisbare Erfahrung in der Einführung agiler IT-Delivery-Organisationen</p>\t</li>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Sehr gutes Verständnis von Versicherungs-IT-Landschaften (idealerweise Leben / Kranken)</p>\t</li>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Erfahrung in der Arbeit mit komplexen, regulierten Organisationen</p>\t</li>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Kenntnisse in agilen Methoden (Scrum, Kanban, Flight Levels)</p>\t</li></ul><h2 data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\"><strong>Wünschenswert:</strong></h2><ul>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Erfahrung in produktzentrierten Organisationsmodellen</p>\t</li>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Background in Softwareentwicklungs- oder IT-Delivery-Prozessen</p>\t</li>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Erfahrung im Aufbau crossfunktionaler Teams</p>\t</li>\t<li>\t<p data-end=\"2062\" data-section-id=\"1w0165q\" data-start=\"2045\">Kenntnisse im Change Management und in Organisationsentwicklung</p>\t</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Frankfurt am Main",
+                            "region": "Hessen",
+                            "country": "DE",
+                            "lat": 50.1109221,
+                            "lng": 8.6821267
+                        },
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Remote",
+                            "region": "",
+                            "country": "DE",
+                            "lat": null,
+                            "lng": null
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "01.06.2026",
+                    "end": "31.12.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Anne Weingardt",
+                    "position": "Business Lead",
+                    "phone": "+496947891890-26",
+                    "email": "anne.weingardt@somi.de",
+                    "image": "https://public.somi.de/img/signatur/aw.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "remote",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-26T14:48:48",
+                "company": "experts"
+            },
+            {
+                "id": "2971059",
+                "url": "/jobs/2971059-strategischer-berater-omnikanalvertrieb-mwd-frankfurt-am-main",
+                "title": "Strategischer Berater Omnikanalvertrieb (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "",
+                        "content": "<h3>Start: 04.05.2026</h3><h3 data-end=\"231\" data-start=\"219\">Laufzeit: 30.09.2026</h3><h3 data-end=\"258\" data-start=\"246\">Standort: Frankfurt, Hybrid</h3><p>&nbsp;</p><h2 data-end=\"15\" data-start=\"0\"><strong>Projektziel:</strong></h2><p>Das Projekt der &nbsp;zielt darauf ab, ein strategisches <strong data-end=\"104\" data-start=\"66\">Zielbild für den Omnikanalvertrieb</strong> zu entwickeln, das bestehende Kanäle optimiert, neue Kanäle identifiziert und die Vertriebsorganisation, Prozesse sowie digitale Schnittstellen zukunftsfähig ausrichtet. Dabei werden konkrete Handlungsbedarfe abgeleitet, priorisiert und in einer langfristigen <strong data-end=\"376\" data-start=\"365\">Roadmap</strong> zur Umsetzung geplant, ohne dass die Maßnahmen sofort umgesetzt werden.</p>"
+                    },
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"158\" data-section-id=\"fcdzvj\" data-start=\"69\">Analyse der bestehenden Vertriebskanäle und Identifikation von Potenzialen und Lücken</li>\t<li data-end=\"234\" data-section-id=\"1uxmif7\" data-start=\"159\">Erstellung von Customer Journeys zur Einbeziehung der Kundenperspektive</li>\t<li data-end=\"306\" data-section-id=\"1ujw34l\" data-start=\"235\">Entwicklung eines strategischen Zielbilds für den Omnikanalvertrieb</li>\t<li data-end=\"362\" data-section-id=\"1clxkel\" data-start=\"307\">Ausbau bestehender und Aufbau neuer Vertriebskanäle</li>\t<li data-end=\"438\" data-section-id=\"16qwmil\" data-start=\"363\">Definition organisatorischer Anpassungen und vertrieblicher Leitplanken</li>\t<li data-end=\"518\" data-section-id=\"11bh0gz\" data-start=\"439\">Festlegung von Anforderungen an Prozesse, Schnittstellen, Systeme und Tools</li>\t<li data-end=\"605\" data-section-id=\"16ic2io\" data-start=\"519\">Ableitung, Priorisierung und Planung konkreter Handlungsmaßnahmen in einer Roadmap</li>\t<li data-end=\"697\" data-section-id=\"14kia78\" data-start=\"606\">Durchführung und Moderation von Workshops sowie Ergebnisaufbereitung für das Management</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"206\" data-section-id=\"8slb1c\" data-start=\"125\"><strong data-end=\"141\" data-start=\"127\">Must-Have:</strong> Erfahrung im <strong data-end=\"204\" data-start=\"155\">Omnikanalvertrieb in der Versicherungsbranche</strong></li>\t<li data-end=\"292\" data-section-id=\"o7np7z\" data-start=\"207\">Erfahrung in der <strong data-end=\"266\" data-start=\"226\">Entwicklung strategischer Zielbilder</strong> und Vertriebsstrukturen</li>\t<li data-end=\"348\" data-section-id=\"fvm73e\" data-start=\"293\"><strong data-end=\"312\" data-start=\"295\">Vertriebsnähe</strong> und Verständnis der Marktmechanik</li>\t<li data-end=\"444\" data-section-id=\"8f40xi\" data-start=\"349\"><strong data-end=\"392\" data-start=\"351\">Grundlegendes technisches Verständnis</strong> für Systeme, Schnittstellen und digitale Lösungen</li>\t<li data-end=\"539\" data-section-id=\"gsn3go\" data-start=\"445\">Kenntnisse in <strong data-end=\"477\" data-start=\"461\">Datenhaltung</strong> (Verarbeitung in deutschen bzw. europäischen Rechenzentren)</li>\t<li data-end=\"637\" data-section-id=\"3s6bd9\" data-start=\"540\"><strong data-end=\"579\" data-start=\"542\">Projekt- und Moderationserfahrung</strong>, inkl. Workshop-Gestaltung und Design-Thinking-Methoden</li>\t<li data-end=\"717\" data-section-id=\"12nz91a\" data-start=\"638\">Fähigkeit zur <strong data-end=\"695\" data-start=\"654\">Zusammenarbeit mit Teilprojektleitern</strong> und Stellvertretung</li>\t<li data-end=\"784\" data-section-id=\"1yejzpx\" data-start=\"718\"><strong data-end=\"782\" data-start=\"720\">Erfahrung in Ergebnisaufbereitung für Management / C-Level</strong></li>\t<li data-end=\"900\" data-section-id=\"af8ep8\" data-start=\"785\"><strong data-end=\"804\" data-start=\"787\">Teamstruktur:</strong> Kombination aus Senior- und Junior-Beratern möglich, mindestens eine Person auf Manager-Level</li></ul>"
+                    },
+                    {
+                        "title": "Sprachanforderungen",
+                        "content": "<ul><li>Deutsch: Verhandlungssicher</li><li>Englisch: Erweiterte Kenntnisse</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "Frankfurt am Main",
+                            "region": "Hessen",
+                            "country": "DE",
+                            "lat": 50.1109221,
+                            "lng": 8.6821267
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "04.05.2026",
+                    "end": "30.09.2026",
+                    "description": null
+                },
+                "contactPerson": {
+                    "name": "Linh Nguyen",
+                    "position": "Senior Recruiting Manager",
+                    "phone": "021195075665",
+                    "email": "linh.nguyen@somi.de",
+                    "image": "https://public.somi.de/img/signatur/lin.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "hybrid",
+                    "description": null
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-25T17:29:55",
+                "company": "experts"
+            },
+            {
+                "id": "2971058",
+                "url": "/jobs/2971058-senior-it-projektleiter-service-architekt-mwd-munchen",
+                "title": "Senior IT-Projektleiter / Service-Architekt (m/w/d)",
+                "descriptions": [
+                    {
+                        "title": "Deine Tätigkeiten",
+                        "content": "<ul>\t<li data-end=\"1012\" data-section-id=\"svuz6n\" data-start=\"907\">Gesamtverantwortliche Leitung eines komplexen IT-Transformationsprojekts mit hoher Integrationsdichte</li>\t<li data-end=\"1115\" data-section-id=\"9d81a0\" data-start=\"1013\">Konzeption und Weiterentwicklung einer stabilen, skalierbaren und integrierten Service-Architektur</li>\t<li data-end=\"1214\" data-section-id=\"acjtrm\" data-start=\"1116\">Sicherstellung eines reibungslosen Zusammenspiels von IT, Fachbereichen und externen Providern</li>\t<li data-end=\"1303\" data-section-id=\"6qlddk\" data-start=\"1215\">Steuerung und Koordination von Dienstleistern inkl. Vertrags- und Providermanagement</li>\t<li data-end=\"1395\" data-section-id=\"fjlmin\" data-start=\"1304\">Etablierung und Weiterentwicklung von IT-Service-Management-Prozessen (z. B. nach ITIL)</li>\t<li data-end=\"1501\" data-section-id=\"6ij1fi\" data-start=\"1396\">Aufbau geeigneter organisatorischer und prozessualer Strukturen für einen nachhaltigen Servicebetrieb</li>\t<li data-end=\"1592\" data-section-id=\"1ogyujv\" data-start=\"1502\">Aktives Stakeholder-Management auf allen Ebenen (Fachbereiche, Partner, Dienstleister)</li>\t<li data-end=\"1707\" data-section-id=\"10ospwr\" data-start=\"1593\">Berücksichtigung regulatorischer Anforderungen, insbesondere im Bereich Datenschutz und Informationssicherheit</li></ul>"
+                    },
+                    {
+                        "title": "Das gesuchte Profil",
+                        "content": "<ul>\t<li data-end=\"1835\" data-section-id=\"1vi6hzl\" data-start=\"1737\">Mehrjährige Erfahrung in der Leitung komplexer IT-Projekte mit hohen Integrationsanforderungen</li>\t<li data-end=\"1929\" data-section-id=\"1ezhv4z\" data-start=\"1836\">Fundierte Kenntnisse in IT-Service-Management (idealerweise ITIL) und Service-Architektur</li>\t<li data-end=\"2011\" data-section-id=\"64712a\" data-start=\"1930\">Erfahrung in der Steuerung externer Dienstleister sowie im Vertragsmanagement</li>\t<li data-end=\"2070\" data-section-id=\"agggn0\" data-start=\"2012\">Ausgeprägte analytische und konzeptionelle Fähigkeiten</li>\t<li data-end=\"2188\" data-section-id=\"vwdleb\" data-start=\"2071\">Erfahrung im regulierten Umfeld, idealerweise im Gesundheitswesen (z. B. Notfallversorgung, Bereitschaftsdienste)</li>\t<li data-end=\"2283\" data-section-id=\"mdmsbx\" data-start=\"2189\">Verständnis für fachliche Prozesse sowie rechtliche und organisatorische Rahmenbedingungen</li>\t<li data-end=\"2344\" data-section-id=\"1xyzwpx\" data-start=\"2284\">Sicheres Stakeholder-Management und Kommunikationsstärke</li>\t<li data-end=\"2462\" data-section-id=\"1yvv73\" data-start=\"2345\">Erfahrung mit gängigen Tools für Dokumentation und Wissensmanagement (z. B. Confluence, cPlace oder vergleichbar)</li></ul>"
+                    }
+                ],
+                "location": {
+                    "places": [
+                        {
+                            "street": "",
+                            "zip": "",
+                            "city": "München",
+                            "region": "Bayern",
+                            "country": "DE",
+                            "lat": 48.1351253,
+                            "lng": 11.5819806
+                        }
+                    ],
+                    "description": null
+                },
+                "date": {
+                    "start": "01.05.2026",
+                    "end": "31.07.2026",
+                    "description": "Mit Option auf Verlängerung"
+                },
+                "contactPerson": {
+                    "name": "Shara Romero Morales",
+                    "position": "Account Manager",
+                    "phone": "0694789189094",
+                    "email": "shara.romero@somi.de",
+                    "image": "https://public.somi.de/img/signatur/sm.jpg"
+                },
+                "workSchedule": {
+                    "type": "fullTime",
+                    "description": null
+                },
+                "jobLocation": {
+                    "type": "hybrid",
+                    "description": "1 x die Woche Onsite"
+                },
+                "contractType": "freelance",
+                "postDate": "2026-03-25T16:05:50",
+                "company": "experts"
+            }
+        ],
+        "total": 66
+    },
+    "state": 200
+}

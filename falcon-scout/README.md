@@ -10,6 +10,7 @@ Multi-platform job scraper service. Each platform is a self-contained Go module 
 | `contractor.de` | HTML scraping | Yes (contact only) | No (single page) | colly, goquery |
 | `solcom.de` | RSS XML feed | No (all data in feed) | No (full feed) | stdlib only |
 | `computerfutures.com` | JSON API (sthree.com) | No (all data in API) | Yes (resultFrom offset) | stdlib only |
+| `somi.de` | JSON API | No (all data in API) | Yes (page offset) | stdlib only |
 
 ## Architecture
 

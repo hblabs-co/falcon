@@ -32,6 +32,7 @@ type Project interface {
 	GetContactPhone() string
 	GetContactRole() string
 	GetContactAddress() string
+	GetContactImage() string
 
 	IsDirectClient() bool
 	IsRemote() bool
