@@ -2,6 +2,8 @@ package platformkit
 
 import (
 	"context"
+	"sort"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -114,6 +116,40 @@ func Order[T ReversibleItem](s *[]T, shouldReverse bool) {
 		reverse(s)
 	}
 
+	for i := range *s {
+		(*s)[i].SetTotal(len(*s))
+		(*s)[i].SetCurrent(i + 1)
+	}
+}
+
+// OrderBy sorts s by the key returned from keyFn, then populates
+// SetTotal / SetCurrent on each item.
+//
+// Smart comparison: when BOTH keys in a pair are pure integers
+// (e.g. contractor.de's "30290"), they compare numerically so
+// "9000" < "30290". Otherwise lexicographic order is used. This
+// handles numeric IDs without caller-side parsing.
+//
+// When descending is true, the largest key is placed first
+// (index 0) — useful when the largest ID is "newest" and should
+// be processed first.
+func OrderBy[T ReversibleItem](s *[]T, keyFn func(T) string, descending bool) {
+	sort.SliceStable(*s, func(i, j int) bool {
+		a := keyFn((*s)[i])
+		b := keyFn((*s)[j])
+		if ai, ae := strconv.Atoi(a); ae == nil {
+			if bi, be := strconv.Atoi(b); be == nil {
+				if descending {
+					return ai > bi
+				}
+				return ai < bi
+			}
+		}
+		if descending {
+			return a > b
+		}
+		return a < b
+	})
 	for i := range *s {
 		(*s)[i].SetTotal(len(*s))
 		(*s)[i].SetCurrent(i + 1)

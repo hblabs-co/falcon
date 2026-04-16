@@ -4,17 +4,20 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	"hblabs.co/falcon/modules/platformkit"
 )
 
-// fixedNow pins nowFunc to 2026-04-16 for deterministic month-phrase
-// year inference ("Ende Mai" → 2026-05-31, "Ende Januar" → 2027-01-31).
+// fixedNow pins platformkit.NowFunc to 2026-04-16 for deterministic
+// month-phrase year inference ("Ende Mai" → 2026-05-31, "Ende Januar" →
+// 2027-01-31).
 func fixedNow(t *testing.T) {
 	t.Helper()
-	prev := nowFunc
-	nowFunc = func() time.Time {
+	prev := platformkit.NowFunc
+	platformkit.NowFunc = func() time.Time {
 		return time.Date(2026, 4, 16, 0, 0, 0, 0, time.UTC)
 	}
-	t.Cleanup(func() { nowFunc = prev })
+	t.Cleanup(func() { platformkit.NowFunc = prev })
 }
 
 func TestBuildDuration(t *testing.T) {

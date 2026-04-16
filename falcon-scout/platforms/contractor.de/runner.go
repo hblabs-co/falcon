@@ -88,7 +88,9 @@ func (r *Runner) findCandidates(ctx context.Context) ([]*ProjectCandidate, map[s
 		r.logger.Info("no new or updated projects")
 		return nil, nil, nil
 	}
-	platformkit.Order(&toFetch, true)
+	// Process newest projects first: contractor.de PlatformIDs are
+	// sequential integers, so highest ID = most recent posting.
+	platformkit.OrderBy(&toFetch, func(c *ProjectCandidate) string { return c.PlatformID }, true)
 	return toFetch, existing, nil
 }
 

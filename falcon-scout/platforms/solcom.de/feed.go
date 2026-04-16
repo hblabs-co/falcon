@@ -179,16 +179,134 @@ func parsePubDate(s string) string {
 	return s
 }
 
-// parseStartDate normalizes a start date from the metadata footer.
-// Handles "01.05.2026" (DD.MM.YYYY), "asap", "Mai 2026", etc.
-// Returns canonical YYYY-MM-DD when possible, otherwise the raw string.
+// parseStartDate normalizes a solcom.de start-date string into one of
+// the closed canonical shapes shared across falcon-scout platforms:
+//
+//   - ""             — empty or unparseable
+//   - "ab sofort"    — ASAP / immediate variants
+//   - "YYYY-MM-DD"   — full calendar date
+//
+// The solcom feed is particularly messy: many entries are compound
+// ("04.05.2026/ spät. 25.05.2026", "asap, spätestens 15.05.2026"),
+// mix formats, or give a month+year instead of a full date. Strategy:
+//
+//  1. Trim + immediate-keyword check.
+//  2. Strip a leading German "latest" prefix ("spät. 15.04.2026" uses
+//     the date, since it's the only signal we have).
+//  3. Compound split: take the *earliest* (first) component when the
+//     string contains "/", ",", " spätestens ", " spät.", " spät:",
+//     or " oder ". Recurse on that component.
+//  4. Try all parse paths: full DD.MM.YYYY, 2-digit year (01.05.26),
+//     compact DDMMYYYY (20032026), canonical YYYY-MM-DD,
+//     "Anfang|Mitte|Ende <Month>", "<Month> YYYY" or "<Month>/<Month> YYYY".
+//  5. Strip German "earliest-start" prefix ("frühster Start in …",
+//     "im …") and recurse.
+//  6. Drop to "".
 func parseStartDate(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return ""
 	}
-	if t, err := time.Parse("02.01.2006", s); err == nil {
+	if platformkit.IsImmediateStart(s) {
+		return platformkit.CanonicalImmediateStart
+	}
+
+	// Strip a leading "latest" prefix — the remaining date is our best signal.
+	if stripped, ok := stripLatestPrefix(s); ok {
+		return parseStartDate(stripped)
+	}
+
+	// Compound: take the earliest piece when the string has a separator.
+	if early := extractEarlyStart(s); early != s {
+		return parseStartDate(early)
+	}
+
+	// European dotted date (strict, lenient, day-clamp recovery).
+	if out, ok := platformkit.ParseEuropeanDate(s, "."); ok {
+		return out
+	}
+	// 2-digit year: "01.05.26" → 2026-05-01.
+	if out, ok := platformkit.ParseEuropeanDate2DigitYear(s, "."); ok {
+		return out
+	}
+	// Compact DDMMYYYY (8 digits): "20032026" → 2026-03-20.
+	if out, ok := platformkit.ParseCompactDate(s); ok {
+		return out
+	}
+	// Already canonical ISO YYYY-MM-DD.
+	if t, err := time.Parse("2006-01-02", s); err == nil {
 		return t.Format("2006-01-02")
 	}
-	return s // "asap", "Mai 2026", etc. — keep as-is for the LLM
+	// German month phrases: "Ende April", "Mitte Mai", "Anfang Juni".
+	if out, ok := platformkit.ParseGermanMonthPhrase(s); ok {
+		return out
+	}
+	// German month + year text: "Mai 2026", "April/Mai 2026", "Juli 26".
+	if out, ok := platformkit.ParseGermanMonthYear(s); ok {
+		return out
+	}
+
+	// Strip a leading "earliest" prefix and retry ("im April 2026",
+	// "frühster Start in Mai", "ab April").
+	if stripped, ok := stripEarliestPrefix(s); ok {
+		return parseStartDate(stripped)
+	}
+
+	return ""
+}
+
+// extractEarlyStart splits s on the first "compound" marker (slash,
+// comma, " spätestens ", " spät.", " spät:", " oder ") and returns the
+// trimmed portion before that marker. If no marker is present, returns
+// s unchanged. Used to pick the *earliest* start date from an entry
+// like "04.05.2026/ spät. 25.05.2026".
+func extractEarlyStart(s string) string {
+	lower := strings.ToLower(s)
+	markers := []string{
+		" spätestens ",
+		" spät.",
+		" spät:",
+		" oder ",
+		"/",
+		",",
+	}
+	earliest := -1
+	for _, m := range markers {
+		if idx := strings.Index(lower, m); idx >= 0 {
+			if earliest < 0 || idx < earliest {
+				earliest = idx
+			}
+		}
+	}
+	if earliest > 0 {
+		return strings.TrimSpace(s[:earliest])
+	}
+	return s
+}
+
+// stripLatestPrefix removes a leading German "latest" phrase so that a
+// lone "spät. 15.04.2026" still yields a date (the only date the API
+// gave us). Returns (rest, true) when a prefix matched.
+func stripLatestPrefix(s string) (string, bool) {
+	lower := strings.ToLower(s)
+	for _, p := range []string{"spätestens zum ", "spätestens ", "spät.:", "spät. ", "spät:", "spät: "} {
+		if strings.HasPrefix(lower, p) {
+			return strings.TrimSpace(s[len(p):]), true
+		}
+	}
+	return s, false
+}
+
+// stripEarliestPrefix removes a leading German "earliest start" phrase
+// so "im April 2026" / "frühster Start in Mai" / "ab April" can be
+// re-parsed as a plain month expression. Returns (rest, true) when a
+// prefix matched.
+func stripEarliestPrefix(s string) (string, bool) {
+	lower := strings.ToLower(s)
+	for _, p := range []string{"frühster start in ", "im ", "ab dem ", "ab "} {
+		if strings.HasPrefix(lower, p) {
+			return strings.TrimSpace(s[len(p):]), true
+		}
+	}
+	return s, false
 }

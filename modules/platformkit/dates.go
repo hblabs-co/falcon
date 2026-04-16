@@ -17,10 +17,13 @@ const CanonicalImmediateStart = "ab sofort"
 // Union of the forms observed across scout platforms.
 var immediateStartKeywords = map[string]struct{}{
 	"asap":                          {},
+	"asasp":                         {}, // common typo of "asap"
 	"immediate":                     {},
 	"immediately":                   {},
 	"sofort":                        {},
 	"ab sofort":                     {},
+	"schnellstmöglich":              {},
+	"schnellstmoeglich":             {},
 	"nächstmöglich":                 {},
 	"nächstmöglichst":               {},
 	"naechstmoeglich":               {},
@@ -83,4 +86,53 @@ func ParseEuropeanDate(s, sep string) (string, bool) {
 		day = last
 	}
 	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).Format("2006-01-02"), true
+}
+
+// ParseEuropeanDate2DigitYear parses DD<sep>MM<sep>YY where YY is a
+// 2-digit year. The century is inferred: YY < 50 → 20YY, else 19YY.
+// Delegates to ParseEuropeanDate for calendar validation (incl. clamp
+// recovery). sep is typically "." or "/".
+//
+// Examples:
+//   - "01.05.26" → "2026-05-01"
+//   - "31.12.99" → "1999-12-31"
+//   - "01/05/26" → "2026-05-01"
+func ParseEuropeanDate2DigitYear(s, sep string) (string, bool) {
+	parts := strings.Split(s, sep)
+	if len(parts) != 3 {
+		return "", false
+	}
+	if len(parts[2]) != 2 {
+		return "", false
+	}
+	yy, err := strconv.Atoi(parts[2])
+	if err != nil || yy < 0 {
+		return "", false
+	}
+	// Pivot at 50: <50 → 20xx, ≥50 → 19xx.
+	century := 2000
+	if yy >= 50 {
+		century = 1900
+	}
+	expanded := parts[0] + sep + parts[1] + sep + strconv.Itoa(century+yy)
+	return ParseEuropeanDate(expanded, sep)
+}
+
+// ParseCompactDate parses 8 digits with no separators as DDMMYYYY.
+// Common upstream typo where the input is entered without dots.
+//
+// Example:
+//   - "20032026" → "2026-03-20"
+func ParseCompactDate(s string) (string, bool) {
+	s = strings.TrimSpace(s)
+	if len(s) != 8 {
+		return "", false
+	}
+	for _, c := range s {
+		if c < '0' || c > '9' {
+			return "", false
+		}
+	}
+	expanded := s[:2] + "." + s[2:4] + "." + s[4:]
+	return ParseEuropeanDate(expanded, ".")
 }
