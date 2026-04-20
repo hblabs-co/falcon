@@ -8,12 +8,12 @@
       "name": "🚀 Falcon — All Services",
       "configurations": [
         "Debug API",
-        "Debug Signal",
-        "Debug Scout",
-        "Debug Dispatch",
-        "Debug Match Engine",
-        "Debug Storage",
-        "Debug Normalizer"
+        // "Debug Signal",
+        // "Debug Scout",
+        // "Debug Dispatch",
+        // "Debug Match Engine",
+        // "Debug Storage",
+        // "Debug Normalizer"
       ],
       "stopAll": true,
       "preLaunchTask": "Docker: start infrastructure",

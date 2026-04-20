@@ -1,0 +1,2 @@
+curl --location 'https://www.constaff.com/wp-json/wp/v2/ansprechpartner?per_page=100' \
+--header 'Accept: application/json, text/javascript, */*; q=0.01'

@@ -60,31 +60,31 @@ func decodeCandidate(raw any) (*ProjectCandidate, error) {
 
 // Project implements interfaces.Project via duck typing.
 type Project struct {
-	PlatformID   string    `json:"platform_id"    bson:"platform_id"`
-	URL          string    `json:"url"            bson:"url"`
-	Title        string    `json:"title"          bson:"title"`
-	Description  string    `json:"description"    bson:"description"`
-	Location     string    `json:"location"       bson:"location"`
-	StartDate    string    `json:"start_date"     bson:"start_date"`
-	EndDate      string    `json:"end_date"       bson:"end_date"`
-	Duration     string    `json:"duration"       bson:"duration"`
-	Remote       bool      `json:"is_remote"      bson:"is_remote"`
-	PostedAt     string    `json:"posted_at"      bson:"posted_at"`
+	PlatformID            string  `json:"platform_id"    bson:"platform_id"`
+	URL                   string  `json:"url"            bson:"url"`
+	Title                 string  `json:"title"          bson:"title"`
+	Description           string  `json:"description"    bson:"description"`
+	Location              string  `json:"location"       bson:"location"`
+	StartDate             string  `json:"start_date"     bson:"start_date"`
+	EndDate               string  `json:"end_date"       bson:"end_date"`
+	Duration              string  `json:"duration"       bson:"duration"`
+	Remote                bool    `json:"is_remote"      bson:"is_remote"`
+	PostedAt              string  `json:"posted_at"      bson:"posted_at"`
 	RateOnsiteFrom        float64 `json:"rate_onsite_from"        bson:"rate_onsite_from"`
 	RateOnsiteTo          float64 `json:"rate_onsite_to"          bson:"rate_onsite_to"`
 	RateOnsiteType        string  `json:"rate_onsite_type"        bson:"rate_onsite_type"`
 	RateOnsiteDescription string  `json:"rate_onsite_description" bson:"rate_onsite_description"`
 
-	RateRemoteFrom        float64 `json:"rate_remote_from"        bson:"rate_remote_from"`
-	RateRemoteTo          float64 `json:"rate_remote_to"          bson:"rate_remote_to"`
-	RateRemoteType        string  `json:"rate_remote_type"        bson:"rate_remote_type"`
-	RateRemoteDescription string  `json:"rate_remote_description" bson:"rate_remote_description"`
-	ContactName  string    `json:"contact_name"   bson:"contact_name"`
-	ContactRole  string    `json:"contact_role"   bson:"contact_role"`
-	ContactPhone string    `json:"contact_phone"  bson:"contact_phone"`
-	ContactEmail string    `json:"contact_email"  bson:"contact_email"`
-	ContactImage string    `json:"contact_image"  bson:"contact_image"`
-	ScrapedAt    time.Time `json:"scraped_at"     bson:"scraped_at"`
+	RateRemoteFrom        float64   `json:"rate_remote_from"        bson:"rate_remote_from"`
+	RateRemoteTo          float64   `json:"rate_remote_to"          bson:"rate_remote_to"`
+	RateRemoteType        string    `json:"rate_remote_type"        bson:"rate_remote_type"`
+	RateRemoteDescription string    `json:"rate_remote_description" bson:"rate_remote_description"`
+	ContactName           string    `json:"contact_name"   bson:"contact_name"`
+	ContactRole           string    `json:"contact_role"   bson:"contact_role"`
+	ContactPhone          string    `json:"contact_phone"  bson:"contact_phone"`
+	ContactEmail          string    `json:"contact_email"  bson:"contact_email"`
+	ContactImage          string    `json:"contact_image"  bson:"contact_image"`
+	ScrapedAt             time.Time `json:"scraped_at"     bson:"scraped_at"`
 }
 
 func (p *Project) GetId() string                { return "" }
@@ -94,7 +94,6 @@ func (p *Project) GetPlatformId() string        { return p.PlatformID }
 func (p *Project) GetReferenceId() string       { return p.PlatformID }
 func (p *Project) GetPlatformUpdatedAt() string { return p.PostedAt }
 func (p *Project) GetTitle() string             { return p.Title }
-func (p *Project) GetCompany() string           { return "SOMI Experts GmbH" }
 func (p *Project) GetDescription() string       { return p.Description }
 func (p *Project) GetStartDate() string         { return p.StartDate }
 func (p *Project) GetEndDate() string           { return p.EndDate }
@@ -178,16 +177,16 @@ func (p *Project) GetContactImage() string   { return p.ContactImage }
 
 func candidateToProject(c *ProjectCandidate) *Project {
 	return &Project{
-		PlatformID:   c.PlatformID,
-		URL:          c.URL,
-		Title:        c.Title,
-		Description:  c.Description,
-		Location:     c.Location,
-		StartDate:    c.StartDate,
-		EndDate:      c.EndDate,
-		Duration:     c.Duration,
-		Remote:       c.Remote,
-		PostedAt:     c.PostedAt,
+		PlatformID:            c.PlatformID,
+		URL:                   c.URL,
+		Title:                 c.Title,
+		Description:           c.Description,
+		Location:              c.Location,
+		StartDate:             c.StartDate,
+		EndDate:               c.EndDate,
+		Duration:              c.Duration,
+		Remote:                c.Remote,
+		PostedAt:              c.PostedAt,
 		RateOnsiteFrom:        c.RateOnsiteFrom,
 		RateOnsiteTo:          c.RateOnsiteTo,
 		RateOnsiteType:        c.RateOnsiteType,
@@ -196,11 +195,11 @@ func candidateToProject(c *ProjectCandidate) *Project {
 		RateRemoteTo:          c.RateRemoteTo,
 		RateRemoteType:        c.RateRemoteType,
 		RateRemoteDescription: c.RateRemoteDescription,
-		ContactName:  c.ContactName,
-		ContactRole:  c.ContactPosition,
-		ContactPhone: c.ContactPhone,
-		ContactEmail: c.ContactEmail,
-		ContactImage: c.ContactImage,
-		ScrapedAt:    time.Now(),
+		ContactName:           c.ContactName,
+		ContactRole:           c.ContactPosition,
+		ContactPhone:          c.ContactPhone,
+		ContactEmail:          c.ContactEmail,
+		ContactImage:          c.ContactImage,
+		ScrapedAt:             time.Now(),
 	}
 }

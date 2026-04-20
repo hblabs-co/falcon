@@ -1,0 +1,159 @@
+{
+    "header": {
+        "url": "http://www.newton.staffitpro.de/staffITproWebApi/Position/where?sortField=Id%20DESC&pageNumber=1&pageSize=16",
+        "content_type": "application/json; charset=utf-8",
+        "http_code": 200,
+        "header_size": 235,
+        "request_size": 513,
+        "filetime": -1,
+        "ssl_verify_result": 0,
+        "redirect_count": 0,
+        "total_time": 0.07037,
+        "namelookup_time": 0.00034,
+        "connect_time": 0.004081,
+        "pretransfer_time": 0.004132,
+        "size_upload": 204,
+        "size_download": 158181,
+        "speed_download": 2259728,
+        "speed_upload": 2914,
+        "download_content_length": -1,
+        "upload_content_length": 204,
+        "starttransfer_time": 0.059201,
+        "redirect_time": 0,
+        "redirect_url": "",
+        "primary_ip": "54.93.190.172",
+        "certinfo": [],
+        "primary_port": 80,
+        "local_ip": "82.165.82.248",
+        "local_port": 41424,
+        "http_version": 2,
+        "protocol": 1,
+        "ssl_verifyresult": 0,
+        "scheme": "HTTP",
+        "appconnect_time_us": 0,
+        "connect_time_us": 4081,
+        "namelookup_time_us": 340,
+        "pretransfer_time_us": 4132,
+        "redirect_time_us": 0,
+        "starttransfer_time_us": 59201,
+        "total_time_us": 70370,
+        "request_header": "POST /staffITproWebApi/Position/where?sortField=Id%20DESC&pageNumber=1&pageSize=16 HTTP/1.1\r\nHost: www.newton.staffitpro.de\r\nAccept-Encoding: deflate, gzip, br\r\nAccept: application/json\r\nContent-Type: application/json\r\nAuthorization: SIP sip_token=f9f4dc74-6364-4ffb-8610-af2ec16945b1\r\nContent-Length: 204\r\n\r\n"
+    },
+    "projects": [
+        {
+            "Begin": "April 2026",
+            "End": "8 Months ++",
+            "Id": 14274,
+            "DisplayJobmarket": true,
+            "JobDescriptionHTML": "\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;\">For our client in Darmstadt we are looking for a </span><span style=\"font-size:10pt;\">Rave EDC Designer (m/f/d).</span></p>\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;\">&nbsp;</span></p>\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;font-weight:bold;\">Tasks:</span></p>\r\n<ul style=\"margin:0pt;padding:0pt;list-style-type:disc;\">\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Adapt and enhance the Rave EDC Designer module for global library use </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Create and modify objects, forms, shapes, and activity datasets </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Program standard edit checks to ensure data integrity and compliance </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Develop custom functions (CF) for study-specific needs </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Build and manage activity datasets according to study protocols </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Define study structure, including forms, datasets, and Schedule of Activities (SoA) </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Collaborate with cross-functional teams to gather requirements and implement changes </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Provide support and troubleshooting for the Designer module </span></p>\r\n</li>\r\n</ul>\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;font-weight:bold;\">&nbsp;</span></p>\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;font-weight:bold;\">Requirements:</span></p>\r\n<ul style=\"margin:0pt;padding:0pt;list-style-type:disc;\">\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Proven experience with Rave EDC, especially the Designer module </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Strong understanding of clinical data capture processes and trial methodologies </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Experience creating and adapting data objects within EDC systems </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Knowledge of programming edit checks and derivations </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Ability to develop custom functions (CF) </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Familiarity with CDISC standards and controlled terminology </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Strong problem-solving skills and attention to detail </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Effective communication and teamwork skills </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Knowledge of regulatory requirements in clinical data management </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Experience working in a global environment </span></p>\r\n</li>\r\n<li style=\"font-size:10pt;color:#000000;margin-left:18pt;\">\r\n<p lang=\"de-DE\" style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;color:#000000;\">Ability to work independently and manage multiple tasks</span></p>\r\n</li>\r\n</ul>\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;\">&nbsp;</span></p>\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;\">Are you currently interested and available?</span></p>\r\n<p lang=\"de-DE\" style=\"margin-top:0pt;margin-bottom:0pt;\"><span style=\"font-size:10pt;\">Then please feel free to contact us anytime.</span></p>\r\n",
+            "ClosingDate": "/Date(1777485600000+0000)/",
+            "JobLocation": "Remote",
+            "JobTitle": "Rave EDC Designer (m/f/d)",
+            "Type": 1,
+            "TypeStr": [
+                "Freiberuflich",
+                "Contractor"
+            ],
+            "User": "JBA"
+        },
+        {
+            "Begin": "April 2026",
+            "End": "3 Monate ++",
+            "Id": 14269,
+            "DisplayJobmarket": true,
+            "JobDescriptionHTML": "<p><span>Für unseren Kunden in Vorarlberg suchen wir einen Senior SAP GTS Consultant (m/w/d).</span></p><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Aufgaben:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Beratung zur Einführung von SAP GTS in einer Greenfield-Umgebung</span></li><li style=\"margin-left:1.5rem;\"><span>Durchführung und Moderation von Workshops zur Anforderungsaufnahme und Lösungsdefinition</span></li><li style=\"margin-left:1.5rem;\"><span>Konzeption von Lösungen im Bereich Außenhandel, Zoll und Trade Compliance</span></li><li style=\"margin-left:1.5rem;\"><span>Unterstützung in der Explore-Phase sowie Vorbereitung der Realisierungsphase</span></li><li style=\"margin-left:1.5rem;\"><span>Abstimmung mit Stakeholdern und Präsentation von Lösungsansätzen</span></li></ul><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Anforderungen:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Mehrjährige Erfahrung als SAP GTS Consultant</span></li><li style=\"margin-left:1.5rem;\"><span>Fundierte Kenntnisse in Außenhandel, Zollprozessen, Exportkontrolle und Trade Compliance</span></li><li style=\"margin-left:1.5rem;\"><span>Erfahrung in der Integration von SAP GTS in SAP ERP oder S/4HANA</span></li><li style=\"margin-left:1.5rem;\"><span>Idealerweise Kenntnisse angrenzender Module wie SD und MM</span></li><li style=\"margin-left:1.5rem;\"><span>Erfahrung als Solution Architect und in internationalen Projekten</span></li><li style=\"margin-left:1.5rem;\"><span>Gute Erfahrung in der Durchführung und Leitung von Workshops</span></li><li style=\"margin-left:1.5rem;\"><span>Kenntnisse in Integrationsszenarien (z. B. IDoc, APIs, SAP CPI) von Vorteil</span></li><li style=\"margin-left:1.5rem;\"><span>Strukturierte, selbstständige und lösungsorientierte Arbeitsweise</span></li><li style=\"margin-left:1.5rem;\"><span>Ausgeprägte Kommunikations- und Präsentationsfähigkeiten</span></li><li style=\"margin-left:1.5rem;\"><span>Verhandlungssichere Deutsch- und Englischkenntnisse in Wort und Schrift</span></li></ul><p><span>&nbsp;</span></p><p><span>Haben Sie Zeit und Interesse an einem spannenden Projekt?</span></p><p><span>Dann freuen wir uns auf Ihre Kontaktaufnahme! </span></p>",
+            "ClosingDate": "/Date(1778004000000+0000)/",
+            "JobLocation": "D6 Region Voralberg / hybrid",
+            "JobTitle": "Senior SAP GTS Consultant (m/w/d)",
+            "Type": 1,
+            "TypeStr": [
+                "Freiberuflich",
+                "Contractor"
+            ],
+            "User": "ANK"
+        },
+        {
+            "Begin": "Mai 2026",
+            "End": "1 Monat ++",
+            "Id": 14263,
+            "DisplayJobmarket": true,
+            "JobDescriptionHTML": "\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">F&uuml;r unseren Kunden suchen wir einen Senior Data Platform Engineer (m/w/d) AWS.</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">&nbsp;</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;font-weight:bold;\">Aufgaben:</span></p>\r\n<ul style=\"margin:0pt;padding:0pt;list-style-type:disc;\">\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Einarbeitung in Gesch&auml;ftsprozesse und Datenstrukturen (SAP SD, Salesforce, Adserver) sowie Abstimmung mit Projektteam</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Verarbeitung von Rohdaten (Amazon S3) und Aufbau/Weiterentwicklung von Datenpipelines im AWS Data Lake</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Umsetzung von Datentransformationen, Aggregationen und Anreicherungen gem&auml;&szlig; fachlich-technischer Konzepte</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Harmonisierung system&uuml;bergreifender Daten und Entwicklung strukturierter Zieldatens&auml;tze f&uuml;r Analysen</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Technische Bereitstellung aufbereiteter Daten in Palantir Foundry sowie konzeptionelle Unterst&uuml;tzung f&uuml;r Datenmodelle</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Umsetzung von Qualit&auml;ts- und Monitoring-Mechanismen sowie Dokumentation von Prozessen und L&ouml;sungen</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Aufbau von Komponenten nach &bdquo;Infrastructure as Code&ldquo; und Sicherstellung von Wissenstransfer (z. B. Workshops, Code Reviews)</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Zusammenarbeit im agilen Umfeld inkl. Ticket-basiertem Vorgehen und regelm&auml;&szlig;igen Reviews</span></p>\r\n</li>\r\n</ul>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">&nbsp;</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;font-weight:bold;\">Anforderungen:</span></p>\r\n<ul style=\"margin:0pt;padding:0pt;list-style-type:disc;\">\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Sehr gute Kenntnisse in AWS (insb. S3, Lambda, Step Functions)</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Fundierte Erfahrung in Python und/oder Scala</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Erfahrung im Aufbau und Betrieb von Data Lakes und Datenpipelines</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Kenntnisse von Datenstrukturen in SAP SD sowie im Salesforce-Datenmodell</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">F&auml;higkeit zur technischen Umsetzung komplexer Datenlogiken</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Erfahrung im Umgang mit Palantir Foundry von Vorteil</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Kenntnisse im Media-/Adserver-Umfeld (z. B. CPM, Impressions) w&uuml;nschenswert</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Idealerweise erfahrung im BI- oder Analytics-Umfeld</span></p>\r\n</li>\r\n<li style=\"font-size:10pt;margin-left:20pt;\">\r\n<p style=\"margin-left:0pt;margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Sehr gute Deutschkenntnisse</span></p>\r\n</li>\r\n</ul>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">&nbsp;</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;font-weight:bold;\">Auslastung:</span><span style=\"font-size:10pt;\"> 75%</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">&nbsp;</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Aufgrund von Kundenvorgaben wird eine projektbezogene Anstellung vorausgesetzt.</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">&nbsp;</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Haben Sie Zeit und Interesse an einem spannenden Projekt?</span></p>\r\n<p style=\"margin-top:0pt;margin-bottom:0pt;line-height:16pt;\"><span style=\"font-size:10pt;\">Dann freuen wir uns auf Ihre Kontaktaufnahme!</span></p>\r\n",
+            "ClosingDate": "/Date(1776967200000+0000)/",
+            "JobLocation": "D1 Berlin / hybrid",
+            "JobTitle": "Senior Data Platform Engineer (m/w/d) AWS ",
+            "Type": 1,
+            "TypeStr": [
+                "Freiberuflich",
+                "Contractor"
+            ],
+            "User": "MMA"
+        },
+        {
+            "Begin": "Mai 2026",
+            "End": "12 Monate ++",
+            "Id": 14260,
+            "DisplayJobmarket": true,
+            "JobDescriptionHTML": "<p><span>Für unseren Kunden suchen wir einen Senior Cloud Developer (m/w/d).</span></p><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Aufgaben:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Entwicklung, Implementierung und Customizing von Softwarekomponenten inkl. Schnittstellen und Datenbanken gemäß Standards</span></li><li style=\"margin-left:1.5rem;\"><span>Schreiben von sauberem, effizientem und dokumentiertem Code unter Einhaltung von Entwicklungsrichtlinien</span></li><li style=\"margin-left:1.5rem;\"><span>Mitarbeit in Planung, Design und Umsetzung von Softwareprojekten</span></li><li style=\"margin-left:1.5rem;\"><span>Durchführung von Tests, Debugging und Fehlerbehebung aus Testphasen</span></li><li style=\"margin-left:1.5rem;\"><span>Erstellung technischer Dokumentationen, Systemdokumentationen und Lieferpakete</span></li><li style=\"margin-left:1.5rem;\"><span>Zusammenarbeit mit Projektbeteiligten zur termingerechten Umsetzung</span></li><li style=\"margin-left:1.5rem;\"><span>Teilnahme an Meetings, Reporting sowie Code-Reviews und Feedback</span></li></ul><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Anforderungen:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Mehrjährige Erfahrung mit Amazon Cloud Development Kit (CDK)</span></li><li style=\"margin-left:1.5rem;\"><span>Erfahrung im Bereich CI/CD</span></li><li style=\"margin-left:1.5rem;\"><span>Fundierte Kenntnisse im DevOps-Umfeld</span></li><li style=\"margin-left:1.5rem;\"><span>Mehrjährige Erfahrung im Bereich Observability</span></li><li style=\"margin-left:1.5rem;\"><span>Kenntnisse in der Entwicklung serverloser Architekturen</span></li><li style=\"margin-left:1.5rem;\"><span>Praxis in der Testautomatisierung</span></li><li style=\"margin-left:1.5rem;\"><span>Sehr gute Kenntnisse in TypeScript</span></li></ul><p><span>&nbsp;</span></p><p><span>Haben Sie Zeit und Interesse an einem spannenden Projekt?</span></p><p><span>Dann freuen wir uns auf Ihre Kontaktaufnahme!</span></p>",
+            "ClosingDate": "/Date(1776967200000+0000)/",
+            "JobLocation": "Remote",
+            "JobTitle": "Senior Cloud Developer (m/w/d)",
+            "Type": 1,
+            "TypeStr": [
+                "Freiberuflich",
+                "Contractor"
+            ],
+            "User": "ANK"
+        },
+        {
+            "Begin": "April 2026",
+            "End": "9 Monate ++",
+            "Id": 14237,
+            "DisplayJobmarket": true,
+            "JobDescriptionHTML": "<p><span>Für unseren Kunden in Nürnberg suchen wir einen Senior Accountant (m/w/d).</span></p><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Profil:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Erstellung von Monats-, Quartals- und Jahresabschlüssen nach HGB, IFRS und weiteren Rechnungslegungsstandards</span></li><li style=\"margin-left:1.5rem;\"><span>Zusammenstellung von Financial- und Intragroup-Reportings</span></li><li style=\"margin-left:1.5rem;\"><span>Abstimmung von Buchungskreisen und Mandanten in SAP</span></li><li style=\"margin-left:1.5rem;\"><span>Erstellung steuerlicher Reportings, einschließlich umsatzsteuerlicher Meldungen</span></li><li style=\"margin-left:1.5rem;\"><span>Prüfung steuerlicher Fragestellungen im Zusammenhang mit Gebühren, Produkten und Verträgen</span></li><li style=\"margin-left:1.5rem;\"><span>Mitwirkung bei der Erstellung von Jahressteuererklärungen</span></li><li style=\"margin-left:1.5rem;\"><span>Mitarbeit in Finanzprojekten, insbesondere zu regulatorischen Anforderungen, Automatisierung, Digitalisierung und Prozessoptimierung</span></li><li style=\"margin-left:1.5rem;\"><span>Sehr gute Deutsch- und Englischkenntnisse in Wort und Schrift</span></li></ul><p><span>&nbsp;</span></p><p><span>&nbsp;</span></p><p><span>Haben Sie Zeit und Interesse an einem spannenden Projekt?</span></p><p><span>Dann freuen wir uns auf Ihre Kontaktaufnahme! </span></p>",
+            "ClosingDate": "/Date(1776276000000+0000)/",
+            "JobLocation": "D9 Nürnberg / hybrid",
+            "JobTitle": "Senior Accountant (m/w/d)",
+            "Type": 1,
+            "TypeStr": [
+                "Freiberuflich",
+                "Contractor"
+            ],
+            "User": "ANK"
+        },
+        {
+            "Begin": "April 2026",
+            "End": "18 Monate",
+            "Id": 14201,
+            "DisplayJobmarket": true,
+            "JobDescriptionHTML": "<p><span>Für unseren Kunden suchen wir einen SAP Basis Administrator (m/w/d).</span></p><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Aufgaben:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Administration, Betrieb und Weiterentwicklung von SAP-Systemen sowie HANA- und Oracle-Datenbanken</span></li><li style=\"margin-left:1.5rem;\"><span>Durchführung von Updates, Patches, Releasewechseln und Systemkopien</span></li><li style=\"margin-left:1.5rem;\"><span>Planung und Durchführung von Archivierungsläufen</span></li><li style=\"margin-left:1.5rem;\"><span>Sicherstellung von Systemverfügbarkeit und Performance</span></li><li style=\"margin-left:1.5rem;\"><span>Analyse und Behebung technischer Störungen im SAP-Umfeld</span></li><li style=\"margin-left:1.5rem;\"><span>Zusammenarbeit mit Fachbereichen, Entwicklern und externen Dienstleistern</span></li></ul><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Anfordeungen:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Abgeschlossene IT-Ausbildung oder Studium der (Wirtschafts-)Informatik bzw. vergleichbare Qualifikation</span></li><li style=\"margin-left:1.5rem;\"><span>Mehrjährige Erfahrung im SAP-Basis-Umfeld</span></li><li style=\"margin-left:1.5rem;\"><span>Schnelle Auffassungsgabe und Fähigkeit zur Entwicklung ganzheitlicher Lösungen</span></li><li style=\"margin-left:1.5rem;\"><span>Selbstständige, strukturierte und verantwortungsbewusste Arbeitsweise</span></li><li style=\"margin-left:1.5rem;\"><span>Kommunikationsstärke und Teamfähigkeit</span></li><li style=\"margin-left:1.5rem;\"><span>Sehr gute Deutsch- und gute Englischkenntnisse</span></li></ul><p><span>&nbsp;</span></p><p><span>Aufgrund von Kundenvorgaben wird eine projektbezogene Anstellung vorausgesetzt.</span></p><p><span>&nbsp;</span></p><p><span>Haben Sie Zeit und Interesse an einem spannenden Projekt?</span></p><p><span>Dann freuen wir uns auf Ihre Kontaktaufnahme</span></p><p><span>&nbsp;</span></p>",
+            "ClosingDate": "/Date(1776276000000+0000)/",
+            "JobLocation": "D6 St. Wendel / hybrid",
+            "JobTitle": "SAP Basis Administrator (m/w/d)",
+            "Type": 5,
+            "TypeStr": [
+                "Freiberuflich, ANÜ",
+                "Contractor, ANÜ"
+            ],
+            "User": "JBA"
+        },
+        {
+            "Begin": "April 2026",
+            "End": "9 Monate ++",
+            "Id": 13898,
+            "DisplayJobmarket": true,
+            "JobDescriptionHTML": "<p><span>Für unseren Kunden in Köln suchen wir einen Tester (m/w/d) Web-Plattform. </span></p><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Aufgaben:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Qualitätssicherung für wiederverwendbare Web-Komponenten von der Konzeption bis zur Auslieferung</span></li><li style=\"margin-left:1.5rem;\"><span>Prüfung von Anforderungen, Konzepten und Designs mit besonderem Fokus auf Barrierefreiheit nach WCAG, Usability und Cross-Browser-Kompatibilität</span></li><li style=\"margin-left:1.5rem;\"><span>Einbringung von QA-Know-how bereits in der Design- und Konzeptionsphase zur frühzeitigen Vermeidung von Fehlern und Barrieren</span></li><li style=\"margin-left:1.5rem;\"><span>Durchführung manueller Tests sowie Weiterentwicklung automatisierter Regressionstests</span></li><li style=\"margin-left:1.5rem;\"><span>Einsatz und Mitgestaltung von KI-Tools zur Unterstützung und Effizienzsteigerung im Testing</span></li><li style=\"margin-left:1.5rem;\"><span>Enge Zusammenarbeit mit Entwicklung und Design bei der Weiterentwicklung eines Design-Komponentensystems</span></li><li style=\"margin-left:1.5rem;\"><span>Durchführung von API- und Microservice-Tests sowie Unterstützung technischer Qualitätssicherung im Entwicklungsprozess</span></li></ul><p><span>&nbsp;</span></p><p><span style=\"font-weight:bold;\">Anforderungen:</span></p><ul><li style=\"margin-left:1.5rem;\"><span>Fundierte Erfahrung im manuellen Testen von Web-Anwendungen</span></li><li style=\"margin-left:1.5rem;\"><span>Nachweisbare Erfahrung im Test von Barrierefreiheitsanforderungen nach WCAG</span></li><li style=\"margin-left:1.5rem;\"><span>Erfahrung im Einsatz von KI-Tools im Testing-Umfeld sowie Offenheit für deren Weiterentwicklung im praktischen Einsatz</span></li><li style=\"margin-left:1.5rem;\"><span>Kenntnisse in Selenium mit Java</span></li><li style=\"margin-left:1.5rem;\"><span>Erfahrung mit API-Testing sowie gutes Verständnis von HTTP und Web-Microservices</span></li><li style=\"margin-left:1.5rem;\"><span>Erfahrung in der Zusammenarbeit mit Design-Systemen sowie Kenntnisse in Figma</span></li><li style=\"margin-left:1.5rem;\"><span>Kenntnisse in React oder Storybook von Vorteil</span></li><li style=\"margin-left:1.5rem;\"><span>Vertrautheit mit agilen Methoden wie Scrum und Kanban sowie agilem Testing</span></li><li style=\"margin-left:1.5rem;\"><span>Hohe Eigeninitiative, Teamorientierung und strukturierte Arbeitsweise</span></li><li style=\"margin-left:1.5rem;\"><span>Sehr gute Deutschkenntnisse in Wort und Schrift</span></li></ul><p><span>&nbsp;</span></p><p><span>Haben Sie Zeit und Interesse an einem spannenden Projekt?</span></p><p><span>Dann freuen wir uns auf Ihre Kontaktaufnahme!</span></p>",
+            "ClosingDate": "/Date(1776276000000+0000)/",
+            "JobLocation": "D5 Köln/hybrid",
+            "JobTitle": "Tester (m/w/d) Web-Plattform",
+            "Type": 1,
+            "TypeStr": [
+                "Freiberuflich",
+                "Contractor"
+            ],
+            "User": "MMA"
+        }
+    ],
+    "query": "\"Status like '0' and DisplayJobMarket like '1' and (JobTitle like '**' or Id like '**' or JobDescriptionRTF like '**' or JobLocation like '**') and (Type like '*5*' or Type like '*3*' or Type like '*1*')\"",
+    "count": 7,
+    "type": "success"
+}

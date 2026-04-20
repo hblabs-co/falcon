@@ -111,6 +111,31 @@ type ReversibleItem interface {
 	SetCurrent(n int)
 }
 
+// PeriodicWorker runs fn immediately, then re-runs it every interval until
+// ctx is cancelled. Designed for background refresh tasks (contact
+// directories, metadata caches, robots.txt re-reads, etc.). Blocks — the
+// caller should launch it in a goroutine.
+//
+//	go platformkit.PeriodicWorker(ctx, 24*time.Hour, func(ctx context.Context) {
+//	    dir, err := fetchContacts(ctx)
+//	    ...
+//	})
+func StartWorker(ctx context.Context, interval time.Duration, fn func(context.Context)) {
+	fn(ctx)
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				fn(ctx)
+			}
+		}
+	}()
+}
+
 func Order[T ReversibleItem](s *[]T, shouldReverse bool) {
 	if shouldReverse {
 		reverse(s)

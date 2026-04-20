@@ -65,7 +65,6 @@ func (p *Project) GetPlatformId() string        { return p.PlatformID }
 func (p *Project) GetReferenceId() string       { return p.PlatformID }
 func (p *Project) GetPlatformUpdatedAt() string { return p.StartDate }
 func (p *Project) GetTitle() string             { return p.Title }
-func (p *Project) GetCompany() string           { return p.Company }
 func (p *Project) GetDescription() string       { return p.Description }
 func (p *Project) GetStartDate() string         { return p.StartDate }
 func (p *Project) GetEndDate() string           { return "" }
@@ -81,12 +80,12 @@ func (p *Project) IsRemote() bool {
 func (p *Project) IsANUE() bool { return false }
 
 func (p *Project) GetRateRaw() string      { return p.Rate }
-func (p *Project) GetRateAmount() *float64  { return nil }
-func (p *Project) GetRateCurrency() string  { return "" }
-func (p *Project) GetRateType() string      { return "" }
+func (p *Project) GetRateAmount() *float64 { return nil }
+func (p *Project) GetRateCurrency() string { return "" }
+func (p *Project) GetRateType() string     { return "" }
 
 func (p *Project) GetContactName() string    { return p.ContactName }
-func (p *Project) GetContactCompany() string { return Source }
+func (p *Project) GetContactCompany() string { return "Contractor Consulting GmbH" }
 func (p *Project) GetContactEmail() string   { return p.ContactEmail }
 func (p *Project) GetContactPhone() string   { return p.ContactPhone }
 func (p *Project) GetContactRole() string    { return "" }

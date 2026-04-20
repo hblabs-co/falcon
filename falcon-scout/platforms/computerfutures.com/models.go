@@ -23,7 +23,7 @@ type ProjectCandidate struct {
 	Duration    string   `json:"duration"     bson:"duration"`
 	Industry    []string `json:"industry"     bson:"industry"`
 	Skills      []string `json:"skills"       bson:"skills"`
-	PostedAt    string   `json:"posted_at"    bson:"posted_at"` // canonical YYYY-MM-DD from postDate
+	PostedAt    string   `json:"posted_at"    bson:"posted_at"`    // canonical YYYY-MM-DD from postDate
 	LastUpdated string   `json:"last_updated" bson:"last_updated"` // raw relative from API e.g. "Updated: 1 day ago" — TODO: use for update detection
 
 	// Rate
@@ -89,7 +89,6 @@ func (p *Project) GetPlatformId() string        { return p.PlatformID }
 func (p *Project) GetReferenceId() string       { return p.PlatformID }
 func (p *Project) GetPlatformUpdatedAt() string { return p.PostedAt }
 func (p *Project) GetTitle() string             { return p.Title }
-func (p *Project) GetCompany() string           { return "Computer Futures, part of SThree" }
 func (p *Project) GetDescription() string       { return p.Description }
 func (p *Project) GetStartDate() string         { return p.StartDate }
 func (p *Project) GetEndDate() string           { return p.EndDate }

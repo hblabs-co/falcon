@@ -32,7 +32,6 @@ type PersistedContact struct {
 	Image   string `json:"image,omitempty"   bson:"image,omitempty"`
 }
 
-func (c *PersistedContact) GetCompany() string { return c.Company }
 func (c *PersistedContact) GetName() string    { return c.Name }
 func (c *PersistedContact) GetRole() string    { return c.Role }
 func (c *PersistedContact) GetEmail() string   { return c.Email }
@@ -50,7 +49,6 @@ type PersistedProject struct {
 	PlatformUpdatedAt time.Time         `json:"platform_updated_at" bson:"platform_updated_at"`
 	DisplayUpdatedAt  time.Time         `json:"display_updated_at"  bson:"display_updated_at"`
 	Title             string            `json:"title"               bson:"title"`
-	Company           string            `json:"company"             bson:"company"`
 	Description       string            `json:"description"         bson:"description"`
 	StartDate         string            `json:"start_date,omitempty"  bson:"start_date,omitempty"`
 	EndDate           string            `json:"end_date,omitempty"    bson:"end_date,omitempty"`
@@ -76,7 +74,6 @@ func (p *PersistedProject) GetPlatformUpdatedAt() string {
 	return p.PlatformUpdatedAt.Format(time.RFC3339)
 }
 func (p *PersistedProject) GetTitle() string            { return p.Title }
-func (p *PersistedProject) GetCompany() string          { return p.Company }
 func (p *PersistedProject) GetDescription() string      { return p.Description }
 func (p *PersistedProject) GetStartDate() string        { return p.StartDate }
 func (p *PersistedProject) GetEndDate() string          { return p.EndDate }
@@ -198,7 +195,6 @@ func resolveID(existing *PersistedProject) string {
 // are set by NewPersistedProject before this is called.
 func (p *PersistedProject) applySource(src interfaces.Project) {
 	p.Title = src.GetTitle()
-	p.Company = src.GetCompany()
 	p.Description = src.GetDescription()
 	p.StartDate = src.GetStartDate()
 	p.EndDate = src.GetEndDate()

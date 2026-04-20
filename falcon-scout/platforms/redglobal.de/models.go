@@ -103,7 +103,6 @@ func (p *Project) GetReferenceId() string       { return p.ReferenceID }
 func (p *Project) GetPlatformUpdatedAt() string { return p.DatePosted }
 
 func (p *Project) GetTitle() string       { return p.Title }
-func (p *Project) GetCompany() string     { return p.Company }
 func (p *Project) GetDescription() string { return p.Description }
 func (p *Project) GetStartDate() string   { return p.DatePosted }
 func (p *Project) GetEndDate() string     { return p.EndDate }
@@ -128,7 +127,7 @@ func (p *Project) GetRateCurrency() string { return "" }
 func (p *Project) GetRateType() string     { return "" }
 
 func (p *Project) GetContactName() string    { return "" }
-func (p *Project) GetContactCompany() string { return "" }
+func (p *Project) GetContactCompany() string { return "RED Global" }
 func (p *Project) GetContactEmail() string   { return "" }
 func (p *Project) GetContactPhone() string   { return "" }
 func (p *Project) GetContactRole() string    { return "" }

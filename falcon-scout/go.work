@@ -4,6 +4,7 @@ use (
 	./platforms/actcon-gmbh.de
 	./platforms/akkodis.com
 	./platforms/computerfutures.com
+	./platforms/constaff.com
 	./platforms/contractor.de
 	./platforms/ferchau.com
 	./platforms/geco-group.com

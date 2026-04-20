@@ -1,0 +1,1947 @@
+[
+    {
+        "id": 5670,
+        "date": "2026-02-03T18:28:35",
+        "date_gmt": "2026-02-03T17:28:35",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=5670"
+        },
+        "modified": "2026-02-03T18:33:14",
+        "modified_gmt": "2026-02-03T17:33:14",
+        "slug": "akh",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/akh/",
+        "title": {
+            "rendered": "AKH"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-5670",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Ann-Kathrin Gelb",
+        "apposition": "Expert Candidate Relations",
+        "apphone": "+49 6221 33896-245",
+        "apemail": "ann-kathrin.gelb@constaff.com",
+        "appicture": {
+            "ID": "4743",
+            "post_author": "6",
+            "post_date": "2025-06-02 11:24:02",
+            "post_date_gmt": "2025-06-02 09:24:02",
+            "post_content": "",
+            "post_title": "AKH",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "akh-4",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2025-06-26 07:04:53",
+            "post_modified_gmt": "2025-06-26 05:04:53",
+            "post_content_filtered": "",
+            "post_parent": "1732",
+            "guid": "https://www.constaff.com/wp-content/uploads/2025/06/AKH.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "4743"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/5670",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=5670"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=5670"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 5597,
+        "date": "2026-01-13T13:58:42",
+        "date_gmt": "2026-01-13T12:58:42",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=5597"
+        },
+        "modified": "2026-01-13T13:58:44",
+        "modified_gmt": "2026-01-13T12:58:44",
+        "slug": "jba",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/jba/",
+        "title": {
+            "rendered": "JBA"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-5597",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Julia Barth",
+        "apposition": "Expert Candidate Relations",
+        "apphone": "+49 6221 33896-262",
+        "apemail": "julia.barth@constaff.com",
+        "appicture": {
+            "ID": "5598",
+            "post_author": "6",
+            "post_date": "2026-01-13 13:58:29",
+            "post_date_gmt": "2026-01-13 12:58:29",
+            "post_content": "",
+            "post_title": "Foto_JBA",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "foto_jba",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2026-03-11 09:31:06",
+            "post_modified_gmt": "2026-03-11 08:31:06",
+            "post_content_filtered": "",
+            "post_parent": "5597",
+            "guid": "https://www.constaff.com/wp-content/uploads/2026/01/Foto_JBA.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "5598"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/5597",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=5597"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=5597"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 5554,
+        "date": "2025-11-24T10:42:04",
+        "date_gmt": "2025-11-24T09:42:04",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=5554"
+        },
+        "modified": "2025-11-24T11:54:53",
+        "modified_gmt": "2025-11-24T10:54:53",
+        "slug": "meb",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/meb/",
+        "title": {
+            "rendered": "MEB"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-5554",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Melissa Bandić",
+        "apposition": "Talent Acquisition Manager",
+        "apphone": "+49 6221 33896 111",
+        "apemail": "jobs@constaff.com",
+        "appicture": {
+            "ID": "5555",
+            "post_author": "6",
+            "post_date": "2025-11-24 10:41:56",
+            "post_date_gmt": "2025-11-24 09:41:56",
+            "post_content": "",
+            "post_title": "MEB",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "meb-2",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2026-03-11 09:32:01",
+            "post_modified_gmt": "2026-03-11 08:32:01",
+            "post_content_filtered": "",
+            "post_parent": "5554",
+            "guid": "https://www.constaff.com/wp-content/uploads/2025/11/MEB.png",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/png",
+            "comment_count": "0",
+            "pod_item_id": "5555"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/5554",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=5554"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=5554"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 5237,
+        "date": "2025-09-16T11:19:45",
+        "date_gmt": "2025-09-16T09:19:45",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=5237"
+        },
+        "modified": "2026-03-11T09:46:07",
+        "modified_gmt": "2026-03-11T08:46:07",
+        "slug": "mma",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/mma/",
+        "title": {
+            "rendered": "MMA"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-5237",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Michelle Maggio",
+        "apposition": "Expert Candidate Relations",
+        "apphone": "+49 6221 33896-261",
+        "apemail": "michelle.maggio@constaff.com",
+        "appicture": {
+            "ID": "5768",
+            "post_author": "9",
+            "post_date": "2026-03-11 09:45:30",
+            "post_date_gmt": "2026-03-11 08:45:30",
+            "post_content": "",
+            "post_title": "michelle-maggio",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "michelle-maggio",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2026-03-11 09:46:08",
+            "post_modified_gmt": "2026-03-11 08:46:08",
+            "post_content_filtered": "",
+            "post_parent": "5237",
+            "guid": "https://www.constaff.com/wp-content/uploads/2026/03/michelle-maggio.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "5768"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/5237",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=5237"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=5237"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 5235,
+        "date": "2025-09-16T11:17:53",
+        "date_gmt": "2025-09-16T09:17:53",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=5235"
+        },
+        "modified": "2026-03-12T12:40:40",
+        "modified_gmt": "2026-03-12T11:40:40",
+        "slug": "ank",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/ank/",
+        "title": {
+            "rendered": "ANK"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-5235",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Annika Kärcher",
+        "apposition": "annika.kaercher@constaff.com",
+        "apphone": "+49 6221 33896-263",
+        "apemail": "annika.kaercher@constaff.com",
+        "appicture": {
+            "ID": "5236",
+            "post_author": "6",
+            "post_date": "2025-09-16 11:16:11",
+            "post_date_gmt": "2025-09-16 09:16:11",
+            "post_content": "",
+            "post_title": "ANK",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "ank-2",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2026-03-12 12:39:39",
+            "post_modified_gmt": "2026-03-12 11:39:39",
+            "post_content_filtered": "",
+            "post_parent": "5235",
+            "guid": "https://www.constaff.com/wp-content/uploads/2025/09/ANK.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "5236"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/5235",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=5235"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=5235"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 5125,
+        "date": "2025-08-01T10:56:20",
+        "date_gmt": "2025-08-01T08:56:20",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=5125"
+        },
+        "modified": "2025-08-01T11:00:41",
+        "modified_gmt": "2025-08-01T09:00:41",
+        "slug": "spo",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/spo/",
+        "title": {
+            "rendered": "SPO"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-5125",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Sarah Pouzar",
+        "apposition": "Duale Studentin Personalmanagement",
+        "apphone": "+49 6221 33896-216",
+        "apemail": "sarah.pouzar@constaff.com",
+        "appicture": {
+            "ID": "5127",
+            "post_author": "6",
+            "post_date": "2025-08-01 11:00:32",
+            "post_date_gmt": "2025-08-01 09:00:32",
+            "post_content": "",
+            "post_title": "SPO_square",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "spo_square",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2025-08-01 11:00:32",
+            "post_modified_gmt": "2025-08-01 09:00:32",
+            "post_content_filtered": "",
+            "post_parent": "5125",
+            "guid": "https://www.constaff.com/wp-content/uploads/2025/08/SPO_square.png",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/png",
+            "comment_count": "0",
+            "pod_item_id": "5127"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/5125",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=5125"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=5125"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 4112,
+        "date": "2024-07-04T10:37:40",
+        "date_gmt": "2024-07-04T08:37:40",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=4112"
+        },
+        "modified": "2024-07-08T16:09:09",
+        "modified_gmt": "2024-07-08T14:09:09",
+        "slug": "abe",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/abe/",
+        "title": {
+            "rendered": "ABE"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-4112",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Andreas Bender",
+        "apposition": "Expert Candidate Relations",
+        "apphone": "+49 6221 33896-224",
+        "apemail": "andreas.bender@constaff.com",
+        "appicture": {
+            "ID": "4116",
+            "post_author": "6",
+            "post_date": "2024-07-08 16:08:49",
+            "post_date_gmt": "2024-07-08 14:08:49",
+            "post_content": "",
+            "post_title": "abe_q",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "abe_q",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2024-07-08 16:09:10",
+            "post_modified_gmt": "2024-07-08 14:09:10",
+            "post_content_filtered": "",
+            "post_parent": "4112",
+            "guid": "https://www.constaff.com/wp-content/uploads/2024/07/abe_q.png",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/png",
+            "comment_count": "0",
+            "pod_item_id": "4116"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/4112",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=4112"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=4112"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 4097,
+        "date": "2024-06-25T12:53:05",
+        "date_gmt": "2024-06-25T10:53:05",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=4097"
+        },
+        "modified": "2024-06-25T12:53:06",
+        "modified_gmt": "2024-06-25T10:53:06",
+        "slug": "default-frontoffice",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/default-frontoffice/",
+        "title": {
+            "rendered": "default-frontoffice"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-4097",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Christopher Haas",
+        "apposition": "Teamlead Partner Management",
+        "apphone": "+49 6221 33896-145",
+        "apemail": "christopher.haas@constaff.com",
+        "appicture": {
+            "ID": "1900",
+            "post_author": "6",
+            "post_date": "2021-12-12 17:43:11",
+            "post_date_gmt": "2021-12-12 16:43:11",
+            "post_content": "",
+            "post_title": "CHA",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "cha-3",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2022-03-31 16:41:03",
+            "post_modified_gmt": "2022-03-31 14:41:03",
+            "post_content_filtered": "",
+            "post_parent": "1733",
+            "guid": "https://www.constaff.com/wp-content/uploads/2021/12/CHA-1.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "1900"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/4097",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=4097"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=4097"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 4019,
+        "date": "2024-05-03T08:33:37",
+        "date_gmt": "2024-05-03T06:33:37",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=4019"
+        },
+        "modified": "2024-05-03T08:33:38",
+        "modified_gmt": "2024-05-03T06:33:38",
+        "slug": "nb",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/nb/",
+        "title": {
+            "rendered": "NB"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-4019",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Nadine Bernhardt",
+        "apposition": "Expert Candidate Relations",
+        "apphone": "+49 6221 33896-242",
+        "apemail": "nadine.bernhardt@constaff.com",
+        "appicture": false,
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/4019",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=4019"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=4019"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 4004,
+        "date": "2024-04-22T15:50:18",
+        "date_gmt": "2024-04-22T13:50:18",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=4004"
+        },
+        "modified": "2024-07-15T17:35:24",
+        "modified_gmt": "2024-07-15T15:35:24",
+        "slug": "hko",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/hko/",
+        "title": {
+            "rendered": "HKO"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-4004",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Hannah Kordt",
+        "apposition": "Talent Development Manager",
+        "apphone": "+49 6221 33896 111",
+        "apemail": "jobs@constaff.com",
+        "appicture": false,
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/4004",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=4004"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=4004"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 3866,
+        "date": "2023-12-05T10:13:14",
+        "date_gmt": "2023-12-05T09:13:14",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=3866"
+        },
+        "modified": "2024-05-21T17:13:54",
+        "modified_gmt": "2024-05-21T15:13:54",
+        "slug": "cha-bewerberhotline",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/cha-bewerberhotline/",
+        "title": {
+            "rendered": "CHA Bewerberhotline"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-3866",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Christopher Haas",
+        "apposition": "Teamlead Partner Management",
+        "apphone": "+49 6221 33896-198",
+        "apemail": "christopher.haas@constaff.com",
+        "appicture": {
+            "ID": "1900",
+            "post_author": "6",
+            "post_date": "2021-12-12 17:43:11",
+            "post_date_gmt": "2021-12-12 16:43:11",
+            "post_content": "",
+            "post_title": "CHA",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "cha-3",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2022-03-31 16:41:03",
+            "post_modified_gmt": "2022-03-31 14:41:03",
+            "post_content_filtered": "",
+            "post_parent": "1733",
+            "guid": "https://www.constaff.com/wp-content/uploads/2021/12/CHA-1.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "1900"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/3866",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=3866"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=3866"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 3863,
+        "date": "2023-12-05T09:34:24",
+        "date_gmt": "2023-12-05T08:34:24",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=3863"
+        },
+        "modified": "2026-01-29T15:00:19",
+        "modified_gmt": "2026-01-29T14:00:19",
+        "slug": "lah",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/lah/",
+        "title": {
+            "rendered": "LAH"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-3863",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Lara Heinzmann",
+        "apposition": "Senior Talent Acquisition Manager",
+        "apphone": "+49 6221 33896 111",
+        "apemail": "jobs@constaff.com",
+        "appicture": {
+            "ID": "5571",
+            "post_author": "6",
+            "post_date": "2025-12-01 13:26:15",
+            "post_date_gmt": "2025-12-01 12:26:15",
+            "post_content": "",
+            "post_title": "Lara Heinzmann",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "larah-2",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2026-01-26 14:07:04",
+            "post_modified_gmt": "2026-01-26 13:07:04",
+            "post_content_filtered": "",
+            "post_parent": "3863",
+            "guid": "https://www.constaff.com/wp-content/uploads/2023/12/larah-1.png",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/png",
+            "comment_count": "0",
+            "pod_item_id": "5571"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/3863",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=3863"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=3863"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 3584,
+        "date": "2023-03-01T13:33:37",
+        "date_gmt": "2023-03-01T12:33:37",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=3584"
+        },
+        "modified": "2025-05-26T16:40:23",
+        "modified_gmt": "2025-05-26T14:40:23",
+        "slug": "akh-bewerberhotline",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/akh-bewerberhotline/",
+        "title": {
+            "rendered": "AKH Bewerberhotline"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-3584",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Ann-Kathrin Gelb",
+        "apposition": "Teamlead Recruiting Management",
+        "apphone": "+49 6221 33896-198",
+        "apemail": "ann-kathrin.gelb@constaff.com",
+        "appicture": {
+            "ID": "4717",
+            "post_author": "6",
+            "post_date": "2025-05-26 16:39:54",
+            "post_date_gmt": "2025-05-26 14:39:54",
+            "post_content": "",
+            "post_title": "akh_neu",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "akh_neu",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2025-06-26 07:05:02",
+            "post_modified_gmt": "2025-06-26 05:05:02",
+            "post_content_filtered": "",
+            "post_parent": "1732",
+            "guid": "https://www.constaff.com/wp-content/uploads/2021/12/akh_neu.png",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/png",
+            "comment_count": "0",
+            "pod_item_id": "4717"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/3584",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=3584"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=3584"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 3532,
+        "date": "2023-02-09T18:53:32",
+        "date_gmt": "2023-02-09T17:53:32",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=3532"
+        },
+        "modified": "2024-03-26T11:45:07",
+        "modified_gmt": "2024-03-26T10:45:07",
+        "slug": "gwa",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/gwa/",
+        "title": {
+            "rendered": "GWA"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-3532",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Gustav Wandres",
+        "apposition": "Dualer Student Personalmanagement",
+        "apphone": "+49 6221 33896-213",
+        "apemail": "gustav.wandres@constaff.com",
+        "appicture": {
+            "ID": "3549",
+            "post_author": "6",
+            "post_date": "2023-02-15 11:27:10",
+            "post_date_gmt": "2023-02-15 10:27:10",
+            "post_content": "",
+            "post_title": "Gustav (2)",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "gustav-2-2",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2023-02-15 11:27:10",
+            "post_modified_gmt": "2023-02-15 10:27:10",
+            "post_content_filtered": "",
+            "post_parent": "3532",
+            "guid": "https://www.constaff.com/wp-content/uploads/2023/02/Gustav-2-1.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "3549"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/3532",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=3532"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=3532"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 3266,
+        "date": "2022-10-12T11:14:56",
+        "date_gmt": "2022-10-12T09:14:56",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=3266"
+        },
+        "modified": "2024-01-09T13:21:19",
+        "modified_gmt": "2024-01-09T12:21:19",
+        "slug": "lri",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/lri/",
+        "title": {
+            "rendered": "LRI"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-3266",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Lea Ricker",
+        "apposition": "Senior Talent Development Manager",
+        "apphone": "+49 6221 33896 111",
+        "apemail": "jobs@constaff.com",
+        "appicture": {
+            "ID": "2759",
+            "post_author": "9",
+            "post_date": "2022-09-19 13:27:12",
+            "post_date_gmt": "2022-09-19 11:27:12",
+            "post_content": "",
+            "post_title": "lea-ricker",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "lea-ricker",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2022-12-05 10:48:17",
+            "post_modified_gmt": "2022-12-05 09:48:17",
+            "post_content_filtered": "",
+            "post_parent": "3266",
+            "guid": "https://www.constaff.com/wp-content/uploads/2022/09/lea-ricker.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "2759"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/3266",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=3266"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=3266"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 2506,
+        "date": "2022-09-15T14:56:21",
+        "date_gmt": "2022-09-15T12:56:21",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=2506"
+        },
+        "modified": "2023-01-04T14:58:20",
+        "modified_gmt": "2023-01-04T13:58:20",
+        "slug": "rbe",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/rbe/",
+        "title": {
+            "rendered": "RBE"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-2506",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Rebecca Benthin",
+        "apposition": "Teamlead Human Relations",
+        "apphone": "+49 6221 33896 111",
+        "apemail": "jobs@constaff.com",
+        "appicture": {
+            "ID": "2756",
+            "post_author": "9",
+            "post_date": "2022-09-19 13:27:06",
+            "post_date_gmt": "2022-09-19 11:27:06",
+            "post_content": "",
+            "post_title": "rebecca-benthin",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "rebecca-benthin",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2023-01-04 14:58:21",
+            "post_modified_gmt": "2023-01-04 13:58:21",
+            "post_content_filtered": "",
+            "post_parent": "2506",
+            "guid": "https://www.constaff.com/wp-content/uploads/2022/09/rebecca-benthin.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "2756"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/2506",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=2506"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=2506"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 2011,
+        "date": "2022-03-31T16:41:00",
+        "date_gmt": "2022-03-31T14:41:00",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=2011"
+        },
+        "modified": "2024-01-10T12:36:55",
+        "modified_gmt": "2024-01-10T11:36:55",
+        "slug": "msc",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/msc/",
+        "title": {
+            "rendered": "MSC"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-2011",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Maurice Schneider",
+        "apposition": "Expert Candidate Relations",
+        "apphone": "+49 6221 33896-203",
+        "apemail": "maurice.schneider@constaff.com",
+        "appicture": {
+            "ID": "2015",
+            "post_author": "6",
+            "post_date": "2022-04-25 09:15:55",
+            "post_date_gmt": "2022-04-25 07:15:55",
+            "post_content": "",
+            "post_title": "Portrait Maurice Schneider",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "msc_q",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2022-05-11 11:16:09",
+            "post_modified_gmt": "2022-05-11 09:16:09",
+            "post_content_filtered": "",
+            "post_parent": "2011",
+            "guid": "https://www.constaff.com/wp-content/uploads/2022/03/MSC_q.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "2015"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/2011",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=2011"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=2011"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 1736,
+        "date": "2021-12-11T14:54:58",
+        "date_gmt": "2021-12-11T13:54:58",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=1736"
+        },
+        "modified": "2021-12-11T14:54:59",
+        "modified_gmt": "2021-12-11T13:54:59",
+        "slug": "fs",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/fs/",
+        "title": {
+            "rendered": "FS"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-1736",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Felix Sprengling",
+        "apposition": "IT Coach & Web Developer",
+        "apphone": "+49 6221 33896 0",
+        "apemail": "felix.sprengling@constaff.com",
+        "appicture": {
+            "ID": "1737",
+            "post_author": "6",
+            "post_date": "2021-12-11 14:54:49",
+            "post_date_gmt": "2021-12-11 13:54:49",
+            "post_content": "",
+            "post_title": "FS_q",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "fs_q",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2021-12-11 14:54:59",
+            "post_modified_gmt": "2021-12-11 13:54:59",
+            "post_content_filtered": "",
+            "post_parent": "1736",
+            "guid": "https://www.constaff.com/wp-content/uploads/2021/12/FS_q.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "1737"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/1736",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=1736"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=1736"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 1733,
+        "date": "2021-12-11T14:49:10",
+        "date_gmt": "2021-12-11T13:49:10",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=1733"
+        },
+        "modified": "2025-06-02T11:25:41",
+        "modified_gmt": "2025-06-02T09:25:41",
+        "slug": "cha",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/cha/",
+        "title": {
+            "rendered": "CHA"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-1733",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Christopher Haas",
+        "apposition": "Teamlead Partner Management",
+        "apphone": "+49 6221 33896-145",
+        "apemail": "christopher.haas@constaff.com",
+        "appicture": false,
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/1733",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=1733"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=1733"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    },
+    {
+        "id": 1732,
+        "date": "2021-12-11T14:48:05",
+        "date_gmt": "2021-12-11T13:48:05",
+        "guid": {
+            "rendered": "https://www.constaff.com/?post_type=ansprechpartner&#038;p=1732"
+        },
+        "modified": "2026-03-04T17:24:57",
+        "modified_gmt": "2026-03-04T16:24:57",
+        "slug": "nrp",
+        "status": "publish",
+        "type": "ansprechpartner",
+        "link": "https://www.constaff.com/ansprechpartner/nrp/",
+        "title": {
+            "rendered": "NRP"
+        },
+        "content": {
+            "rendered": "",
+            "protected": false
+        },
+        "template": "",
+        "categories": [],
+        "class_list": [
+            "post-1732",
+            "ansprechpartner",
+            "type-ansprechpartner",
+            "status-publish",
+            "hentry"
+        ],
+        "apname": "Nicholas Ricardo-Perez",
+        "apposition": "Teamlead Partner Manager",
+        "apphone": "+49 6221 33896-215",
+        "apemail": "nicholas.ricardo-perez@constaff.com",
+        "appicture": {
+            "ID": "5672",
+            "post_author": "6",
+            "post_date": "2026-02-26 20:06:58",
+            "post_date_gmt": "2026-02-26 19:06:58",
+            "post_content": "",
+            "post_title": "nicholas-ricardo-perez",
+            "post_excerpt": "",
+            "post_status": "inherit",
+            "comment_status": "open",
+            "ping_status": "closed",
+            "post_password": "",
+            "post_name": "nicholas-ricardo-perez",
+            "to_ping": "",
+            "pinged": "",
+            "post_modified": "2026-02-26 20:07:34",
+            "post_modified_gmt": "2026-02-26 19:07:34",
+            "post_content_filtered": "",
+            "post_parent": "1732",
+            "guid": "https://www.constaff.com/wp-content/uploads/2021/12/nicholas-ricardo-perez.jpg",
+            "menu_order": "0",
+            "post_type": "attachment",
+            "post_mime_type": "image/jpeg",
+            "comment_count": "0",
+            "pod_item_id": "5672"
+        },
+        "_links": {
+            "self": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner/1732",
+                    "targetHints": {
+                        "allow": [
+                            "GET"
+                        ]
+                    }
+                }
+            ],
+            "collection": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/ansprechpartner"
+                }
+            ],
+            "about": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/types/ansprechpartner"
+                }
+            ],
+            "wp:attachment": [
+                {
+                    "href": "https://www.constaff.com/wp-json/wp/v2/media?parent=1732"
+                }
+            ],
+            "wp:term": [
+                {
+                    "taxonomy": "category",
+                    "embeddable": true,
+                    "href": "https://www.constaff.com/wp-json/wp/v2/categories?post=1732"
+                }
+            ],
+            "curies": [
+                {
+                    "name": "wp",
+                    "href": "https://api.w.org/{rel}",
+                    "templated": true
+                }
+            ]
+        }
+    }
+]

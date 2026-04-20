@@ -11,7 +11,6 @@ type Project interface {
 	GetPlatformUpdatedAt() string
 
 	GetTitle() string
-	GetCompany() string
 	GetDescription() string
 	GetStartDate() string
 	GetEndDate() string

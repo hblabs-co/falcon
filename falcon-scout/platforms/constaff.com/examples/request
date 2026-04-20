@@ -1,0 +1,9 @@
+curl --location 'https://www.constaff.com/wp-admin/admin-ajax.php' \
+--header 'Accept: application/json, text/javascript, */*; q=0.01' \
+--form 'action="searchProjects"' \
+--form 'contractsAsString[]="Contracting"' \
+--form 'selectedContracts[]="5"' \
+--form 'selectedContracts[]="3"' \
+--form 'selectedContracts[]="1"' \
+--form 'searchQuery=""' \
+--form 'page="1"'
