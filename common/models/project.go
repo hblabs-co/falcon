@@ -42,9 +42,10 @@ func (c *PersistedContact) GetAddress() string { return c.Address }
 // It implements interfaces.Project so it can be used anywhere a project is expected.
 type PersistedProject struct {
 	ID                string            `json:"id"                  bson:"id"`
-	PlatformID        string            `json:"platform_id"         bson:"platform_id"`
-	ReferenceID       string            `json:"reference_id"        bson:"reference_id"`
-	Platform          string            `json:"platform"            bson:"platform"`
+	PlatformID        string            `json:"platform_id"         bson:"platform_id"`  // unique id given by the platform could be the same as the referenceId
+	ReferenceID       string            `json:"reference_id"        bson:"reference_id"` // unique id given by the platform for the project itself
+	CompanyID         string            `json:"company_id"          bson:"company_id"`   // id of the company set by freelance.de.
+	Platform          string            `json:"platform"            bson:"platform"`     // name of the plantform for exmaple some.de
 	URL               string            `json:"url"                 bson:"url"`
 	PlatformUpdatedAt time.Time         `json:"platform_updated_at" bson:"platform_updated_at"`
 	DisplayUpdatedAt  time.Time         `json:"display_updated_at"  bson:"display_updated_at"`

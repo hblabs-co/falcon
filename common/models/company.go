@@ -10,9 +10,10 @@ import (
 // Indexed by company_id (unique across platforms since IDs are platform-assigned).
 type Company struct {
 	ID           string    `json:"id"             bson:"id"`
-	CompanyID    string    `json:"company_id"     bson:"company_id"` // platform-assigned ID, e.g. "13525"
 	CompanyName  string    `json:"company_name"   bson:"company_name"`
-	LogoMinioURL string    `json:"logo_minio_url" bson:"logo_minio_url"` // empty if logo unavailable
+	CompanyID    string    `json:"company_id"     bson:"company_id"`         // ID assigned by freelance.de e.g. "13525"
+	Source       string    `json:"source,omitempty" bson:"source,omitempty"` // platform name, e.g. "somi.de"
+	LogoMinioURL string    `json:"logo_minio_url" bson:"logo_minio_url"`     // empty if logo unavailable
 	CreatedAt    time.Time `json:"created_at"     bson:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"     bson:"updated_at"`
 

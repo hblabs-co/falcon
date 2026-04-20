@@ -222,6 +222,16 @@ func (s *Storage) RawUpdate(ctx context.Context, collection string, filter bson.
 	return err
 }
 
+// BulkUpdate applies update to all documents matching filter. Returns the
+// number of documents modified. Unlike RawUpdate this does NOT upsert.
+func (s *Storage) BulkUpdate(ctx context.Context, collection string, filter bson.M, update bson.M) (int64, error) {
+	res, err := s.db.Collection(collection).UpdateMany(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+	return res.ModifiedCount, nil
+}
+
 // FindPage returns one page of documents sorted by sortField.
 // Pass sortDesc=true for newest-first. Returns total matching count alongside results.
 // results must be a pointer to a slice.

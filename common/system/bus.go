@@ -113,6 +113,23 @@ func InitBus(streams []jetstream.StreamConfig) {
 	})
 }
 
+// deliverPolicy returns the JetStream deliver policy from the NATS_DELIVER_POLICY
+// env var. Default is "new" (only messages published after consumer creation).
+// Set to "all" to replay every message still in the stream — useful for
+// debugging or re-processing after a consumer reset.
+//
+// Supported values: "all", "last", "new" (default).
+func deliverPolicy() jetstream.DeliverPolicy {
+	switch helpers.ReadEnvOptional("NATS_DELIVER_POLICY", "new") {
+	case "all":
+		return jetstream.DeliverAllPolicy
+	case "last":
+		return jetstream.DeliverLastPolicy
+	default:
+		return jetstream.DeliverNewPolicy
+	}
+}
+
 // Subscribe creates a durable JetStream consumer and dispatches messages to
 // handler in a background goroutine. Returning an error nacks the message.
 func Subscribe(ctx context.Context, stream, consumer, subject string, handler func([]byte) error) error {
@@ -120,7 +137,7 @@ func Subscribe(ctx context.Context, stream, consumer, subject string, handler fu
 		Name:          consumer,
 		FilterSubject: subject,
 		AckPolicy:     jetstream.AckExplicitPolicy,
-		DeliverPolicy: jetstream.DeliverNewPolicy,
+		DeliverPolicy: deliverPolicy(),
 		AckWait:       10 * time.Minute,
 	})
 	if err != nil {
@@ -180,7 +197,7 @@ func SubscribeWithBackoff(
 		Name:          consumer,
 		FilterSubject: subject,
 		AckPolicy:     jetstream.AckExplicitPolicy,
-		DeliverPolicy: jetstream.DeliverNewPolicy,
+		DeliverPolicy: deliverPolicy(),
 		AckWait:       2 * time.Hour, // must be > longest backoff interval
 		MaxDeliver:    maxDeliver,
 		BackOff:       backoff,

@@ -136,7 +136,7 @@ func (s *Service) Run() {
 
 		logger := logrus.WithField("platform", p.Name())
 		p.SetLogger(logger)
-		p.SetSaveHandler(newSaveFn(logger))
+		p.SetSaveHandler(newSaveFn(logger, p.CompanyID()))
 		p.SetFilterHandler(newFilterFn(logger))
 		p.SetWarnHandler(newWarnFn(p.Name()))
 		p.SetErrHandler(newErrFn(p.Name()))
@@ -200,6 +200,32 @@ func (s *Service) runMetadataLoop(ctx context.Context, p Platform, logger *logru
 	if err := system.GetStorage().GetByField(ctx, constants.MongoCompaniesCollection, "company_id", companyID, &probe); err != nil {
 		logger.Fatalf("metadata loop: company with company_id=%q not found in companies collection: %v", companyID, err)
 		return
+	}
+
+	// Backfill source on companies that predate the field.
+	// TODO: if a platform is ever renamed (e.g. domain change), this won't
+	// update the source on companies that already have one. Add a migration
+	// or force-update path if that happens.
+	if probe.Source == "" {
+		_ = system.GetStorage().RawUpdate(ctx, constants.MongoCompaniesCollection,
+			bson.M{"company_id": companyID},
+			bson.M{"$set": bson.M{"source": p.Name()}})
+		logger.Infof("backfilled source=%q on company %s", p.Name(), companyID)
+	}
+
+	// Backfill company_id on old projects that predate the field.
+	// Uses $set with a filter that only touches docs missing the field,
+	// so it's idempotent and a no-op once all projects are backfilled.
+	if res, err := system.GetStorage().BulkUpdate(ctx, constants.MongoProjectsCollection,
+		bson.M{"platform": p.Name(), "$or": []bson.M{
+			{"company_id": ""},
+			{"company_id": bson.M{"$exists": false}},
+		}},
+		bson.M{"$set": bson.M{"company_id": companyID}},
+	); err != nil {
+		logger.Warnf("backfill company_id on projects: %v", err)
+	} else if res > 0 {
+		logger.Infof("backfilled company_id=%q on %d projects for %s", companyID, res, p.Name())
 	}
 
 	platformName := p.Name()
@@ -285,7 +311,7 @@ func missingMethods(iface any, concrete any) []string {
 	return missing
 }
 
-func newSaveFn(logger *logrus.Entry) platformkit.SaveFn {
+func newSaveFn(logger *logrus.Entry, companyID string) platformkit.SaveFn {
 	return func(ctx context.Context, project any, existing any) error {
 		src, ok := project.(interfaces.Project)
 		if !ok {
@@ -300,6 +326,7 @@ func newSaveFn(logger *logrus.Entry) platformkit.SaveFn {
 		}
 
 		p := models.NewPersistedProject(src, prev)
+		p.CompanyID = companyID
 
 		if err := system.GetStorage().Replace(ctx, constants.MongoProjectsCollection, p); err != nil {
 			logger.Errorf("replace project %s: %v", p.PlatformID, err)
