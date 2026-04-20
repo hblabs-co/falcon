@@ -14,17 +14,24 @@ struct JobsView: View {
     @Environment(\.scenePhase) var scenePhase
     @State private var vm = JobsViewModel()
     @State private var bannerVisible = true
+    @State private var scrollToTop = false
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    heroBanner
-                    jobsList
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 16) {
+                        heroBanner
+                            .id("top")
+                        jobsList
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 110)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 110)
+                .onChange(of: scrollToTop) { _, _ in
+                    withAnimation { proxy.scrollTo("top", anchor: .top) }
+                }
             }
             .coordinateSpace(name: "jobsScroll")
             .background(Color(UIColor.systemGroupedBackground))
@@ -61,7 +68,13 @@ struct JobsView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         } else {
             HStack(spacing: 8) {
-                FalconIconView(size: 22, cornerRadius: 5)
+                Button {
+                    scrollToTop.toggle()
+                    Task { await vm.refresh() }
+                } label: {
+                    FalconIconView(size: 22, cornerRadius: 5)
+                }
+                .buttonStyle(.plain)
                 Text(lm.t(.tabJobs))
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                 if vm.todayCount > 0 {

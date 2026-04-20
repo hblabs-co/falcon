@@ -102,7 +102,7 @@ enum Strings {
     private static let table: [AppLanguage: [StringKey: String]] = [
         .english: [
             .tabJobs: "Jobs",
-            .tabAlerts: "Alerts",
+            .tabAlerts: "Matches",
             .tabSettings: "Settings",
 
             .sectionNotifications: "Notifications",
@@ -132,9 +132,9 @@ enum Strings {
 
             .langAppLabel: "App Language",
 
-            .alertsEmpty: "No Alerts Yet",
-            .alertsEmptyDescription: "Received notifications will appear here.",
-            .alertsBannerTagline: "Push Notifications",
+            .alertsEmpty: "No Matches Yet",
+            .alertsEmptyDescription: "Projects matching your profile will appear here.",
+            .alertsBannerTagline: "AI Matching",
 
             .jobsTitle: "Jobs",
 
@@ -256,7 +256,7 @@ enum Strings {
 
         .german: [
             .tabJobs: "Jobs",
-            .tabAlerts: "Alerts",
+            .tabAlerts: "Treffer",
             .tabSettings: "Einstellungen",
 
             .sectionNotifications: "Benachrichtigungen",
@@ -273,7 +273,7 @@ enum Strings {
             .notifStatusPending: "Ausstehend",
             .notifEnableButton: "Benachrichtigungen aktivieren",
 
-            .configAPIURL: "API URL",
+            .configAPIURL: "API-URL",
             .configUserID: "Benutzer-ID",
             .configRegister: "Mit API registrieren",
             .configRegistering: "Wird registriert…",
@@ -282,21 +282,21 @@ enum Strings {
             .tokenNone: "Noch kein Token",
             .tokenCopy: "Kopieren",
 
-            .lastNotifNone: "Noch keine empfangen",
+            .lastNotifNone: "Noch keine erhalten",
 
             .langAppLabel: "App-Sprache",
 
-            .alertsEmpty: "Keine Benachrichtigungen",
-            .alertsEmptyDescription: "Empfangene Benachrichtigungen erscheinen hier.",
-            .alertsBannerTagline: "Push-Benachrichtigungen",
+            .alertsEmpty: "Noch keine Treffer",
+            .alertsEmptyDescription: "Projekte, die zu deinem Profil passen, erscheinen hier.",
+            .alertsBannerTagline: "KI-gestützte Treffer",
 
             .jobsTitle: "Jobs",
 
-            .aboutCraftedIn: "Mit ♥ in Hamburg gebaut",
+            .aboutCraftedIn: "Entwickelt Mit ♥ in Hamburg",
             .aboutCreatedBy: "Erstellt von",
             .aboutVersion: "Version",
-            .aboutBuild: "Build",
-            .aboutGdprNote: "CV-Embeddings werden lokal verarbeitet (Ollama — keine Daten verlassen unsere Server). Die Matching-Analyse erfolgt durch Mistral AI, einen externen Dienst mit Sitz in Frankreich (EU). Mit der Nutzung von Falcon stimmen Sie der Verarbeitung Ihrer Lebenslaufdaten durch Mistral AI zu.",
+            .aboutBuild: "Build-Version",
+            .aboutGdprNote: "CV-Embeddings werden lokal verarbeitet (Ollama — keine Daten verlassen unsere Server). Die Analyse passender Treffer erfolgt durch Mistral AI, einen externen Dienst mit Sitz in Frankreich (EU). Mit der Nutzung von Falcon stimmen Sie der Verarbeitung Ihrer Lebenslaufdaten durch Mistral AI zu.",
             .aboutMistralPrivacy: "Datenschutzerklärung von Mistral AI",
             .aboutCreator: "Entwickler",
             .aboutCreatorBio: "Full-Stack-Entwickler mit %d+ Jahren Erfahrung, spezialisiert auf skalierbare Architekturen für Echtzeitsysteme.",
@@ -313,14 +313,14 @@ enum Strings {
             .splashSubtitle: "Job-Intelligenz",
 
             .tabProfile: "Profil",
-            .tabStats: "Stats",
-            .jobsBannerTagline: "Job-Intelligenz",
+            .tabStats: "Statistiken",
+            .jobsBannerTagline: "Intelligente Jobsuche",
             .jobsBannerMatchCount: "Stellenangebote heute",
 
             .profileAnonymous: "Anonym",
             .profileCVTitle: "Lebenslauf",
             .profileCVNone: "Kein Lebenslauf hochgeladen",
-            .profileCVHint: "Lade deinen Lebenslauf hoch, um Matches zu starten",
+            .profileCVHint: "Lade deinen Lebenslauf hoch, um passende Treffer zu erhalten",
             .profileCVUpload: "Lebenslauf hochladen",
             .profileCVUploadPending: "Demnächst via falcon-api",
             .profileCVDropzone: "Lebenslauf auswählen",
@@ -339,39 +339,39 @@ enum Strings {
             .profileCVSectionOthers: "Sonstige",
             .profileCVReplace: "Lebenslauf ersetzen",
             .profileWhyTitle: "Passende Projekte finden",
-            .profileWhyBody: "Lade deinen Lebenslauf hoch und lass Falcon dich mit den relevantesten Freelance-Projekten matchen. Unsere KI analysiert deine Fähigkeiten und Erfahrungen.",
+            .profileWhyBody: "Lade deinen Lebenslauf hoch und lass Falcon die relevantesten Freelance-Projekte für dich finden. Unsere KI analysiert deine Fähigkeiten und Erfahrungen.",
             .profileLoginButton: "Anmelden",
             .profileLoginTitle: "Anmelden",
-            .profileLoginEmailHint: "Wir schicken dir einen Magic Link per E-Mail.",
-            .profileLoginCTA: "Login-Link senden",
+            .profileLoginEmailHint: "Wir schicken dir einen Anmeldelink per E-Mail.",
+            .profileLoginCTA: "Anmeldelink senden",
             .authErrorTitle: "Anmeldung fehlgeschlagen",
             .authErrorTokenUsed: "Dieser Link wurde bereits verwendet. Bitte fordere einen neuen an.",
             .authErrorTokenExpired: "Dieser Link ist abgelaufen. Bitte fordere einen neuen an.",
             .authErrorGeneric: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
             .loginSentTitle: "Prüfe dein E-Mail-Postfach",
-            .loginSentBody: "Wir haben einen Login-Link an **%@** gesendet. Tippe darauf, um dich anzumelden.",
+            .loginSentBody: "Wir haben einen Anmeldelink an **%@** gesendet. Tippe darauf, um dich anzumelden.",
             .loginSentSpamHint: "Nicht gefunden? Überprüfe deinen Spam-Ordner.",
             .profileHowTitle: "So funktioniert es",
             .profileStep1Title: "Lebenslauf hochladen",
             .profileStep1Body: "Teile deine Erfahrung und Fähigkeiten als Word-Dokument.",
             .profileStep2Title: "KI-Analyse",
             .profileStep2Body: "Falcon extrahiert automatisch deine Fähigkeiten, Erfahrung und Technologien.",
-            .profileStep3Title: "Matches erhalten",
+            .profileStep3Title: "Treffer erhalten",
             .profileStep3Body: "Erhalte personalisierte Projektempfehlungen passend zu deinem Profil.",
-            .profileSkillsTitle: "Deine Skills",
-            .profileSkillsNone: "Skills erscheinen, sobald dein Lebenslauf verarbeitet wurde",
+            .profileSkillsTitle: "Deine Fähigkeiten",
+            .profileSkillsNone: "Fähigkeiten erscheinen, sobald dein Lebenslauf verarbeitet wurde",
 
             .legalLastUpdated: "Zuletzt aktualisiert",
 
-            .statsMatchesTotal: "Matches",
-            .statsAvgScore: "Ø Score",
-            .statsAlertsTotal: "Alerts",
-            .statsMatchHistory: "Match-Verlauf",
-            .statsTopSkills: "Gefragte Skills",
-            .statsTopSkillsEmpty: "Daten erscheinen nach dem ersten Match",
+            .statsMatchesTotal: "Treffer",
+            .statsAvgScore: "Ø Bewertung",
+            .statsAlertsTotal: "Benachrichtigungen",
+            .statsMatchHistory: "Trefferverlauf",
+            .statsTopSkills: "Gefragte Fähigkeiten",
+            .statsTopSkillsEmpty: "Daten erscheinen nach dem ersten Treffer",
 
-            .noCVWarningTitle: "Noch keine Job-Alerts",
-            .noCVWarningBody: "Lade deinen Lebenslauf hoch, damit Falcon dich mit passenden Projekten matcht und Alerts sendet.",
+            .noCVWarningTitle: "Noch keine Job-Benachrichtigungen",
+            .noCVWarningBody: "Lade deinen Lebenslauf hoch, damit Falcon passende Projekte für dich findet und dir Benachrichtigungen sendet.",
             .cvFailedAlertTitle: "Lebenslauf-Verarbeitung fehlgeschlagen",
             .cvFailedAlertBody: "Beim Verarbeiten deines Lebenslaufs ist ein Fehler aufgetreten. Bitte lade ihn erneut hoch.",
             .cvFailedAlertButton: "Zum Profil",
@@ -379,9 +379,9 @@ enum Strings {
             .settingsLogout: "Abmelden",
             .processingFact1: "Wir nutzen Mistral AI für DSGVO-Konformität",
             .processingFact2: "Deine Daten bleiben auf Servern in Deutschland",
-            .processingFact3: "Wir analysieren öffentliche Stellenangebote für Matches",
+            .processingFact3: "Wir analysieren öffentliche Stellenangebote, um passende Treffer zu finden",
             .processingFact4: "Dein Lebenslauf wird sicher verarbeitet und nie weitergegeben",
-            .processingFact5: "Matching startet automatisch, sobald dein Profil bereit ist",
+            .processingFact5: "Passende Treffer werden automatisch ermittelt, sobald dein Profil bereit ist",
             .reviewGood: "Guter Vermittler",
             .reviewAcceptable: "Akzeptabler Vermittler",
             .reviewBad: "Schlechter Vermittler",
@@ -396,7 +396,7 @@ enum Strings {
             .noNotifPermissionBody: "Aktiviere Benachrichtigungen, damit Falcon dich bei einem passenden Projekt informieren kann.",
             .noNotifPermissionButton: "Benachrichtigungen aktivieren",
 
-            .detailHighlights: "Highlights",
+            .detailHighlights: "Wichtige Punkte",
             .detailMustHave: "Pflichtanforderungen",
             .detailShouldHave: "Sollte mitbringen",
             .detailNiceToHave: "Von Vorteil",
@@ -410,7 +410,7 @@ enum Strings {
 
         .spanish: [
             .tabJobs: "Empleos",
-            .tabAlerts: "Alertas",
+            .tabAlerts: "Coincidencias",
             .tabSettings: "Ajustes",
 
             .sectionNotifications: "Notificaciones",
@@ -427,7 +427,7 @@ enum Strings {
             .notifStatusPending: "Pendiente",
             .notifEnableButton: "Activar notificaciones",
 
-            .configAPIURL: "API URL",
+            .configAPIURL: "URL de la API",
             .configUserID: "ID de usuario",
             .configRegister: "Registrar con API",
             .configRegistering: "Registrando…",
@@ -440,17 +440,17 @@ enum Strings {
 
             .langAppLabel: "Idioma de la app",
 
-            .alertsEmpty: "Sin alertas aún",
-            .alertsEmptyDescription: "Las notificaciones recibidas aparecerán aquí.",
-            .alertsBannerTagline: "Notificaciones push",
+            .alertsEmpty: "Sin coincidencias aún",
+            .alertsEmptyDescription: "Los proyectos que coincidan con tu perfil aparecerán aquí.",
+            .alertsBannerTagline: "Coincidencias con IA",
 
             .jobsTitle: "Empleos",
 
             .aboutCraftedIn: "Hecho con ♥ en Hamburgo",
             .aboutCreatedBy: "Creado por",
             .aboutVersion: "Versión",
-            .aboutBuild: "Build",
-            .aboutGdprNote: "Los embeddings del CV se generan localmente (Ollama — sin datos fuera de nuestros servidores). El análisis de matching lo realiza Mistral AI, un servicio externo con sede en Francia (UE). Al usar Falcon aceptas que tus datos del CV sean procesados por Mistral AI.",
+            .aboutBuild: "Compilación",
+            .aboutGdprNote: "Los embeddings del CV se generan localmente (Ollama — sin datos fuera de nuestros servidores). El análisis de coincidencias lo realiza Mistral AI, un servicio externo con sede en Francia (UE). Al usar Falcon aceptas que tus datos del CV sean procesados por Mistral AI.",
             .aboutMistralPrivacy: "Política de privacidad de Mistral AI",
             .aboutCreator: "Desarrollador",
             .aboutCreatorBio: "Desarrollador Full Stack con %d+ años de experiencia, especializado en arquitecturas escalables para sistemas en tiempo real.",
@@ -464,11 +464,11 @@ enum Strings {
             .aboutTermsOfUse: "Términos de uso",
             .aboutSourceCode: "Código fuente",
 
-            .splashSubtitle: "Inteligencia de empleo",
+            .splashSubtitle: "IA para proyectos Freelance",
 
             .tabProfile: "Perfil",
-            .tabStats: "Stats",
-            .jobsBannerTagline: "Inteligencia de empleo",
+            .tabStats: "Estadísticas",
+            .jobsBannerTagline: "Inteligencia laboral",
             .jobsBannerMatchCount: "ofertas laborales hoy",
 
             .profileAnonymous: "Anónimo",
@@ -517,12 +517,12 @@ enum Strings {
 
             .legalLastUpdated: "Última actualización",
 
-            .statsMatchesTotal: "Matches",
-            .statsAvgScore: "Score prom.",
+            .statsMatchesTotal: "Coincidencias",
+            .statsAvgScore: "Puntuación prom.",
             .statsAlertsTotal: "Alertas",
             .statsMatchHistory: "Historial",
             .statsTopSkills: "Skills más demandados",
-            .statsTopSkillsEmpty: "Los datos aparecerán tras tu primer match",
+            .statsTopSkillsEmpty: "Los datos aparecerán tras tu primera coincidencia",
 
             .noCVWarningTitle: "Sin alertas de empleo",
             .noCVWarningBody: "Sube tu CV para que Falcon te conecte con proyectos relevantes y te envíe alertas.",
@@ -535,7 +535,7 @@ enum Strings {
             .processingFact2: "Tus datos permanecen en servidores en Alemania",
             .processingFact3: "Analizamos ofertas laborales públicas para encontrar coincidencias",
             .processingFact4: "Tu CV se procesa de forma segura y nunca se comparte",
-            .processingFact5: "El matching comienza automáticamente cuando tu perfil esté listo",
+            .processingFact5: "Las coincidencias comienzan automáticamente cuando tu perfil esté listo",
             .reviewGood: "Buen Reclutador",
             .reviewAcceptable: "Reclutador Aceptable",
             .reviewBad: "Mal Reclutador",

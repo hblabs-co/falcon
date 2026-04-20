@@ -59,7 +59,7 @@ struct MainTabView: View {
 
     private var floatingTabBar: some View {
         HStack(spacing: 0) {
-            tabItem(icon: "bell.fill",           label: lm.t(.tabAlerts),    tab: .alerts)
+            tabItem(icon: "sparkles",             label: lm.t(.tabAlerts),    tab: .alerts)
             // tabItem(icon: "chart.bar.fill",      label: lm.t(.tabStats),     tab: .stats)
             tabItem(icon: "briefcase.fill",      label: lm.t(.tabJobs),      tab: .jobs)
             tabItem(icon: "person.fill",         label: lm.t(.tabProfile),   tab: .profile)

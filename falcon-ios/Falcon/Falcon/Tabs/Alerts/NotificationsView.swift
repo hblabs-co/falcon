@@ -46,7 +46,7 @@ struct NotificationsView: View {
                         } else {
                             ContentUnavailableView(
                                 lm.t(.alertsEmpty),
-                                systemImage: "bell.slash",
+                                systemImage: "sparkles",
                                 description: Text(lm.t(.alertsEmptyDescription))
                             )
                         }

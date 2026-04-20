@@ -8,7 +8,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = NotificationManager.shared
         application.registerForRemoteNotifications()
+        registerSettingsBundle()
         return true
+    }
+
+    private func registerSettingsBundle() {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        UserDefaults.standard.set(version, forKey: "version_preference")
+        UserDefaults.standard.set(build, forKey: "build_preference")
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
