@@ -101,6 +101,10 @@ struct SettingsView: View {
             }
             .disabled(!canRegister)
 
+            Button("Test Live Activity") {
+                nm.debugStartFakeMatchActivity()
+            }
+
             if case .failed(let msg) = nm.signalStatus {
                 Text(msg).font(.caption).foregroundStyle(.red)
             }

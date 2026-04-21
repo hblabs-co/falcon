@@ -61,10 +61,37 @@ func (s *Service) handleMatchResult(data []byte) error {
 		return nil
 	}
 
+	// Total matches for this user — shown in the Live Activity header.
+	totalMatches64, _ := system.GetStorage().Count(ctx, constants.MongoMatchResultsCollection, bson.M{"user_id": event.UserID})
+	totalMatches := int(totalMatches64)
+
 	var staleTokens []string
 	for _, dt := range tokens {
 		lang := s.resolveDeviceLanguage(event.UserID, "ios", dt.DeviceID)
-		if err := s.apns.Send(ctx, dt.Token, &event, lang); err != nil {
+
+		// Priority: UPDATE an existing activity if we have its update token.
+		// On success → next; on failure (activity ended) → fall through to
+		// push-to-start which creates a fresh activity.
+		if dt.LiveActivityUpdateToken != "" {
+			if err := s.apns.SendMatchLiveActivityUpdate(ctx, dt.LiveActivityUpdateToken, &event, lang, totalMatches); err == nil {
+				log.Infof("liveactivity UPDATE sent to user %s device %s… (lang=%s, total=%d)", event.UserID, dt.Token[:8], lang, totalMatches)
+				continue
+			} else {
+				log.Warnf("liveactivity update failed for device %s…: %v — trying start", dt.Token[:8], err)
+			}
+		}
+
+		// iOS 17.2+ with a push-to-start token: starts a new activity.
+		if dt.LiveActivityToken != "" {
+			if err := s.apns.SendMatchLiveActivityStart(ctx, dt.LiveActivityToken, &event, lang, totalMatches); err != nil {
+				log.Warnf("liveactivity start failed for device %s…: %v — falling back to regular push", dt.Token[:8], err)
+			} else {
+				log.Infof("liveactivity START+push sent to user %s device %s… (lang=%s, total=%d)", event.UserID, dt.Token[:8], lang, totalMatches)
+				continue
+			}
+		}
+
+		if err := s.apns.Send(ctx, dt.Token, &event, lang, totalMatches); err != nil {
 			if s.apns.IsStaleToken(err) {
 				log.Warnf("stale apns token %s…— queued for removal", dt.Token[:8])
 				staleTokens = append(staleTokens, dt.Token)
@@ -269,15 +296,66 @@ func (s *Service) handleAdminTestMatch(data []byte) error {
 			continue
 		}
 
+		// Total matches for this admin (for the Live Activity header).
+		totalMatches64, _ := system.GetStorage().Count(ctx, constants.MongoMatchResultsCollection, bson.M{"user_id": user.ID})
+		totalMatches := int(totalMatches64)
+
 		for _, dt := range tokens {
 			lang := s.resolveDeviceLanguage(user.ID, "ios", dt.DeviceID)
-			if err := s.apns.Send(ctx, dt.Token, &match, lang); err != nil {
+
+			// Try update → start → regular push, mirroring handleMatchResult.
+			if dt.LiveActivityUpdateToken != "" {
+				if err := s.apns.SendMatchLiveActivityUpdate(ctx, dt.LiveActivityUpdateToken, &match, lang, totalMatches); err == nil {
+					logrus.Infof("[signal] admin test liveactivity UPDATE sent to %s device %s… (lang=%s, project=%s, total=%d)", email, dt.Token[:8], lang, match.ProjectID, totalMatches)
+					continue
+				} else {
+					logrus.Warnf("[signal] admin test update failed for %s device %s…: %v — trying start", email, dt.Token[:8], err)
+				}
+			}
+			if dt.LiveActivityToken != "" {
+				if err := s.apns.SendMatchLiveActivityStart(ctx, dt.LiveActivityToken, &match, lang, totalMatches); err != nil {
+					logrus.Warnf("[signal] admin test start failed for %s device %s…: %v — falling back", email, dt.Token[:8], err)
+				} else {
+					logrus.Infof("[signal] admin test liveactivity START+push sent to %s device %s… (lang=%s, project=%s, total=%d)", email, dt.Token[:8], lang, match.ProjectID, totalMatches)
+					continue
+				}
+			}
+
+			if err := s.apns.Send(ctx, dt.Token, &match, lang, totalMatches); err != nil {
 				logrus.Errorf("[signal] admin test match push to %s device %s…: %v", email, dt.Token[:8], err)
 				continue
 			}
 			logrus.Infof("[signal] admin test match sent to %s device %s… (lang=%s, project=%s)", email, dt.Token[:8], lang, match.ProjectID)
 		}
 	}
+	return nil
+}
+
+// handleLiveActivityUpdateToken upserts (or clears) the per-activity update
+// token on a device's IOSDeviceToken record. Signal uses this to send
+// event="update" pushes and refresh the existing activity instead of creating
+// a new one each time.
+func (s *Service) handleLiveActivityUpdateToken(data []byte) error {
+	var evt models.IOSLiveActivityUpdateTokenEvent
+	if err := json.Unmarshal(data, &evt); err != nil {
+		return fmt.Errorf("unmarshal live_activity_update_token: %w", err)
+	}
+	if evt.DeviceID == "" {
+		return fmt.Errorf("live_activity_update_token event missing device_id")
+	}
+
+	ctx := context.Background()
+	if err := system.GetStorage().Set(ctx, constants.MongoIOSDeviceTokensCollection,
+		bson.M{"device_id": evt.DeviceID},
+		bson.M{"live_activity_update_token": evt.Token, "updated_at": time.Now()}); err != nil {
+		return fmt.Errorf("update live_activity_update_token: %w", err)
+	}
+
+	action := "set"
+	if evt.Token == "" {
+		action = "cleared"
+	}
+	logrus.Infof("[signal] live_activity_update_token %s for device %s", action, evt.DeviceID)
 	return nil
 }
 
@@ -289,12 +367,13 @@ func (s *Service) handleRegisterIOSDeviceToken(data []byte) error {
 
 	now := time.Now()
 	dt := models.IOSDeviceToken{
-		ID:        gonanoid.Must(),
-		UserID:    evt.UserID,
-		DeviceID:  evt.DeviceID,
-		Token:     evt.Token,
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:                gonanoid.Must(),
+		UserID:            evt.UserID,
+		DeviceID:          evt.DeviceID,
+		Token:             evt.Token,
+		LiveActivityToken: evt.LiveActivityToken,
+		CreatedAt:         now,
+		UpdatedAt:         now,
 	}
 
 	ctx := context.Background()
@@ -303,6 +382,10 @@ func (s *Service) handleRegisterIOSDeviceToken(data []byte) error {
 		return fmt.Errorf("upsert device token: %w", err)
 	}
 
-	logrus.Infof("[signal] registered token %s… for user %s device %s", evt.Token[:8], evt.UserID, evt.DeviceID)
+	laSuffix := "no live_activity_token"
+	if evt.LiveActivityToken != "" {
+		laSuffix = fmt.Sprintf("live_activity_token=%s…", evt.LiveActivityToken[:min(16, len(evt.LiveActivityToken))])
+	}
+	logrus.Infof("[signal] registered token %s… for user %s device %s (%s)", evt.Token[:8], evt.UserID, evt.DeviceID, laSuffix)
 	return nil
 }

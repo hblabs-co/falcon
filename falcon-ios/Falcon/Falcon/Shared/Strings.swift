@@ -28,6 +28,7 @@ enum StringKey {
 
     // Alerts view
     case matchesEmpty, matchesEmptyDescription, matchesBannerTagline, matchesBannerTotal
+    case matchesInfoBadge, matchesInfoBadgeTitle
     case matchLabelApplyImmediately, matchLabelTopCandidate
     case matchLabelAcceptable, matchLabelNotSuitable
     case matchesDetails, matchesViewJob, matchesSkillsYouHave, matchesMissingSkills
@@ -93,6 +94,9 @@ enum StringKey {
     // No notifications permission
     case noNotifPermissionTitle, noNotifPermissionBody, noNotifPermissionButton
 
+    // Live Activities disabled
+    case liveActivitiesDisabledTitle, liveActivitiesDisabledBody
+
     // Job detail
     case detailHighlights, detailMustHave, detailShouldHave, detailNiceToHave
     case detailResponsibilities, detailContact, detailViewOriginal, detailShowMore
@@ -143,6 +147,8 @@ enum Strings {
             .matchesEmptyDescription: "Projects matching your profile will appear here.",
             .matchesBannerTagline: "AI Matching",
             .matchesBannerTotal: "total matches",
+            .matchesInfoBadge: "Matches are projects the AI thinks fit your profile, ranked by score.",
+            .matchesInfoBadgeTitle: "What are matches?",
             .matchLabelApplyImmediately: "Apply Immediately",
             .matchLabelTopCandidate: "Top Candidate",
             .matchLabelAcceptable: "Acceptable",
@@ -268,6 +274,9 @@ enum Strings {
             .noNotifPermissionBody: "Enable notifications so Falcon can alert you when a matching project is found.",
             .noNotifPermissionButton: "Enable Notifications",
 
+            .liveActivitiesDisabledTitle: "Live Activities disabled",
+            .liveActivitiesDisabledBody: "Enable Live Activities and frequent updates in Settings to see scores on your Lock Screen and Dynamic Island.",
+
             .detailHighlights: "Highlights",
             .detailMustHave: "Must Have",
             .detailShouldHave: "Should Have",
@@ -318,6 +327,8 @@ enum Strings {
             .matchesEmptyDescription: "Projekte, die zu deinem Profil passen, erscheinen hier.",
             .matchesBannerTagline: "KI-gestützte Treffer",
             .matchesBannerTotal: "Treffer gesamt",
+            .matchesInfoBadge: "Treffer sind Projekte, die laut KI zu deinem Profil passen, sortiert nach Punktzahl.",
+            .matchesInfoBadgeTitle: "Was sind Treffer?",
             .matchesDetails: "Treffer-Details",
             .matchesViewJob: "Zum Job",
             .matchesSkillsYouHave: "Vorhandene Fähigkeiten",
@@ -443,6 +454,9 @@ enum Strings {
             .noNotifPermissionBody: "Aktiviere Benachrichtigungen, damit Falcon dich bei einem passenden Projekt informieren kann.",
             .noNotifPermissionButton: "Benachrichtigungen aktivieren",
 
+            .liveActivitiesDisabledTitle: "Live-Aktivitäten deaktiviert",
+            .liveActivitiesDisabledBody: "Aktiviere in den Einstellungen Live-Aktivitäten und häufige Updates, um Treffer auf Sperrbildschirm und Dynamic Island zu sehen.",
+
             .detailHighlights: "Wichtige Punkte",
             .detailMustHave: "Pflichtanforderungen",
             .detailShouldHave: "Sollte mitbringen",
@@ -493,7 +507,9 @@ enum Strings {
             .matchesEmptyDescription: "Los proyectos que coincidan con tu perfil aparecerán aquí.",
             .matchesBannerTagline: "Coincidencias con IA",
             .matchesBannerTotal: "coincidencias totales",
-            .matchesDetails: "Detalles de la coincidencia",
+            .matchesInfoBadge: "Las coincidencias son proyectos que según la IA encajan con tu perfil, ordenadas por puntuación.",
+            .matchesInfoBadgeTitle: "¿Qué son las coincidencias?",
+            .matchesDetails: "Ver detalles",
             .matchesViewJob: "Ver oferta",
             .matchesSkillsYouHave: "Habilidades que tienes",
             .matchesMissingSkills: "Habilidades que faltan",
@@ -617,6 +633,9 @@ enum Strings {
             .noNotifPermissionTitle: "Notificaciones desactivadas",
             .noNotifPermissionBody: "Activa las notificaciones para que Falcon te avise cuando encuentre un proyecto compatible.",
             .noNotifPermissionButton: "Activar notificaciones",
+
+            .liveActivitiesDisabledTitle: "Live Activities desactivadas",
+            .liveActivitiesDisabledBody: "Activa Live Activities y las actualizaciones frecuentes en Ajustes para ver las coincidencias en la pantalla de bloqueo y Dynamic Island.",
 
             .detailHighlights: "Destacados",
             .detailMustHave: "Imprescindible",

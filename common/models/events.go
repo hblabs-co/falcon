@@ -54,6 +54,18 @@ type IOSDeviceTokenRegisterEvent struct {
 	UserID   string `json:"user_id"`
 	DeviceID string `json:"device_id"`
 	Token    string `json:"token"`
+	// LiveActivityToken is optional — iOS 17.2+ push-to-start token for the
+	// FalconMatchAttributes activity. Empty for older iOS.
+	LiveActivityToken string `json:"live_activity_token,omitempty"`
+}
+
+// IOSLiveActivityUpdateTokenEvent is published to "signal.live_activity_update_token"
+// when iOS assigns (or clears) an update token for a running Live Activity.
+// An empty token means the activity ended/dismissed — signal clears the field
+// so the next push falls back to push-to-start.
+type IOSLiveActivityUpdateTokenEvent struct {
+	DeviceID string `json:"device_id"`
+	Token    string `json:"token"` // empty to clear
 }
 
 // ProjectNormalizedEvent is published to "project.normalized" by falcon-normalizer

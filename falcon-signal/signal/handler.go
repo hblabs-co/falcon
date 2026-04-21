@@ -83,6 +83,17 @@ func (m *Module) Register(ctx context.Context) error {
 	}
 	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalAdminTestMatch)
 
+	if err := system.Subscribe(
+		ctx,
+		constants.StreamSignal,
+		"falcon-signal-live-activity-update",
+		constants.SubjectSignalLiveActivityUpdate,
+		svc.handleLiveActivityUpdateToken,
+	); err != nil {
+		return err
+	}
+	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalLiveActivityUpdate)
+
 	// Start the background flush loop that delivers buffered admin alerts.
 	// Events arriving via handleAdminAlert are deduped in the buffer; the
 	// loop flushes every ADMIN_ALERT_WINDOW (default 2m) and sends the

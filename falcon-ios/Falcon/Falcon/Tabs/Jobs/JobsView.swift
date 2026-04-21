@@ -4,6 +4,7 @@ import SwiftUI
 
 struct JobsView: View {
     @Environment(LanguageManager.self) var lm
+    @Environment(NotificationManager.self) var nm
     @Environment(\.scenePhase) var scenePhase
     @State private var vm = JobsViewModel()
     @State private var bannerVisible = true
@@ -16,6 +17,12 @@ struct JobsView: View {
                     VStack(spacing: 16) {
                         heroBanner
                             .id("top")
+                        if nm.authStatus != .authorized {
+                            NotificationsDisabledBanner()
+                        }
+                        if nm.liveActivitiesRestricted {
+                            LiveActivitiesDisabledBanner()
+                        }
                         jobsList
                     }
                     .padding(.horizontal, 16)

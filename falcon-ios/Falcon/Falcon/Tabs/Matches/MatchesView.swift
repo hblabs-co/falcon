@@ -187,30 +187,97 @@ struct MatchesView: View {
     }
 
     // MARK: - Content body (state branches)
-
+    //
+    // Priority:
+    //   1. No CV             → upload first (hard blocker)
+    //   2. CV failed         → retry (hard blocker)
+    //   3. Empty + notifs off → full-screen CTA to enable notifications
+    //   4. Empty             → empty state
+    //   5. Has items / loading / error → list or status with a compact
+    //      "notifs off" banner on top when applicable
     @ViewBuilder
     private var contentBody: some View {
-        if isCVFailed {
-            cvFailedView
-        } else if session.userID.isEmpty {
+        if session.userID.isEmpty {
             noSessionView
-        } else if let vm, vm.isLoading {
-            loadingView
-        } else if let vm, let err = vm.error {
-            errorView(err)
-        } else if let vm, vm.matches.isEmpty {
-            emptyView
-        } else if let vm {
-            matchListBody(vm)
+        } else if isCVFailed {
+            cvFailedView
+        } else if let vm, vm.matches.isEmpty, !vm.isLoading, vm.error == nil {
+            if nm.authStatus != .authorized {
+                notificationsDisabledView
+            } else {
+                emptyView
+            }
         } else {
-            loadingView
+            VStack(spacing: 16) {
+                if nm.authStatus != .authorized {
+                    NotificationsDisabledBanner()
+                }
+                if nm.liveActivitiesRestricted {
+                    LiveActivitiesDisabledBanner()
+                }
+                if let vm, vm.isLoading {
+                    loadingView
+                } else if let vm, let err = vm.error {
+                    errorView(err)
+                } else if let vm {
+                    matchListBody(vm)
+                } else {
+                    loadingView
+                }
+            }
         }
+    }
+
+    private var notificationsDisabledView: some View {
+        VStack(spacing: 16) {
+            ContentUnavailableView(
+                lm.t(.noNotifPermissionTitle),
+                systemImage: "bell.slash.fill",
+                description: Text(lm.t(.noNotifPermissionBody))
+            )
+            Button(lm.t(.noNotifPermissionButton)) {
+                nm.requestPermission()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding(.top, 40)
+    }
+
+    // MARK: - Info badge shown at the top of the list (always visible).
+
+    private var infoBadge: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 30, height: 30)
+                .background(Circle().fill(Color.accentColor.opacity(0.15)))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(lm.t(.matchesInfoBadgeTitle))
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.accentColor)
+                Text(lm.t(.matchesInfoBadge))
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Color.accentColor.opacity(0.75))
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.accentColor.opacity(0.1))
+        )
     }
 
     // MARK: - List body (no wrapping ScrollView — parent handles scrolling)
 
     private func matchListBody(_ vm: MatchesViewModel) -> some View {
         LazyVStack(spacing: 14) {
+            infoBadge
             ForEach(vm.matches) { match in
                 matchCard(match)
                     .id(match.id)
@@ -418,6 +485,8 @@ struct MatchesView: View {
                     .frame(width: 16, height: 16)
                     Text(lm.t(.matchesViewJob))
                         .font(.system(size: 13, weight: .semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
@@ -434,6 +503,8 @@ struct MatchesView: View {
                         .font(.system(size: 11, weight: .semibold))
                     Text(lm.t(.matchesDetails))
                         .font(.system(size: 13, weight: .semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)

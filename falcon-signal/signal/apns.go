@@ -2,8 +2,10 @@ package signal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/payload"
@@ -50,8 +52,9 @@ func newAPNSClient() (*apnsClient, error) {
 // Send delivers a push notification to the given device token, localized to
 // lang. Summary and label title are picked from the multi-lang fields on the
 // result; lang falls back to "de" (the authoritative source language) when a
-// translation is missing.
-func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *models.MatchResultEvent, lang string) error {
+// translation is missing. totalMatches is the user's current total match
+// count for the Live Activity header.
+func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *models.MatchResultEvent, lang string, totalMatches int) error {
 	summary := result.Summary[lang]
 	if summary == "" {
 		summary = result.Summary["de"]
@@ -68,6 +71,8 @@ func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *model
 		Custom("score", result.Score).
 		Custom("label", string(result.Label)).
 		Custom("summary", summary).
+		Custom("company_name", result.CompanyName).
+		Custom("total_matches", totalMatches).
 		Custom("matched_skills", result.MatchedSkills).
 		Custom("missing_skills", result.MissingSkills).
 		Custom("scores", map[string]float32{
@@ -94,6 +99,154 @@ func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *model
 	}
 
 	logrus.Infof("apns sent — apns_id=%s device=%s…", resp.ApnsID, deviceToken[:8])
+	return nil
+}
+
+// SendMatchLiveActivityStart sends a push-to-start APNs payload that makes iOS
+// spin up a FalconMatchAttributes Live Activity on Lock Screen / Dynamic Island
+// without the app running. Requires iOS 17.2+ and a liveActivityToken obtained
+// from Activity.pushToStartTokenUpdates.
+//
+// The payload includes an inline alert so the same push also shows the normal
+// banner — one push, two effects. Devices on older iOS don't register a
+// liveActivityToken so they never receive this payload and fall back to Send.
+//
+// Topic MUST be "<bundle>.push-type.liveactivity" with header
+// apns-push-type: liveactivity.
+func (a *apnsClient) SendMatchLiveActivityStart(ctx context.Context, liveActivityToken string, result *models.MatchResultEvent, lang string, totalMatches int) error {
+	summary := result.Summary[lang]
+	if summary == "" {
+		summary = result.Summary["de"]
+	}
+
+	// Raw aps structure — apns2's payload builder doesn't expose the
+	// liveactivity-specific keys (event, content-state, attributes-type), so
+	// we construct the payload by hand.
+	body := map[string]any{
+		"aps": map[string]any{
+			"timestamp":       time.Now().Unix(),
+			"event":           "start",
+			"attributes-type": "FalconMatchAttributes",
+			"attributes":      map[string]any{},
+			"content-state": map[string]any{
+				"score":                result.Score,
+				"label":                string(result.Label),
+				"lang":                 lang,
+				"projectTitle":         result.ProjectTitle,
+				"companyName":          result.CompanyName,
+				"totalMatches":         totalMatches,
+				"summary":              summary,
+				"projectID":            result.ProjectID,
+				"cvID":                 result.CVID,
+				"skillsMatch":          result.Scores.SkillsMatch,
+				"seniorityFit":         result.Scores.SeniorityFit,
+				"domainExperience":     result.Scores.DomainExperience,
+				"communicationClarity": result.Scores.CommunicationClarity,
+				"projectRelevance":     result.Scores.ProjectRelevance,
+				"techStackOverlap":     result.Scores.TechStackOverlap,
+			},
+			"alert": map[string]any{
+				"title":    result.ProjectTitle,
+				"subtitle": labelTitle(result.Label, lang),
+				"body":     summary,
+			},
+			"sound": "default",
+		},
+	}
+
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal liveactivity payload: %w", err)
+	}
+
+	// apns2 v0.23 doesn't expose PushTypeLiveActivity as a constant, but the
+	// underlying type is just a string alias — the lib sends it verbatim in
+	// the apns-push-type header.
+	notification := &apns2.Notification{
+		DeviceToken: liveActivityToken,
+		Topic:       a.bundleID + ".push-type.liveactivity",
+		Payload:     raw,
+		PushType:    apns2.EPushType("liveactivity"),
+		Priority:    apns2.PriorityHigh,
+	}
+
+	resp, err := a.client.PushWithContext(ctx, notification)
+	if err != nil {
+		return fmt.Errorf("apns liveactivity push: %w", err)
+	}
+	if !resp.Sent() {
+		return fmt.Errorf("apns liveactivity rejected: %s (%d)", resp.Reason, resp.StatusCode)
+	}
+
+	logrus.Infof("apns liveactivity sent — apns_id=%s device=%s…", resp.ApnsID, liveActivityToken[:8])
+	return nil
+}
+
+// SendMatchLiveActivityUpdate refreshes an already-running Live Activity with
+// new content-state. The device token here is the per-activity UPDATE token
+// iOS handed out when the activity started (different from the pushToStart
+// token in SendMatchLiveActivityStart).
+//
+// Returns an error if the activity has ended (410 Gone from APNs) — callers
+// should clear the stored update token and fall back to SendMatchLiveActivityStart.
+func (a *apnsClient) SendMatchLiveActivityUpdate(ctx context.Context, updateToken string, result *models.MatchResultEvent, lang string, totalMatches int) error {
+	summary := result.Summary[lang]
+	if summary == "" {
+		summary = result.Summary["de"]
+	}
+
+	body := map[string]any{
+		"aps": map[string]any{
+			"timestamp": time.Now().Unix(),
+			"event":     "update",
+			"content-state": map[string]any{
+				"score":                result.Score,
+				"label":                string(result.Label),
+				"lang":                 lang,
+				"projectTitle":         result.ProjectTitle,
+				"companyName":          result.CompanyName,
+				"totalMatches":         totalMatches,
+				"summary":              summary,
+				"projectID":            result.ProjectID,
+				"cvID":                 result.CVID,
+				"skillsMatch":          result.Scores.SkillsMatch,
+				"seniorityFit":         result.Scores.SeniorityFit,
+				"domainExperience":     result.Scores.DomainExperience,
+				"communicationClarity": result.Scores.CommunicationClarity,
+				"projectRelevance":     result.Scores.ProjectRelevance,
+				"techStackOverlap":     result.Scores.TechStackOverlap,
+			},
+			"alert": map[string]any{
+				"title":    result.ProjectTitle,
+				"subtitle": labelTitle(result.Label, lang),
+				"body":     summary,
+			},
+			"sound": "default",
+		},
+	}
+
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal liveactivity update payload: %w", err)
+	}
+
+	notification := &apns2.Notification{
+		DeviceToken: updateToken,
+		Topic:       a.bundleID + ".push-type.liveactivity",
+		Payload:     raw,
+		PushType:    apns2.EPushType("liveactivity"),
+		Priority:    apns2.PriorityHigh,
+	}
+
+	resp, err := a.client.PushWithContext(ctx, notification)
+	if err != nil {
+		return fmt.Errorf("apns liveactivity update push: %w", err)
+	}
+	if !resp.Sent() {
+		return fmt.Errorf("apns liveactivity update rejected: %s (%d)", resp.Reason, resp.StatusCode)
+	}
+
+	logrus.Infof("apns liveactivity UPDATE sent — apns_id=%s update_token=%s…", resp.ApnsID, updateToken[:8])
 	return nil
 }
 

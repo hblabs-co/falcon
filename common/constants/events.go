@@ -27,4 +27,5 @@ const (
 	SubjectSignalMagicLink           = "signal.magic_link"
 	SubjectSignalAdminAlert          = "signal.admin_alert"
 	SubjectSignalAdminTestMatch      = "signal.admin_test_match"
+	SubjectSignalLiveActivityUpdate  = "signal.live_activity_update_token"
 )

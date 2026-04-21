@@ -1,5 +1,4 @@
 import Foundation
-import ActivityKit
 
 @Observable
 final class JobsViewModel {
@@ -13,8 +12,6 @@ final class JobsViewModel {
     private(set) var todayCount    = 0
 
     var hasMore: Bool { currentPage < totalPages }
-
-    private var liveActivity: Activity<FalconJobsAttributes>?
 
     // MARK: - Public
 
@@ -45,15 +42,6 @@ final class JobsViewModel {
         isLoadingMore = false
     }
 
-    func endLiveActivity() async {
-        let state = FalconJobsAttributes.ContentState(
-            projectCount: total,
-            latestTitle: projects.first?.displayTitle ?? ""
-        )
-        await liveActivity?.end(ActivityContent(state: state, staleDate: nil), dismissalPolicy: .immediate)
-        liveActivity = nil
-    }
-
     // MARK: - Private
 
     private func fetch(page: Int) async {
@@ -73,7 +61,6 @@ final class JobsViewModel {
             total       = response.pagination.total
             todayCount  = response.todayCount
             self.error  = nil
-            await updateLiveActivity()
         } catch is CancellationError {
             print("[jobs] fetch page=\(page) cancelled (CancellationError)")
         } catch let urlError as URLError where urlError.code == .cancelled {
@@ -84,22 +71,6 @@ final class JobsViewModel {
         }
     }
 
-    private func updateLiveActivity() async {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        let state = FalconJobsAttributes.ContentState(
-            projectCount: total,
-            latestTitle: projects.first?.displayTitle ?? ""
-        )
-        if let activity = liveActivity {
-            await activity.update(ActivityContent(state: state, staleDate: nil))
-        } else {
-            liveActivity = try? Activity.request(
-                attributes: FalconJobsAttributes(),
-                content: ActivityContent(state: state, staleDate: nil),
-                pushType: nil
-            )
-        }
-    }
 }
 
 // MARK: - API

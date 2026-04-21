@@ -13,7 +13,15 @@ struct FalconApp: App {
                 .environment(LanguageManager.shared)
                 .environment(SessionManager.shared)
                 .onOpenURL { url in
-                    authHandler.handle(url)
+                    // Route deep links by host:
+                    //   falcon://auth?token=...         → magic-link auth
+                    //   falcon://match?project_id&cv_id → Live Activity tap → open match detail
+                    switch url.host {
+                    case "match":
+                        NotificationManager.shared.handleMatchDeepLink(url)
+                    default:
+                        authHandler.handle(url)
+                    }
                 }
                 .onChange(of: authHandler.errorKey) { _, key in
                     if key != nil { showAuthError = true }
