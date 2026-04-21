@@ -15,6 +15,11 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     var signalStatus: SignalStatus = .idle
     var lastNotification: ReceivedNotification?
 
+    /// Set when the user taps a MATCH_RESULT notification. Observers (MainTabView,
+    /// MatchesView) react by switching to the matches tab, scrolling to the
+    /// match, and opening its details. Reset to nil after the UI consumes it.
+    var pendingMatchNavigation: MatchNotificationPayload?
+
     // API URL source of truth:
     // - DEBUG   → UserDefaults (editable from Settings) with Config.apiURL as fallback
     // - Release → hardcoded production falcon-api URL, never user-editable
@@ -29,6 +34,16 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         let title: String
         let body: String
         let receivedAt: Date
+    }
+
+    /// Payload extracted from a tapped MATCH_RESULT push. Equatable so SwiftUI's
+    /// onChange fires only when the target match changes.
+    struct MatchNotificationPayload: Equatable {
+        let projectID: String
+        let cvID: String
+        /// Matches `MatchResult.id` (composite) so ScrollViewReader + sheet(item:)
+        /// can target it directly without an extra lookup.
+        var matchID: String { "\(projectID)-\(cvID)" }
     }
 
     private override init() {
@@ -139,5 +154,29 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             )
         }
         completionHandler([.banner, .sound, .badge])
+    }
+
+    /// Handles notification taps (app launched or backgrounded). For MATCH_RESULT
+    /// pushes we set `pendingMatchNavigation` so the UI can navigate to the
+    /// matches tab and open the tapped match's detail sheet.
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        defer { completionHandler() }
+
+        let content = response.notification.request.content
+        guard content.categoryIdentifier == "MATCH_RESULT" else { return }
+
+        let info = content.userInfo
+        guard let projectID = info["project_id"] as? String,
+              let cvID      = info["cv_id"]      as? String else { return }
+
+        Task { @MainActor in
+            self.pendingMatchNavigation = MatchNotificationPayload(
+                projectID: projectID, cvID: cvID
+            )
+        }
     }
 }

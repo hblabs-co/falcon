@@ -14,6 +14,8 @@ struct MatchesView: View {
     @State private var openedMatch: MatchResult?
     @State private var loadingProjectID: String?
     @State private var bannerVisible = true
+    // matchID to briefly highlight after scrolling to it (notification tap flow).
+    @State private var highlightedMatchID: String?
 
     var body: some View {
         NavigationStack {
@@ -36,6 +38,26 @@ struct MatchesView: View {
                 }
                 .onChange(of: scrollToTop) { _, _ in
                     withAnimation { proxy.scrollTo("top", anchor: .top) }
+                }
+                // Consume pending notification tap. Fires on 3 triggers so
+                // cold-launch and live-tap both work:
+                //   1. payload changes (runtime tap while MatchesView is alive)
+                //   2. matches list finishes loading (cold-launch — view
+                //      mounted before loadInitial completed)
+                //   3. view first appears (user navigates manually to tab after
+                //      a tap that arrived earlier)
+                .onChange(of: nm.pendingMatchNavigation) { _, payload in
+                    guard let payload else { return }
+                    handleMatchNavigation(payload: payload, proxy: proxy)
+                }
+                .onChange(of: vm?.matches.count ?? 0) { _, count in
+                    guard count > 0, let payload = nm.pendingMatchNavigation else { return }
+                    handleMatchNavigation(payload: payload, proxy: proxy)
+                }
+                .onAppear {
+                    if let payload = nm.pendingMatchNavigation {
+                        handleMatchNavigation(payload: payload, proxy: proxy)
+                    }
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
@@ -191,6 +213,13 @@ struct MatchesView: View {
         LazyVStack(spacing: 14) {
             ForEach(vm.matches) { match in
                 matchCard(match)
+                    .id(match.id)
+                    .scaleEffect(highlightedMatchID == match.id ? 1.015 : 1.0)
+                    .shadow(
+                        color: highlightedMatchID == match.id ? Color.accentColor.opacity(0.35) : .clear,
+                        radius: highlightedMatchID == match.id ? 18 : 0
+                    )
+                    .animation(.spring(response: 0.35, dampingFraction: 0.7), value: highlightedMatchID)
                     .onAppear {
                         if match.id == vm.matches.last?.id {
                             Task { await vm.loadMore() }
@@ -493,6 +522,42 @@ struct MatchesView: View {
                 .buttonStyle(.bordered)
         }
         .padding(.top, 40)
+    }
+
+    // MARK: - Notification tap navigation
+
+    /// Scroll to the notification's match, open its detail sheet, and briefly
+    /// highlight the card. Called from both .onChange (payload arrives while
+    /// MatchesView is alive) and .onAppear (payload arrived before this tab
+    /// was rendered).
+    private func handleMatchNavigation(payload: NotificationManager.MatchNotificationPayload, proxy: ScrollViewProxy) {
+        // Only consume the payload when we actually find the match. If matches
+        // haven't loaded yet (cold-launch via notification), leave the payload
+        // for the next trigger (onChange of matches.count) to retry.
+        guard let match = vm?.matches.first(where: { $0.id == payload.matchID }) else {
+            print("[matches] notification match \(payload.matchID) not loaded yet — will retry when list fills")
+            return
+        }
+
+        Task { @MainActor in
+            // Let the tab-switch animation settle before scrolling.
+            try? await Task.sleep(for: .milliseconds(350))
+
+            withAnimation(.easeInOut(duration: 0.35)) {
+                proxy.scrollTo(match.id, anchor: .center)
+            }
+            highlightedMatchID = match.id
+            openedMatch = match
+
+            // Consume the payload so a later tap re-triggers.
+            nm.pendingMatchNavigation = nil
+
+            // Fade out the highlight after a moment.
+            try? await Task.sleep(for: .seconds(2))
+            if highlightedMatchID == match.id {
+                highlightedMatchID = nil
+            }
+        }
     }
 
     // MARK: - Open project

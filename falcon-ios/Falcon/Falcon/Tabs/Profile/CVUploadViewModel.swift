@@ -51,7 +51,9 @@ final class CVUploadViewModel {
         guard case .idle = state else { return }
         let session = SessionManager.shared
         guard session.isAuthenticated else { return }
-        guard let url = URL(string: "\(apiBase)/me?platform=ios") else { return }
+        // Pass device_id so the server merges this device's per-device overrides
+        // (e.g. app_language set from Settings) with the user-wide defaults.
+        guard let url = URL(string: "\(apiBase)/me?platform=ios&device_id=\(KeychainHelper.deviceID)") else { return }
         guard let jwt = session.cachedJWT else { return }
 
         var req = URLRequest(url: url)

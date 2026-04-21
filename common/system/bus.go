@@ -303,5 +303,6 @@ func StreamSignal() []jetstream.StreamConfig {
 		constants.SubjectSignalDeviceTokenRegister,
 		constants.SubjectSignalMagicLink,
 		constants.SubjectSignalAdminAlert,
+		constants.SubjectSignalAdminTestMatch,
 	)
 }

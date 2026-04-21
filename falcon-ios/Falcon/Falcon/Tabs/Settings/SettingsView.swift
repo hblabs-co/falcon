@@ -133,10 +133,14 @@ struct SettingsView: View {
         req.httpMethod = "PUT"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.setValue("Bearer \(jwt)", forHTTPHeaderField: "Authorization")
+        // Scope the setting to this specific device so a user with multiple
+        // iOS devices can pick a different language on each. Signal reads the
+        // same device_id when localizing match-result pushes.
         req.httpBody = try? JSONSerialization.data(withJSONObject: [
-            "platform": "ios",
-            "name":     "app_language",
-            "value":    lang.rawValue
+            "platform":  "ios",
+            "device_id": KeychainHelper.deviceID,
+            "name":      "app_language",
+            "value":     lang.rawValue
         ])
         URLSession.shared.dataTask(with: req).resume()
     }

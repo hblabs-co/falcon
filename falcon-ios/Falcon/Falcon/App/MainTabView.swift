@@ -48,7 +48,17 @@ struct MainTabView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
-        .task { await nm.refreshStatus() }
+        .task {
+            await nm.refreshStatus()
+            // Cold-launch via notification tap: didReceive fires BEFORE this
+            // view mounts, so .onChange never sees the transition. Check the
+            // initial value explicitly.
+            if nm.pendingMatchNavigation != nil {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    selectedTab = .matches
+                }
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 Task { await nm.refreshStatus() }
@@ -63,6 +73,15 @@ struct MainTabView: View {
                 await cvUploadVM.restoreFromServer()
             } else {
                 cvUploadVM.reset()
+            }
+        }
+        // When the user taps a MATCH_RESULT push, NotificationManager fills
+        // pendingMatchNavigation. Switch to the matches tab here; MatchesView
+        // picks up the same payload to scroll + open the detail sheet.
+        .onChange(of: nm.pendingMatchNavigation) { _, payload in
+            guard payload != nil else { return }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                selectedTab = .matches
             }
         }
     }

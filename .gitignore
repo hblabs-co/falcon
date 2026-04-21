@@ -3,6 +3,10 @@
 coverage.out
 __debug_*
 *.p8
+
 falcon-ios/**/Config.swift
 falcon-ios/**/xcuserdata/
 falcon-import/recruiter_rodeo/recruiters.html
+
+falcon-scout/scout/scout
+see_later

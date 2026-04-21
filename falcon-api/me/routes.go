@@ -21,9 +21,13 @@ func (Routes) Mount(r *gin.Engine) {
 	g.GET("", handleGetMe)
 	g.PUT("/config", handlePutConfig)
 
+	// Compound unique key (user_id, platform, device_id, name). device_id is
+	// an empty string for user-wide configs — Mongo treats "" as a real value,
+	// so user-wide and device-specific entries for the same name coexist on
+	// different rows without colliding.
 	if err := system.GetStorage().EnsureCompoundIndex(system.Ctx(), system.CompoundIndexSpec{
 		Collection: constants.MongoUsersConfigurationsCollection,
-		Fields:     []string{"user_id", "platform", "name"},
+		Fields:     []string{"user_id", "platform", "device_id", "name"},
 		Unique:     true,
 	}); err != nil {
 		logrus.Fatalf("configurations index: %v", err)
@@ -31,10 +35,14 @@ func (Routes) Mount(r *gin.Engine) {
 }
 
 // handleGetMe returns configurations and the active CV for the authenticated user.
-// Query params: platform
+// Query params:
+//   - platform  (required)
+//   - device_id (optional) — when present, the response merges user-wide configs
+//     with this device's overrides (device-specific values win).
 func handleGetMe(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	platform := c.Query("platform")
+	deviceID := c.Query("device_id")
 	if userID == nil || userID == "" || platform == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "platform is required"})
 		return
@@ -43,21 +51,35 @@ func handleGetMe(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	// Configs
-	var configs []models.UserConfig
-	err := system.GetStorage().GetMany(ctx, constants.MongoUsersConfigurationsCollection, bson.M{
+	// Fetch user-wide configs + (optionally) this device's overrides in one query.
+	configFilter := bson.M{
 		"user_id":  uid,
 		"platform": platform,
-	}, &configs)
-	if err != nil {
-		logrus.Errorf("get configs user=%s platform=%s: %v", uid, platform, err)
+	}
+	if deviceID != "" {
+		configFilter["device_id"] = bson.M{"$in": []string{"", deviceID}}
+	} else {
+		configFilter["device_id"] = ""
+	}
+
+	var configs []models.UserConfig
+	if err := system.GetStorage().GetMany(ctx, constants.MongoUsersConfigurationsCollection, configFilter, &configs); err != nil {
+		logrus.Errorf("get configs user=%s platform=%s device=%s: %v", uid, platform, deviceID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch configurations"})
 		return
 	}
 
+	// Merge: put user-wide first, then let device-specific overwrite per name.
 	cfgMap := make(map[string]any, len(configs))
 	for _, cfg := range configs {
-		cfgMap[cfg.Name] = cfg.Value
+		if cfg.DeviceID == "" {
+			cfgMap[cfg.Name] = cfg.Value
+		}
+	}
+	for _, cfg := range configs {
+		if cfg.DeviceID != "" {
+			cfgMap[cfg.Name] = cfg.Value
+		}
 	}
 
 	// Active CV (latest by user_id — there's at most one after dedup in falcon-storage)
@@ -73,12 +95,16 @@ func handleGetMe(c *gin.Context) {
 }
 
 type putConfigRequest struct {
-	Platform string `json:"platform" binding:"required"`
-	Name     string `json:"name"     binding:"required"`
+	Platform string `json:"platform"  binding:"required"`
+	// DeviceID is optional. Empty → user-wide default that applies to all of
+	// the user's devices. Non-empty → per-device override for this setting.
+	DeviceID string `json:"device_id"`
+	Name     string `json:"name"      binding:"required"`
 	Value    any    `json:"value"`
 }
 
-// handlePutConfig upserts a single configuration entry.
+// handlePutConfig upserts a single configuration entry, scoped user-wide or
+// per-device depending on whether device_id is present in the request.
 func handlePutConfig(c *gin.Context) {
 	uid, _ := c.Get("user_id")
 
@@ -92,18 +118,20 @@ func handlePutConfig(c *gin.Context) {
 	cfg := models.UserConfig{
 		UserID:    uid.(string),
 		Platform:  req.Platform,
+		DeviceID:  req.DeviceID,
 		Name:      req.Name,
 		Value:     req.Value,
 		UpdatedAt: time.Now(),
 	}
 
 	filter := bson.M{
-		"user_id":  uid.(string),
-		"platform": req.Platform,
-		"name":     req.Name,
+		"user_id":   uid.(string),
+		"platform":  req.Platform,
+		"device_id": req.DeviceID,
+		"name":      req.Name,
 	}
 	if err := system.GetStorage().Set(ctx, constants.MongoUsersConfigurationsCollection, filter, cfg); err != nil {
-		logrus.Errorf("put config user=%s platform=%s name=%s: %v", uid, req.Platform, req.Name, err)
+		logrus.Errorf("put config user=%s platform=%s device=%s name=%s: %v", uid, req.Platform, req.DeviceID, req.Name, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save configuration"})
 		return
 	}

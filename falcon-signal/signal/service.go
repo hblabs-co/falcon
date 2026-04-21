@@ -63,7 +63,8 @@ func (s *Service) handleMatchResult(data []byte) error {
 
 	var staleTokens []string
 	for _, dt := range tokens {
-		if err := s.apns.Send(ctx, dt.Token, &event); err != nil {
+		lang := s.resolveDeviceLanguage(event.UserID, "ios", dt.DeviceID)
+		if err := s.apns.Send(ctx, dt.Token, &event, lang); err != nil {
 			if s.apns.IsStaleToken(err) {
 				log.Warnf("stale apns token %s…— queued for removal", dt.Token[:8])
 				staleTokens = append(staleTokens, dt.Token)
@@ -72,7 +73,7 @@ func (s *Service) handleMatchResult(data []byte) error {
 			}
 			continue
 		}
-		log.Infof("push sent to user %s device %s…", event.UserID, dt.Token[:8])
+		log.Infof("push sent to user %s device %s… (lang=%s)", event.UserID, dt.Token[:8], lang)
 	}
 
 	if len(staleTokens) > 0 {
@@ -100,6 +101,47 @@ func (s *Service) handleMagicLink(data []byte) error {
 
 	logrus.Infof("[signal] magic link email sent to %s (lang=%s)", evt.Email, lang)
 	return nil
+}
+
+// resolveDeviceLanguage returns the effective app_language for the given user
+// on the given device. Lookup order:
+//  1. Device-specific (user_id + platform + device_id + name=app_language)
+//  2. User-wide default (device_id="")
+//  3. Fallback "de" — the authoritative source language of MatchResultEvent.
+//
+// One query fetches both rows by $in{"", deviceID}; the helper then picks
+// device-specific if present, else user-wide, else the default.
+func (s *Service) resolveDeviceLanguage(userID, platform, deviceID string) string {
+	ctx := context.Background()
+
+	var configs []models.UserConfig
+	err := system.GetStorage().GetMany(ctx, constants.MongoUsersConfigurationsCollection, bson.M{
+		"user_id":   userID,
+		"platform":  platform,
+		"name":      constants.ConfigNameAppLanguage,
+		"device_id": bson.M{"$in": []string{"", deviceID}},
+	}, &configs)
+	if err != nil || len(configs) == 0 {
+		return "de"
+	}
+
+	var userWide string
+	for _, cfg := range configs {
+		if cfg.DeviceID == deviceID && deviceID != "" {
+			if lang, ok := cfg.Value.(string); ok && lang != "" {
+				return lang
+			}
+		}
+		if cfg.DeviceID == "" {
+			if lang, ok := cfg.Value.(string); ok && lang != "" {
+				userWide = lang
+			}
+		}
+	}
+	if userWide != "" {
+		return userWide
+	}
+	return "de"
 }
 
 // resolveUserLanguage looks up the user's app_language config for the given platform.
@@ -171,6 +213,72 @@ func (s *Service) handleAdminAlert(data []byte) error {
 	default:
 		return fmt.Errorf("admin_alert event has unknown kind %q", evt.Kind)
 	}
+}
+
+// handleAdminTestMatch is triggered by a manual admin action. For each admin
+// user (resolved from ADMIN_EMAILS → Falcon user by email) it fetches the
+// match_result at event.Index (scored_at desc, same order iOS shows) and
+// pushes it to their iOS devices, localized per device.
+// Does NOT store anything — purely a delivery test against real data.
+func (s *Service) handleAdminTestMatch(data []byte) error {
+	ctx := context.Background()
+
+	var event models.AdminTestMatchEvent
+	if err := json.Unmarshal(data, &event); err != nil {
+		logrus.Warnf("[signal] admin test match: unmarshal failed (using index=0): %v", err)
+	}
+	if event.Index < 0 {
+		event.Index = 0
+	}
+
+	admins := s.admin.config.List()
+	if len(admins) == 0 {
+		logrus.Warn("[signal] admin test match: ADMIN_EMAILS is empty, nothing to do")
+		return nil
+	}
+
+	for _, email := range admins {
+		var user models.User
+		if err := system.GetStorage().GetByField(ctx, constants.MongoUsersCollection, "email", email, &user); err != nil {
+			logrus.Warnf("[signal] admin test match: admin %s is not a Falcon user, skipping", email)
+			continue
+		}
+
+		// match_result at the given index for THIS admin.
+		// FindPage uses 1-indexed pages with pageSize=1 → page=index+1.
+		var results []models.MatchResultEvent
+		total, err := system.GetStorage().FindPage(ctx, constants.MongoMatchResultsCollection,
+			bson.M{"user_id": user.ID}, "scored_at", true, event.Index+1, 1, &results)
+		if err != nil {
+			logrus.Errorf("[signal] admin test match: fetch match for %s: %v", email, err)
+			continue
+		}
+		if total == 0 || len(results) == 0 {
+			logrus.Warnf("[signal] admin test match: admin %s has no match at index %d (total=%d)", email, event.Index, total)
+			continue
+		}
+		match := results[0]
+
+		var tokens []models.IOSDeviceToken
+		if err := system.GetStorage().GetAllByField(ctx, constants.MongoIOSDeviceTokensCollection, "user_id", user.ID, &tokens); err != nil {
+			logrus.Warnf("[signal] admin test match: fetch tokens for %s: %v", email, err)
+			continue
+		}
+		if len(tokens) == 0 {
+			logrus.Warnf("[signal] admin test match: admin %s has no registered iOS devices", email)
+			continue
+		}
+
+		for _, dt := range tokens {
+			lang := s.resolveDeviceLanguage(user.ID, "ios", dt.DeviceID)
+			if err := s.apns.Send(ctx, dt.Token, &match, lang); err != nil {
+				logrus.Errorf("[signal] admin test match push to %s device %s…: %v", email, dt.Token[:8], err)
+				continue
+			}
+			logrus.Infof("[signal] admin test match sent to %s device %s… (lang=%s, project=%s)", email, dt.Token[:8], lang, match.ProjectID)
+		}
+	}
+	return nil
 }
 
 func (s *Service) handleRegisterIOSDeviceToken(data []byte) error {

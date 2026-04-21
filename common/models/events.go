@@ -99,3 +99,11 @@ type AdminAlertEvent struct {
 	Kind AdminAlertKind `json:"kind"`
 	ID   string         `json:"id"`
 }
+
+// AdminTestMatchEvent is published to "signal.admin_test_match" by the admin
+// POST /signal/test-last-match endpoint. Index picks which of the admin's own
+// match_results to push, ordered by scored_at desc (same order the iOS list
+// shows): 0 = latest (default), 1 = second latest, 2 = third, etc.
+type AdminTestMatchEvent struct {
+	Index int `json:"index"`
+}

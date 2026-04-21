@@ -47,19 +47,27 @@ func newAPNSClient() (*apnsClient, error) {
 	return &apnsClient{client: client, bundleID: bundleID}, nil
 }
 
-// Send delivers a push notification to the given device token.
-func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *models.MatchResultEvent) error {
+// Send delivers a push notification to the given device token, localized to
+// lang. Summary and label title are picked from the multi-lang fields on the
+// result; lang falls back to "de" (the authoritative source language) when a
+// translation is missing.
+func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *models.MatchResultEvent, lang string) error {
+	summary := result.Summary[lang]
+	if summary == "" {
+		summary = result.Summary["de"]
+	}
+
 	p := payload.NewPayload().
 		AlertTitle(result.ProjectTitle).
-		AlertSubtitle(labelTitle(result.Label)).
-		AlertBody(result.Summary).
+		AlertSubtitle(labelTitle(result.Label, lang)).
+		AlertBody(summary).
 		Sound("default").
 		Category("MATCH_RESULT").
 		Custom("project_id", result.ProjectID).
 		Custom("cv_id", result.CVID).
 		Custom("score", result.Score).
 		Custom("label", string(result.Label)).
-		Custom("summary", result.Summary).
+		Custom("summary", summary).
 		Custom("matched_skills", result.MatchedSkills).
 		Custom("missing_skills", result.MissingSkills).
 		Custom("scores", map[string]float32{
@@ -144,13 +152,42 @@ func (a *apnsClient) IsStaleToken(err error) bool {
 	return strings.Contains(msg, "BadDeviceToken") || strings.Contains(msg, "Unregistered")
 }
 
-func labelTitle(label models.MatchLabel) string {
-	switch label {
-	case models.MatchLabelApplyImmediately:
-		return "Jetzt bewerben!"
-	case models.MatchLabelTopCandidate:
-		return "Starker Kandidat"
-	default:
-		return "Neue Projektempfehlung"
+// labelTitle returns the localized APNs subtitle string for the given match
+// label. Used as the notification's second line above the body.
+func labelTitle(label models.MatchLabel, lang string) string {
+	switch lang {
+	case "en":
+		switch label {
+		case models.MatchLabelApplyImmediately:
+			return "Apply immediately!"
+		case models.MatchLabelTopCandidate:
+			return "Top candidate"
+		case models.MatchLabelAcceptable:
+			return "Acceptable match"
+		default:
+			return "New match"
+		}
+	case "es":
+		switch label {
+		case models.MatchLabelApplyImmediately:
+			return "¡Aplica ya!"
+		case models.MatchLabelTopCandidate:
+			return "Top candidato"
+		case models.MatchLabelAcceptable:
+			return "Coincidencia aceptable"
+		default:
+			return "Nueva coincidencia"
+		}
+	default: // "de" and anything unknown → German (authoritative source)
+		switch label {
+		case models.MatchLabelApplyImmediately:
+			return "Jetzt bewerben!"
+		case models.MatchLabelTopCandidate:
+			return "Starker Kandidat"
+		case models.MatchLabelAcceptable:
+			return "Akzeptabler Treffer"
+		default:
+			return "Neuer Treffer"
+		}
 	}
 }
