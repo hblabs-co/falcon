@@ -359,6 +359,44 @@ func (s *Service) handleLiveActivityUpdateToken(data []byte) error {
 	return nil
 }
 
+// handleLogoutIOSDeviceToken unbinds a device from its user. The APNs
+// device token itself is a device attribute (doesn't change on logout),
+// so we keep it. We clear user_id + live_activity_token +
+// live_activity_update_token — signal's match lookup is
+// GetAllByField("user_id"), so no user_id means no pushes. Re-login
+// calls /device-token which upserts by device_id and restores the
+// binding. Idempotent: unmatched filter is a no-op, not an error.
+func (s *Service) handleLogoutIOSDeviceToken(data []byte) error {
+	var evt models.IOSDeviceTokenLogoutEvent
+	if err := json.Unmarshal(data, &evt); err != nil {
+		return fmt.Errorf("unmarshal device_token.logout: %w", err)
+	}
+	if evt.DeviceID == "" {
+		return fmt.Errorf("device_token.logout event missing device_id")
+	}
+
+	ctx := context.Background()
+	filter := bson.M{"device_id": evt.DeviceID}
+	if evt.UserID != "" {
+		// Scoping by user_id protects the row if somehow a different
+		// user already re-registered on this device before this event
+		// was processed (rare, but NATS is async).
+		filter["user_id"] = evt.UserID
+	}
+	update := bson.M{"$set": bson.M{
+		"user_id":                    "",
+		"live_activity_token":        "",
+		"live_activity_update_token": "",
+		"updated_at":                 time.Now(),
+	}}
+	if _, err := system.GetStorage().BulkUpdate(ctx, constants.MongoIOSDeviceTokensCollection, filter, update); err != nil {
+		return fmt.Errorf("unbind token for device %s: %w", evt.DeviceID, err)
+	}
+
+	logrus.Infof("[signal] logout: unbound device %s (user_id=%s)", evt.DeviceID, evt.UserID)
+	return nil
+}
+
 func (s *Service) handleRegisterIOSDeviceToken(data []byte) error {
 	var evt models.IOSDeviceTokenRegisterEvent
 	if err := json.Unmarshal(data, &evt); err != nil {

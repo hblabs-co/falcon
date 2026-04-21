@@ -1,5 +1,8 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import OSLog
+
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "login")
 
 struct ProfileView: View {
     @Environment(LanguageManager.self) var lm
@@ -18,6 +21,9 @@ struct ProfileView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    if !session.isAuthenticated {
+                        AlreadyHaveAccountBanner()
+                    }
                     if case .done = vm.state,
                        let cv = vm.normalizedCV?.lang(for: lm.appLanguage) {
                         CVProfileView(cv: cv, onReplace: { vm.reset() })
@@ -126,28 +132,29 @@ struct ProfileView: View {
     // MARK: - Why CV card
 
     private var whyCVCard: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(spacing: 12) {
             Image(systemName: "sparkles")
-                .font(.system(size: 22))
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Color.accentColor)
-                .frame(width: 32)
-                .padding(.top, 2)
+                .frame(width: 30, height: 30)
+                .background(Circle().fill(Color.accentColor.opacity(0.15)))
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(lm.t(.profileWhyTitle))
-                    .font(.system(size: 15, weight: .semibold))
-
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.accentColor)
                 Text(lm.t(.profileWhyBody))
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Color.accentColor.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
             }
+
+            Spacer(minLength: 0)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.accentColor.opacity(0.07))
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.accentColor.opacity(0.1))
         )
     }
 }
@@ -590,13 +597,13 @@ struct LoginSheet: View {
 
     @MainActor
     private func sendMagicLink() async {
-        print("[login] sendMagicLink called for \(email)")
+        log.info("sendMagicLink called for \(email, privacy: .public)")
         isSending = true
         errorMessage = nil
 
         let base = NotificationManager.shared.apiURL
         guard let url = URL(string: "\(base)/auth/magic") else {
-            print("[login] invalid url: \(base)/auth/magic")
+            log.error("invalid url: \(base, privacy: .public)/auth/magic")
             errorMessage = "Invalid server URL"
             isSending = false
             return
@@ -613,27 +620,28 @@ struct LoginSheet: View {
             "platform": "ios"
         ])
 
-        print("[login] POST \(url)")
+        log.info("POST \(url.absoluteString, privacy: .public)")
 
         do {
             let (data, response) = try await URLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse else {
-                print("[login] no HTTP response")
+                log.error("no HTTP response")
                 errorMessage = "No response from server"
                 isSending = false
                 return
             }
-            print("[login] status: \(http.statusCode)")
+            log.info("status: \(http.statusCode, privacy: .public)")
             if (200...299).contains(http.statusCode) {
+                RealtimeClient.shared.emit("magic_link_requested", metadata: ["email": email])
                 withAnimation { sent = true }
             } else {
                 let body = String(data: data, encoding: .utf8) ?? "n/a"
-                print("[login] error body: \(body)")
+                log.error("error body: \(body, privacy: .public)")
                 let msg = (try? JSONDecoder().decode([String: String].self, from: data))?["error"]
                 errorMessage = msg ?? "Request failed (\(http.statusCode))"
             }
         } catch {
-            print("[login] exception: \(error)")
+            log.error("exception: \(error.localizedDescription, privacy: .public)")
             errorMessage = error.localizedDescription
         }
         isSending = false

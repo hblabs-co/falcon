@@ -3,4 +3,7 @@
 enum Config {
     static let apiURL = "http://your-api-server:8080"
     static let userID = "your-nanoid-user-id"
+    static let imageHost = "http://your-minio-host:9000"
+    static let realtimeURL = "ws://your-realtime-server:8090/ws"
+    static let realtimeSecret = "shared-secret-matching-server-REALTIME_SHARED_SECRET"
 }

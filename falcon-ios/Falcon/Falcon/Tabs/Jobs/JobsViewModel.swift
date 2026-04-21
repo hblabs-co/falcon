@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "jobs")
 
 @Observable
 final class JobsViewModel {
@@ -17,22 +20,22 @@ final class JobsViewModel {
 
     func loadInitial() async {
         guard !isLoading else {
-            print("[jobs] loadInitial skipped — already loading")
+            log.info("loadInitial skipped — already loading")
             return
         }
-        print("[jobs] loadInitial starting")
+        log.info("loadInitial starting")
         isLoading = true
         error     = nil
         await fetch(page: 1)
         isLoading = false
-        print("[jobs] loadInitial done — \(projects.count) projects, error=\(error ?? "nil")")
+        log.info("loadInitial done — \(self.projects.count, privacy: .public) projects, error=\((self.error ?? "nil"), privacy: .public)")
     }
 
     func refresh() async {
-        print("[jobs] refresh starting")
+        log.info("refresh starting")
         error = nil
         await fetch(page: 1)
-        print("[jobs] refresh done — \(projects.count) projects")
+        log.info("refresh done — \(self.projects.count, privacy: .public) projects")
     }
 
     func loadMore() async {
@@ -45,10 +48,10 @@ final class JobsViewModel {
     // MARK: - Private
 
     private func fetch(page: Int) async {
-        print("[jobs] fetch page=\(page)")
+        log.info("fetch page=\(page, privacy: .public)")
         do {
             let response = try await ProjectsAPI.fetch(page: page)
-            print("[jobs] fetch page=\(page) got \(response.data.count) items")
+            log.info("fetch page=\(page, privacy: .public) got \(response.data.count, privacy: .public) items")
             if page == 1 {
                 projects = response.data
             } else {
@@ -62,11 +65,11 @@ final class JobsViewModel {
             todayCount  = response.todayCount
             self.error  = nil
         } catch is CancellationError {
-            print("[jobs] fetch page=\(page) cancelled (CancellationError)")
+            log.error("fetch page=\(page, privacy: .public) cancelled (CancellationError)")
         } catch let urlError as URLError where urlError.code == .cancelled {
-            print("[jobs] fetch page=\(page) cancelled (URLError)")
+            log.error("fetch page=\(page, privacy: .public) cancelled (URLError)")
         } catch {
-            print("[jobs] fetch page=\(page) error: \(error)")
+            log.error("fetch page=\(page, privacy: .public) error: \(error.localizedDescription, privacy: .public)")
             self.error = error.localizedDescription
         }
     }

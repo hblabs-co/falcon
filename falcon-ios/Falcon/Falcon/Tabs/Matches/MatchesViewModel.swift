@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "matches")
 
 @Observable
 final class MatchesViewModel {
@@ -61,7 +64,7 @@ final class MatchesViewModel {
         } catch let urlError as URLError where urlError.code == .cancelled {
             // ignore
         } catch {
-            print("[matches] fetch page=\(page) error: \(error)")
+            log.error("fetch page=\(page, privacy: .public) error: \(error.localizedDescription, privacy: .public)")
             self.error = error.localizedDescription
         }
     }

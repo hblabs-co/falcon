@@ -2,6 +2,9 @@ import Foundation
 import UserNotifications
 import UIKit
 import ActivityKit
+import OSLog
+
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "notifications")
 
 @Observable
 final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
@@ -105,7 +108,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 await MainActor.run {
                     self?.liveActivityPushToStartToken = token
                 }
-                print("[live-activity] pushToStart token: \(token.prefix(16))…")
+                log.info("pushToStart token: \(String(token.prefix(16)), privacy: .public)…")
                 let userID = SessionManager.shared.userID
                 if !userID.isEmpty {
                     self?.registerWithSignal(userID: userID)
@@ -120,19 +123,19 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     /// new activity on every match. When the activity ends, we clear the
     /// token on backend so the next push falls back to start.
     private func startLiveActivityUpdatesObserver() {
-        print("[live-activity] startLiveActivityUpdatesObserver() called")
+        log.info("startLiveActivityUpdatesObserver() called")
         guard #available(iOS 16.2, *) else {
-            print("[live-activity] iOS < 16.2 — observer skipped")
+            log.info("iOS < 16.2 — observer skipped")
             return
         }
-        print("[live-activity] scheduling activityUpdates observer task")
+        log.info("scheduling activityUpdates observer task")
         liveActivityUpdatesObserver = Task { [weak self] in
-            print("[live-activity] activityUpdates observer task RUNNING")
+            log.info("activityUpdates observer task RUNNING")
             // Log any activities that are ALREADY running when this observer
             // starts (e.g. app launched while a push-to-start activity is on
             // Lock Screen). activityUpdates only yields NEW arrivals.
             let existing = Activity<FalconMatchAttributes>.activities
-            print("[live-activity] observer started — \(existing.count) already-running activity(ies)")
+            log.info("observer started — \(existing.count, privacy: .public) already-running activity(ies)")
 
             // If there are no running activities, clear any stale update_token
             // that may still be in the backend (app was killed before we got
@@ -145,13 +148,13 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 // streams so we can re-capture the update token (iOS may
                 // replay the current one) and observe later lifecycle events.
                 for a in existing {
-                    print("[live-activity]  ↳ existing id=\(a.id) state=\(a.activityState) project=\(a.content.state.projectID) score=\(a.content.state.score) title=\(a.content.state.projectTitle)")
+                    log.info(" ↳ existing id=\(a.id, privacy: .public) state=\(String(describing: a.activityState), privacy: .public) project=\(a.content.state.projectID, privacy: .public) score=\(a.content.state.score, privacy: .public) title=\(a.content.state.projectTitle, privacy: .public)")
                     self?.observeActivity(a)
                 }
             }
 
             for await activity in Activity<FalconMatchAttributes>.activityUpdates {
-                print("[live-activity] ▶ NEW activity arrived id=\(activity.id) state=\(activity.activityState) project=\(activity.content.state.projectID) score=\(activity.content.state.score) title=\(activity.content.state.projectTitle)")
+                log.info("▶ NEW activity arrived id=\(activity.id, privacy: .public) state=\(String(describing: activity.activityState), privacy: .public) project=\(activity.content.state.projectID, privacy: .public) score=\(activity.content.state.score, privacy: .public) title=\(activity.content.state.projectTitle, privacy: .public)")
                 self?.observeActivity(activity)
             }
         }
@@ -166,13 +169,13 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         Task { [weak self] in
             for await data in activity.pushTokenUpdates {
                 let token = data.map { String(format: "%02x", $0) }.joined()
-                print("[live-activity] update token for activity \(activity.id): \(token.prefix(16))… (len=\(token.count))")
+                log.info("update token for activity \(activity.id, privacy: .public): \(String(token.prefix(16)), privacy: .public)… (len=\(token.count, privacy: .public))")
                 await self?.sendLiveActivityUpdateToken(token)
             }
         }
         Task { [weak self] in
             for await state in activity.activityStateUpdates {
-                print("[live-activity] activity \(activity.id) → state=\(state)")
+                log.info("activity \(activity.id, privacy: .public) → state=\(String(describing: state), privacy: .public)")
                 switch state {
                 case .ended, .dismissed:
                     await self?.sendLiveActivityUpdateToken("")
@@ -183,7 +186,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
         Task {
             for await content in activity.contentUpdates {
-                print("[live-activity] activity \(activity.id) content updated — score=\(content.state.score) project=\(content.state.projectID) title=\(content.state.projectTitle)")
+                log.info("activity \(activity.id, privacy: .public) content updated — score=\(content.state.score, privacy: .public) project=\(content.state.projectID, privacy: .public) title=\(content.state.projectTitle, privacy: .public)")
             }
         }
     }
@@ -287,9 +290,9 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         // regular APNs push (no Live Activity).
         if let liveToken = liveActivityPushToStartToken {
             body["live_activity_token"] = liveToken
-            print("[live-activity] registerWithSignal: including live_activity_token=\(liveToken.prefix(16))…")
+            log.info("registerWithSignal: including live_activity_token=\(String(liveToken.prefix(16)), privacy: .public)…")
         } else {
-            print("[live-activity] registerWithSignal: no live_activity_token yet (iOS < 17.2 or not assigned yet)")
+            log.info("registerWithSignal: no live_activity_token yet (iOS < 17.2 or not assigned yet)")
         }
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
@@ -313,8 +316,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         let content = notification.request.content
-        print("[push] willPresent fired — category=\(content.categoryIdentifier) title=\(content.title)")
-        print("[push] userInfo keys: \(Array(content.userInfo.keys))")
+        log.info("willPresent fired — category=\(content.categoryIdentifier, privacy: .public) title=\(content.title, privacy: .public)")
+        log.info("userInfo keys: \(Array(content.userInfo.keys), privacy: .public)")
         Task { @MainActor in
             self.lastNotification = ReceivedNotification(
                 title: content.title,
@@ -327,7 +330,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             if content.categoryIdentifier == "MATCH_RESULT" {
                 self.startOrUpdateMatchActivity(content: content)
             } else {
-                print("[push] category is \"\(content.categoryIdentifier)\" — not starting activity (expected \"MATCH_RESULT\")")
+                log.info("category is \"\(content.categoryIdentifier, privacy: .public)\" — not starting activity (expected \"MATCH_RESULT\")")
             }
         }
         completionHandler([.banner, .sound, .badge])
@@ -344,17 +347,83 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         defer { completionHandler() }
 
         let content = response.notification.request.content
-        guard content.categoryIdentifier == "MATCH_RESULT" else { return }
+        log.error("didReceive fired — category=\(content.categoryIdentifier, privacy: .public) actionID=\(response.actionIdentifier, privacy: .public) title=\(content.title, privacy: .public)")
+
+        // Tag session source unconditionally — every push tap caused the
+        // open, regardless of whether we can route to a specific screen.
+        Task { @MainActor in
+            RealtimeClient.shared.noteSessionSource("push_notification")
+            RealtimeClient.shared.noteAppOpenSource("push_notification")
+        }
+
+        guard content.categoryIdentifier == "MATCH_RESULT" else {
+            log.info("didReceive: non-MATCH_RESULT category, no routing")
+            return
+        }
 
         let info = content.userInfo
         guard let projectID = info["project_id"] as? String,
               let cvID      = info["cv_id"]      as? String else { return }
 
         Task { @MainActor in
+            RealtimeClient.shared.emit(RealtimeEvent.NotificationOpen, metadata: [
+                "project_id": projectID,
+                "cv_id":      cvID
+            ])
             self.pendingMatchNavigation = MatchNotificationPayload(
                 projectID: projectID, cvID: cvID
             )
         }
+    }
+
+    // MARK: - Logout cleanup
+
+    /// Called from SessionManager.logout(). Tells the backend to drop this
+    /// device's push tokens, ends any running Live Activity, and clears
+    /// delivered/pending notifications + badge. Best-effort — failures are
+    /// logged but don't block the logout itself.
+    @MainActor
+    func logoutCleanup(userID: String) async {
+        // 1. Tell backend to unbind this device. Server clears user_id +
+        //    live_activity_token on the ios_device_tokens row (keeps the
+        //    APNs token itself since that's a device attribute, not a
+        //    user one) and deletes the JWT row from the tokens
+        //    collection. user_id scopes the unbind so concurrent edits
+        //    for a different user on the same device aren't clobbered.
+        if let url = URL(string: "\(apiURL)/device-token/logout") {
+            var req = URLRequest(url: url)
+            req.httpMethod = "POST"
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.httpBody = try? JSONSerialization.data(withJSONObject: [
+                "device_id": KeychainHelper.deviceID,
+                "user_id":   userID
+            ])
+            _ = try? await URLSession.shared.data(for: req)
+        }
+
+        // 2. End every Live Activity. End is async; .immediate dismissal
+        //    avoids the iOS default fade-out delay so the Lock Screen
+        //    cleans up right away.
+        if #available(iOS 16.2, *) {
+            for activity in Activity<FalconMatchAttributes>.activities {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+        }
+        matchActivity = nil
+
+        // 3. Drop delivered & pending UNNotifications + badge so the
+        //    notification center doesn't still show old matches from
+        //    the previous user.
+        let center = UNUserNotificationCenter.current()
+        center.removeAllDeliveredNotifications()
+        center.removeAllPendingNotificationRequests()
+        try? await center.setBadgeCount(0)
+
+        // 4. Local state reset. Signal has already cleared the server-
+        //    side update token when activities ended; no need to POST.
+        pendingMatchNavigation = nil
+        lastNotification = nil
+        signalStatus = .idle
     }
 
     // MARK: - Deep link handling
@@ -371,8 +440,14 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         let cvID = components.queryItems?.first { $0.name == "cv_id" }?.value ?? ""
         guard !projectID.isEmpty, !cvID.isEmpty else { return }
 
-        print("[deep-link] match project_id=\(projectID) cv_id=\(cvID)")
+        log.info("match project_id=\(projectID, privacy: .public) cv_id=\(cvID, privacy: .public)")
         Task { @MainActor in
+            // Tag session trigger so session_started gets source=live_activity.
+            RealtimeClient.shared.noteSessionSource("live_activity")
+            RealtimeClient.shared.emit(RealtimeEvent.LiveActivityOpen, metadata: [
+                "project_id": projectID,
+                "cv_id":      cvID
+            ])
             self.pendingMatchNavigation = MatchNotificationPayload(
                 projectID: projectID, cvID: cvID
             )
@@ -387,15 +462,15 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     @MainActor
     func debugStartFakeMatchActivity() {
         let authInfo = ActivityAuthorizationInfo()
-        print("[live-activity][debug] areActivitiesEnabled=\(authInfo.areActivitiesEnabled)")
+        log.info("areActivitiesEnabled=\(authInfo.areActivitiesEnabled, privacy: .public)")
         if #available(iOS 17.2, *) {
             if let t = liveActivityPushToStartToken {
-                print("[live-activity][debug] pushToStartToken=\(t.prefix(16))… (len=\(t.count))")
+                log.info("pushToStartToken=\(String(t.prefix(16)), privacy: .public)… (len=\(t.count, privacy: .public))")
             } else {
-                print("[live-activity][debug] pushToStartToken=nil — iOS hasn't assigned one yet")
+                log.info("pushToStartToken=nil — iOS hasn't assigned one yet")
             }
         } else {
-            print("[live-activity][debug] iOS < 17.2 — push-to-start not supported on this device")
+            log.info("iOS < 17.2 — push-to-start not supported on this device")
         }
         guard authInfo.areActivitiesEnabled else { return }
 
@@ -429,9 +504,9 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                     pushType: nil
                 )
                 matchActivity = activity
-                print("[live-activity][debug] started id=\(activity.id)")
+                log.info("started id=\(activity.id, privacy: .public)")
             } catch {
-                print("[live-activity][debug] failed: \(error)")
+                log.error("failed: \(error.localizedDescription, privacy: .public)")
             }
         }
     }
@@ -444,7 +519,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     private func startOrUpdateMatchActivity(content: UNNotificationContent) {
         let authInfo = ActivityAuthorizationInfo()
         guard authInfo.areActivitiesEnabled else {
-            print("[live-activity] areActivitiesEnabled=false — check Settings → Falcon → Live Activities and Info.plist NSSupportsLiveActivities=YES")
+            log.error("areActivitiesEnabled=false — check Settings → Falcon → Live Activities and Info.plist NSSupportsLiveActivities=YES")
             return
         }
 
@@ -462,7 +537,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         let scores = (info["scores"] as? [String: Any]) ?? [:]
         func s(_ key: String) -> Double { (scores[key] as? NSNumber)?.doubleValue ?? 0 }
 
-        print("[live-activity] starting/updating with score=\(score) label=\(label) title=\(projectTitle)")
+        log.info("starting/updating with score=\(score, privacy: .public) label=\(label, privacy: .public) title=\(projectTitle, privacy: .public)")
 
         let state = FalconMatchAttributes.ContentState(
             score:        score,
@@ -490,7 +565,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         if let activity = matchActivity {
             Task {
                 await activity.update(activityContent)
-                print("[live-activity] updated existing activity id=\(activity.id)")
+                log.info("updated existing activity id=\(activity.id, privacy: .public)")
             }
         } else {
             do {
@@ -500,9 +575,9 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                     pushType: nil
                 )
                 matchActivity = activity
-                print("[live-activity] requested new activity id=\(activity.id) state=\(activity.activityState)")
+                log.info("requested new activity id=\(activity.id, privacy: .public) state=\(String(describing: activity.activityState), privacy: .public)")
             } catch {
-                print("[live-activity] Activity.request failed: \(error)")
+                log.error("Activity.request failed: \(error.localizedDescription, privacy: .public)")
             }
         }
     }

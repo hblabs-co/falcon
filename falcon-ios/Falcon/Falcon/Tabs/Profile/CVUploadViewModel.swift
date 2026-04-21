@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "cv")
 
 @Observable
 final class CVUploadViewModel {
@@ -29,10 +32,10 @@ final class CVUploadViewModel {
 
         do {
             let data = try Data(contentsOf: url)
-            print("[CV] file read ok — \(url.lastPathComponent) \(data.count) bytes")
+            log.info("file read ok — \(url.lastPathComponent, privacy: .public) \(data.count, privacy: .public) bytes")
             state = .emailEntry(data: data, filename: url.lastPathComponent)
         } catch {
-            print("[CV] file read failed: \(error)")
+            log.error("file read failed: \(error.localizedDescription, privacy: .public)")
             state = .failed("Could not read file: \(error.localizedDescription)")
         }
     }
@@ -61,7 +64,8 @@ final class CVUploadViewModel {
         do {
             let (data, response) = try await URLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
-                print("[CV] restore: server returned \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+                let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+                log.info("restore: server returned \(status, privacy: .public)")
                 return
             }
             let me = try JSONDecoder().decode(MeResponse.self, from: data)
@@ -70,11 +74,11 @@ final class CVUploadViewModel {
             LanguageManager.shared.applyConfigs(me.configs)
 
             guard let cv = me.cv else {
-                print("[CV] restore: no CV found for user")
+                log.info("restore: no CV found for user")
                 return
             }
 
-            print("[CV] restore from server: cv_id=\(cv.id) status=\(cv.status)")
+            log.info("restore from server: cv_id=\(cv.id, privacy: .public) status=\(cv.status, privacy: .public)")
 
             if let normalized = cv.normalized {
                 normalizedCV = normalized
@@ -86,7 +90,7 @@ final class CVUploadViewModel {
                 startPolling(cvID: cv.id)
             }
         } catch {
-            print("[CV] restore error: \(error)")
+            log.error("restore error: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -109,7 +113,7 @@ final class CVUploadViewModel {
             // Step 4: poll until server reaches normalized or failed
             startPolling(cvID: prepared.cvId)
         } catch {
-            print("[CV] upload pipeline failed: \(error)")
+            log.error("upload pipeline failed: \(error.localizedDescription, privacy: .public)")
             state = .failed(error.localizedDescription)
         }
     }
@@ -134,14 +138,14 @@ final class CVUploadViewModel {
             let (data, response) = try await URLSession.shared.data(from: url)
             guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return }
             let doc = try JSONDecoder().decode(CVStatusResponse.self, from: data)
-            print("[CV] poll status: \(doc.status)")
+            log.info("poll status: \(doc.status, privacy: .public)")
             if let normalized = doc.normalized {
                 normalizedCV = normalized
                 updateDisplayName(normalized)
             }
             applyServerStatus(doc.status)
         } catch {
-            print("[CV] poll error: \(error)")
+            log.error("poll error: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -175,7 +179,8 @@ final class CVUploadViewModel {
         req.httpBody = try JSONEncoder().encode(["filename": filename])
 
         let (data, response) = try await URLSession.shared.data(for: req)
-        print("[CV] prepare status: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+        let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+        log.info("prepare status: \(status, privacy: .public)")
         try assertHTTP(response, context: "prepare")
         return try JSONDecoder().decode(CVPreparedResponse.self, from: data)
     }
@@ -196,7 +201,8 @@ final class CVUploadViewModel {
         }
         let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
         let (_, response) = try await session.upload(for: req, from: data)
-        print("[CV] storage upload status: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+        let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+        log.info("storage upload status: \(status, privacy: .public)")
         try assertHTTP(response, context: "storage upload")
     }
 

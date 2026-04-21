@@ -5,6 +5,7 @@ import SwiftUI
 struct JobsView: View {
     @Environment(LanguageManager.self) var lm
     @Environment(NotificationManager.self) var nm
+    @Environment(SessionManager.self) var session
     @Environment(\.scenePhase) var scenePhase
     @State private var vm = JobsViewModel()
     @State private var bannerVisible = true
@@ -17,11 +18,8 @@ struct JobsView: View {
                     VStack(spacing: 16) {
                         heroBanner
                             .id("top")
-                        if nm.authStatus != .authorized {
-                            NotificationsDisabledBanner()
-                        }
-                        if nm.liveActivitiesRestricted {
-                            LiveActivitiesDisabledBanner()
+                        if !session.isAuthenticated {
+                            AlreadyHaveAccountBanner()
                         }
                         jobsList
                     }
@@ -240,7 +238,7 @@ struct JobCard: View {
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .onTapGesture { showDetail = true }
         .sheet(isPresented: $showDetail) {
-            JobDetailView(project: project)
+            JobDetailView(project: project, source: "jobs")
                 .environment(lm)
         }
     }

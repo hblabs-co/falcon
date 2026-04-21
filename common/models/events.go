@@ -59,6 +59,18 @@ type IOSDeviceTokenRegisterEvent struct {
 	LiveActivityToken string `json:"live_activity_token,omitempty"`
 }
 
+// IOSDeviceTokenLogoutEvent is published to "signal.device_token.logout" when
+// the user logs out from the app. Signal does NOT delete the row — the
+// APNs device token itself is a property of the device, not the user.
+// Instead it clears user_id + live_activity_token + live_activity_update_token
+// so signal's match lookup (GetAllByField "user_id") returns nothing for
+// this device until the next register re-binds it. Keyed by (device_id,
+// user_id) to avoid touching another user's row on a shared device.
+type IOSDeviceTokenLogoutEvent struct {
+	DeviceID string `json:"device_id"`
+	UserID   string `json:"user_id,omitempty"`
+}
+
 // IOSLiveActivityUpdateTokenEvent is published to "signal.live_activity_update_token"
 // when iOS assigns (or clears) an update token for a running Live Activity.
 // An empty token means the activity ended/dismissed — signal clears the field

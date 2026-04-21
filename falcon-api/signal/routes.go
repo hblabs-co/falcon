@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
@@ -15,6 +16,7 @@ type Routes struct{}
 
 func (Routes) Mount(r *gin.Engine) {
 	r.POST("/device-token", handleRegisterIOSDeviceToken)
+	r.POST("/device-token/logout", handleLogoutIOSDeviceToken)
 	r.POST("/live-activity-update-token", handleLiveActivityUpdateToken)
 }
 
@@ -52,6 +54,50 @@ func handleRegisterIOSDeviceToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "registered"})
+}
+
+// handleLogoutIOSDeviceToken godoc
+// POST /device-token/logout
+// Body: { "device_id": "...", "user_id": "..." }
+// Publishes signal.device_token.logout so falcon-signal unbinds the row
+// (clears user_id + live_activity_token) without deleting the APNs token.
+// user_id is optional but strongly recommended — it scopes the unbind so
+// a concurrent re-register by a different user on the same device isn't
+// accidentally overwritten.
+func handleLogoutIOSDeviceToken(c *gin.Context) {
+	var body struct {
+		DeviceID string `json:"device_id" binding:"required"`
+		UserID   string `json:"user_id"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Delete JWT session rows for this (user, device). Kept minimal —
+	// we want the tokens collection to stop recognising this session
+	// immediately, not just after expiry. Missing rows is a no-op.
+	if body.UserID != "" {
+		if err := system.GetStorage().DeleteMany(c.Request.Context(), constants.MongoTokensCollection, bson.M{
+			"user_id":   body.UserID,
+			"device_id": body.DeviceID,
+			"type":      models.TokenTypeJWT,
+		}); err != nil {
+			logrus.Warnf("[signal] logout: delete JWTs for user=%s device=%s: %v", body.UserID, body.DeviceID, err)
+		}
+	}
+
+	evt := models.IOSDeviceTokenLogoutEvent{
+		DeviceID: body.DeviceID,
+		UserID:   body.UserID,
+	}
+	if err := system.Publish(c.Request.Context(), constants.SubjectSignalDeviceTokenLogout, evt); err != nil {
+		logrus.Errorf("publish device_token.logout: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to logout device"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "logged_out"})
 }
 
 // handleLiveActivityUpdateToken godoc

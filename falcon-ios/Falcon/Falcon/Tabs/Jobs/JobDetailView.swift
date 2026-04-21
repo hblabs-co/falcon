@@ -2,6 +2,11 @@ import SwiftUI
 
 struct JobDetailView: View {
     let project: ProjectItem
+    /// Where this detail sheet was opened from — sent in project_viewed so
+    /// the backend can distinguish "Treffer → Ver oferta" from "Jobs tab
+    /// → card tap". Defaults to "unknown" when an unannotated call site
+    /// hasn't been updated yet.
+    var source: String = "unknown"
     @Environment(LanguageManager.self) var lm
 
     var body: some View {
@@ -55,6 +60,12 @@ struct JobDetailView: View {
         }
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(22)
+        .task {
+            RealtimeClient.shared.emitProjectViewed(
+                projectID: project.projectId,
+                source: source
+            )
+        }
     }
 
     @ViewBuilder
@@ -67,12 +78,24 @@ struct JobDetailView: View {
         if let phoneURL, let emailURL {
             HStack(spacing: 10) {
                 ctaButton(icon: "phone.fill", label: lm.t(.detailCallCTA), url: phoneURL)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        RealtimeClient.shared.emitContactCalled(projectID: project.projectId, source: source)
+                    })
                 ctaIconButton(icon: "envelope.fill", url: emailURL)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        RealtimeClient.shared.emitContactEmailed(projectID: project.projectId, source: source)
+                    })
             }
         } else if let phoneURL {
             ctaButton(icon: "phone.fill", label: lm.t(.detailCallCTA), url: phoneURL)
+                .simultaneousGesture(TapGesture().onEnded {
+                    RealtimeClient.shared.emitContactCalled(projectID: project.projectId, source: source)
+                })
         } else if let emailURL {
             ctaButton(icon: "envelope.fill", label: lm.t(.detailEmailCTA), url: emailURL)
+                .simultaneousGesture(TapGesture().onEnded {
+                    RealtimeClient.shared.emitContactEmailed(projectID: project.projectId, source: source)
+                })
         }
     }
 
@@ -344,6 +367,9 @@ struct JobDetailView: View {
                             label: lm.t(.detailCallContact),
                             url: url
                         )
+                        .simultaneousGesture(TapGesture().onEnded {
+                            RealtimeClient.shared.emitContactCalled(projectID: project.projectId, source: source)
+                        })
                     }
                     if let email = contact.email?.nilIfEmpty,
                        let url = URL(string: "mailto:\(email)") {
@@ -352,6 +378,9 @@ struct JobDetailView: View {
                             label: lm.t(.detailEmailContact),
                             url: url
                         )
+                        .simultaneousGesture(TapGesture().onEnded {
+                            RealtimeClient.shared.emitContactEmailed(projectID: project.projectId, source: source)
+                        })
                     }
                 }
             }
@@ -405,6 +434,9 @@ struct JobDetailView: View {
                 )
                 .foregroundStyle(Color.accentColor)
             }
+            .simultaneousGesture(TapGesture().onEnded {
+                RealtimeClient.shared.emitOriginalOpened(projectID: project.projectId, source: source)
+            })
         }
     }
 

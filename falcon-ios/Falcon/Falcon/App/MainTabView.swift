@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum AppTab {
-    case jobs, matches, stats, profile, settings
+    case jobs, matches, stats, profile, settings, actions
 }
 
 struct MainTabView: View {
@@ -30,6 +30,7 @@ struct MainTabView: View {
                     case .matches:     MatchesView(selectedTab: $selectedTab, scrollToTop: $matchesScrollToTop)
                     case .profile:     ProfileView()
                     case .settings:    SettingsView(contactDrawer: $contactDrawer)
+                    case .actions:     ActionsView()
                     case .jobs, .stats: EmptyView()
                     }
                 }
@@ -86,8 +87,20 @@ struct MainTabView: View {
         }
     }
 
+    /// Number of pending action banners ActionsView would render. Drives
+    /// the red counter badge on the tab icon so the user can see from any
+    /// screen that something needs attention.
+    private var actionsPendingCount: Int {
+        var n = 0
+        if !session.isAuthenticated { n += 1 }
+        if nm.authStatus != .authorized { n += 1 }
+        if nm.liveActivitiesRestricted { n += 1 }
+        return n
+    }
+
     private var floatingTabBar: some View {
         HStack(spacing: 0) {
+            tabItem(icon: "bell.fill",           label: lm.t(.tabActions),   tab: .actions, badge: actionsPendingCount)
             tabItem(icon: "sparkles",             label: lm.t(.tabMatches),   tab: .matches)
             // tabItem(icon: "chart.bar.fill",      label: lm.t(.tabStats),     tab: .stats)
             tabItem(icon: "briefcase.fill",      label: lm.t(.tabJobs),      tab: .jobs)
@@ -104,7 +117,7 @@ struct MainTabView: View {
         .padding(.horizontal, 20)
     }
 
-    private func tabItem(icon: String, label: String, tab: AppTab) -> some View {
+    private func tabItem(icon: String, label: String, tab: AppTab, badge: Int = 0) -> some View {
         let isActive = selectedTab == tab
         return Button {
             if isActive {
@@ -117,8 +130,19 @@ struct MainTabView: View {
             }
         } label: {
             VStack(spacing: 3) {
-                Image(systemName: icon)
-                    .font(.system(size: 18, weight: isActive ? .semibold : .regular))
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: isActive ? .semibold : .regular))
+                    if badge > 0 {
+                        Text("\(badge)")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .frame(minWidth: 16, minHeight: 16)
+                            .padding(.horizontal, 3)
+                            .background(Capsule().fill(Color.red))
+                            .offset(x: 10, y: -6)
+                    }
+                }
                 Text(label)
                     .font(.system(size: 9, weight: .medium))
             }

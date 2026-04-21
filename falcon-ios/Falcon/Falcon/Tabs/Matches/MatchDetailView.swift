@@ -62,6 +62,12 @@ struct MatchDetailView: View {
         }
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(22)
+        .task {
+            RealtimeClient.shared.emitMatchViewed(
+                projectID: match.projectId,
+                cvID: match.cvId
+            )
+        }
     }
 
     // MARK: - Header

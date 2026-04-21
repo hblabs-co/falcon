@@ -9,6 +9,9 @@ struct LoginToolbarModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    RealtimeStatusIcon()
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     if session.isAuthenticated {
                         HStack(spacing: 6) {

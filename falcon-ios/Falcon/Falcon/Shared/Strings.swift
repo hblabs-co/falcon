@@ -2,7 +2,8 @@ import Foundation
 
 enum StringKey {
     // Tabs
-    case tabJobs, tabMatches, tabSettings, tabProfile
+    case tabJobs, tabMatches, tabSettings, tabProfile, tabActions
+    case actionsEmptyTitle, actionsEmptyBody
 
     // Settings sections
     case sectionNotifications, sectionConfiguration, sectionDeviceToken
@@ -58,6 +59,7 @@ enum StringKey {
     case profileCVSectionExperience, profileCVSectionTechnologies, profileCVSectionOthers, profileCVReplace
     case profileWhyTitle, profileWhyBody
     case profileLoginButton, profileLoginTitle, profileLoginEmailHint, profileLoginCTA
+    case alreadyHaveAccountTitle, alreadyHaveAccountBody
     case authErrorTitle, authErrorTokenUsed, authErrorTokenExpired, authErrorGeneric
     case loginSentTitle, loginSentBody, loginSentSpamHint
     case profileHowTitle
@@ -192,6 +194,9 @@ enum Strings {
 
             .tabProfile: "Profile",
             .tabStats: "Stats",
+            .tabActions: "Actions",
+            .actionsEmptyTitle: "Nothing to do",
+            .actionsEmptyBody: "Your account and notifications are all set up.",
             .jobsBannerTagline: "Job Intelligence",
             .jobsBannerMatchCount: "job offers today",
 
@@ -222,6 +227,8 @@ enum Strings {
             .profileLoginTitle: "Sign in",
             .profileLoginEmailHint: "We'll send a magic link to your inbox.",
             .profileLoginCTA: "Send login link",
+            .alreadyHaveAccountTitle: "Already have an account?",
+            .alreadyHaveAccountBody: "Sign in to sync your CV and matches across devices.",
             .authErrorTitle: "Login failed",
             .authErrorTokenUsed: "This link has already been used. Please request a new one.",
             .authErrorTokenExpired: "This link has expired. Please request a new one.",
@@ -372,6 +379,9 @@ enum Strings {
 
             .tabProfile: "Profil",
             .tabStats: "Statistiken",
+            .tabActions: "Aktionen",
+            .actionsEmptyTitle: "Nichts zu tun",
+            .actionsEmptyBody: "Dein Konto und die Benachrichtigungen sind vollständig eingerichtet.",
             .jobsBannerTagline: "Intelligente Jobsuche",
             .jobsBannerMatchCount: "Stellenangebote heute",
 
@@ -402,6 +412,8 @@ enum Strings {
             .profileLoginTitle: "Anmelden",
             .profileLoginEmailHint: "Wir schicken dir einen Anmeldelink per E-Mail.",
             .profileLoginCTA: "Anmeldelink senden",
+            .alreadyHaveAccountTitle: "Schon ein Konto?",
+            .alreadyHaveAccountBody: "Melde dich an, um Lebenslauf und Treffer geräteübergreifend zu synchronisieren.",
             .authErrorTitle: "Anmeldung fehlgeschlagen",
             .authErrorTokenUsed: "Dieser Link wurde bereits verwendet. Bitte fordere einen neuen an.",
             .authErrorTokenExpired: "Dieser Link ist abgelaufen. Bitte fordere einen neuen an.",
@@ -552,6 +564,9 @@ enum Strings {
 
             .tabProfile: "Perfil",
             .tabStats: "Estadísticas",
+            .tabActions: "Acciones",
+            .actionsEmptyTitle: "Nada pendiente",
+            .actionsEmptyBody: "Tu cuenta y notificaciones están al día.",
             .jobsBannerTagline: "Inteligencia laboral",
             .jobsBannerMatchCount: "ofertas laborales hoy",
 
@@ -582,6 +597,8 @@ enum Strings {
             .profileLoginTitle: "Iniciar sesión",
             .profileLoginEmailHint: "Te enviaremos un enlace mágico a tu correo.",
             .profileLoginCTA: "Enviar enlace de acceso",
+            .alreadyHaveAccountTitle: "¿Ya tienes cuenta?",
+            .alreadyHaveAccountBody: "Inicia sesión para sincronizar tu CV y coincidencias entre dispositivos.",
             .authErrorTitle: "Error al iniciar sesión",
             .authErrorTokenUsed: "Este enlace ya fue utilizado. Solicita uno nuevo.",
             .authErrorTokenExpired: "Este enlace ha expirado. Solicita uno nuevo.",

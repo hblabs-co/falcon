@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "session")
 
 /// Owns the authenticated user identity for the current session.
 ///
@@ -33,7 +36,7 @@ final class SessionManager {
                 guard let exp = claims["exp"] as? TimeInterval,
                       Date(timeIntervalSince1970: exp) > Date()
                 else {
-                    print("[session] jwt expired — clearing session")
+                    log.info("jwt expired — clearing session")
                     return nil
                 }
                 let sub  = claims["sub"]   as? String ?? ""
@@ -42,10 +45,10 @@ final class SessionManager {
             } catch KeychainError.notFound {
                 return nil
             } catch KeychainError.userCancelled {
-                print("[session] biometry cancelled by user")
+                log.info("biometry cancelled by user")
                 return nil
             } catch {
-                print("[session] restore failed: \(error)")
+                log.error("restore failed: \(error.localizedDescription, privacy: .public)")
                 return nil
             }
         }.value
@@ -53,6 +56,10 @@ final class SessionManager {
         await MainActor.run {
             if let result {
                 cachedJWT = result.jwt
+                // First-wins: if didReceive or .onOpenURL already marked
+                // a stronger trigger (push_notification, magic_link,
+                // live_activity), this no-ops.
+                RealtimeClient.shared.noteSessionSource("faceid")
                 apply(userID: result.userID, email: result.email)
             } else {
                 KeychainHelper.deleteJWT()
@@ -66,14 +73,25 @@ final class SessionManager {
         do {
             try KeychainHelper.saveJWT(jwt)
         } catch {
-            print("[session] keychain save failed: \(error) — falling back to memory only")
+            log.error("keychain save failed: \(error.localizedDescription, privacy: .public) — falling back to memory only")
         }
         cachedJWT = jwt
+        RealtimeClient.shared.noteSessionSource("magic_link")
         apply(userID: userID, email: email)
     }
 
-    /// Clears the session and removes the JWT from Keychain.
+    /// Clears the session and removes the JWT from Keychain. Also tells
+    /// the server to stop pushing to this device, ends any live activity,
+    /// and clears local notifications. Cleanup is fire-and-forget (runs
+    /// on a Task) so logout() returns immediately — the UI can dismiss
+    /// without waiting for the network round-trip.
+    ///
+    /// user_id is captured BEFORE the state reset so the cleanup Task sees
+    /// the real value, not the empty string we're about to write.
     func logout() {
+        let leavingUserID = userID
+        Task { await NotificationManager.shared.logoutCleanup(userID: leavingUserID) }
+
         KeychainHelper.deleteJWT()
         cachedJWT = nil
         userID = ""

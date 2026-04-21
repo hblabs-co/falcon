@@ -1,4 +1,7 @@
 import SwiftUI
+import OSLog
+
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "matches")
 
 struct MatchesView: View {
     @Environment(LanguageManager.self) var lm
@@ -23,6 +26,9 @@ struct MatchesView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         heroBanner.id("top")
+                        if !session.isAuthenticated {
+                            AlreadyHaveAccountBanner()
+                        }
                         contentBody
                     }
                     .padding(.horizontal, 16)
@@ -81,7 +87,7 @@ struct MatchesView: View {
                 }
             }
             .sheet(item: $openedProject) { project in
-                JobDetailView(project: project).environment(lm)
+                JobDetailView(project: project, source: "matches").environment(lm)
             }
             .sheet(item: $openedMatch) { match in
                 MatchDetailView(match: match).environment(lm)
@@ -209,12 +215,6 @@ struct MatchesView: View {
             }
         } else {
             VStack(spacing: 16) {
-                if nm.authStatus != .authorized {
-                    NotificationsDisabledBanner()
-                }
-                if nm.liveActivitiesRestricted {
-                    LiveActivitiesDisabledBanner()
-                }
                 if let vm, vm.isLoading {
                     loadingView
                 } else if let vm, let err = vm.error {
@@ -606,7 +606,7 @@ struct MatchesView: View {
         // haven't loaded yet (cold-launch via notification), leave the payload
         // for the next trigger (onChange of matches.count) to retry.
         guard let match = vm?.matches.first(where: { $0.id == payload.matchID }) else {
-            print("[matches] notification match \(payload.matchID) not loaded yet — will retry when list fills")
+            log.info("notification match \(payload.matchID, privacy: .public) not loaded yet — will retry when list fills")
             return
         }
 
@@ -644,7 +644,7 @@ struct MatchesView: View {
             )
             openedProject = project
         } catch {
-            print("[matches] open project \(match.projectId) failed: \(error)")
+            log.error("open project \(match.projectId, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

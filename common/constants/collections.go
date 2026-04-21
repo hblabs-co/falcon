@@ -13,4 +13,5 @@ const (
 	MongoUsersCollection               = "users"
 	MongoUsersConfigurationsCollection = "users_configurations"
 	MongoTokensCollection              = "tokens"
+	MongoRealtimeStatsCollection       = "realtime_stats"
 )

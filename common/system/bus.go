@@ -301,9 +301,17 @@ func StreamSignal() []jetstream.StreamConfig {
 	return NewBusConfig(
 		constants.StreamSignal,
 		constants.SubjectSignalDeviceTokenRegister,
+		constants.SubjectSignalDeviceTokenLogout,
 		constants.SubjectSignalMagicLink,
 		constants.SubjectSignalAdminAlert,
 		constants.SubjectSignalAdminTestMatch,
 		constants.SubjectSignalLiveActivityUpdate,
+	)
+}
+
+func StreamRealtime() []jetstream.StreamConfig {
+	return NewBusConfig(
+		constants.StreamRealtime,
+		constants.SubjectRealtimeEvent,
 	)
 }
