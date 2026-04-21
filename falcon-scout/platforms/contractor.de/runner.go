@@ -117,9 +117,13 @@ func (r *Runner) collectCandidates(ctx context.Context) ([]*ProjectCandidate, ma
 
 	// Apply filter if available.
 	if r.filter != nil {
+		// contractor.de has no publication date (StartDate is when the project
+		// starts, not when it was posted), so we emit zero for every candidate.
+		// The filter then matches it against the zero persisted as PlatformUpdatedAt
+		// and skips known projects on subsequent polls.
 		updatedAt := make(map[string]time.Time, len(candidates))
 		for _, c := range candidates {
-			updatedAt[c.PlatformID] = parseCandidateDate(c.StartDate)
+			updatedAt[c.PlatformID] = time.Time{}
 		}
 
 		skip, pageExisting, filterErr := r.filter(ctx, Source, updatedAt)

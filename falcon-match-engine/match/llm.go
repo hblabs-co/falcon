@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/ownhttp"
+	"hblabs.co/falcon/modules/llm"
 )
 
-const systemPrompt = `You are a strict technical recruiter evaluating freelance candidates.
+const scoreSystemPrompt = `You are a strict technical recruiter evaluating freelance candidates.
 Your evaluations must be calibrated and honest — most candidates are NOT a perfect fit.
 
 Scoring rules you must follow:
@@ -25,11 +25,12 @@ Scoring rules you must follow:
 - communication_clarity reflects only writing quality and structure, not technical strength. A score of 10 means flawless professional writing — rare.
 - summary must be a single sentence in German, max 120 characters, suitable as an iOS push notification body. Format: "Score {score} · {strongest fit reason}, {main gap if any}."
 
-All text fields in the JSON response (positive_points, negative_points, improvement_tips, matched_skills, missing_skills, summary) must be written in German.
+All text fields in the JSON response (positive_points, negative_points, improvement_tips, summary) must be written in German.
+matched_skills and missing_skills contain technology/skill names in their original form (not translated).
 
 Always respond with valid JSON only. No markdown, no explanation outside the JSON.`
 
-const userPromptTemplate = `Evaluate the following CV against the project description. Be strict and calibrated.
+const scoreUserPromptTemplate = `Evaluate the following CV against the project description. Be strict and calibrated.
 
 Score each dimension from 0 to 10 using the full range — do not cluster scores in the 7-9 range:
 - skills_match: how well the candidate's skills cover what the project needs (penalise hard for missing must-haves)
@@ -68,8 +69,22 @@ PROJECT:
 CV:
 {{cv_text}}`
 
-// llmResponse is the raw JSON the LLM returns.
-type llmResponse struct {
+const translateSystemPrompt = `You are a translation engine for structured match-result JSON.
+
+You receive a JSON object where the human-readable text fields are in German, and you return a copy where those fields are translated into the requested target language.
+
+Output rules:
+- Respond ONLY with a valid JSON object. No markdown, no explanation.
+- Preserve the exact structure and every key name without exception.
+- Translate ONLY the strings inside: summary, positive_points, negative_points, improvement_tips.
+- Keep identical (do not translate): dates, numbers, booleans, null, URLs, snake_case identifiers, ISO codes, and all entries in matched_skills and missing_skills (those are tech names like "React", "AWS", "Kubernetes").
+- If a string is already in the target language or is a proper noun/tech term, keep it as-is.`
+
+// maxCVChars is the safety limit for CV text sent to the LLM (~12 000 tokens at ~4 chars/token).
+const maxCVChars = 48_000
+
+// llmRaw is the raw JSON shape the scoring LLM returns.
+type llmRaw struct {
 	Score  float32 `json:"score"`
 	Scores struct {
 		SkillsMatch          float32 `json:"skills_match"`
@@ -87,34 +102,30 @@ type llmResponse struct {
 	Summary         string   `json:"summary"`
 }
 
-// maxCVChars is the safety limit for CV text sent to the LLM (~12 000 tokens at ~4 chars/token).
-const maxCVChars = 48_000
-
-type llmClient struct {
-	http     *ownhttp.Client
-	model    string
-	provider string
+// scorer wraps the shared LLM client with match-specific prompts and a translate
+// step so each match_result carries de/en/es text fields.
+type scorer struct {
+	llm *llm.Client
 }
 
-func newLLMClient() (*llmClient, error) {
-	values, err := helpers.ReadEnvs("LLM_URL", "LLM_API_KEY", "LLM_MODEL", "LLM_PROVIDER")
-	if err != nil {
-		return nil, err
-	}
-	url, key, model, provider := values[0], values[1], values[2], values[3]
-	return &llmClient{
-		http:     ownhttp.New(url, map[string]string{"Authorization": "Bearer " + key}),
-		model:    model,
-		provider: provider,
-	}, nil
+func newScorer(client *llm.Client) *scorer {
+	return &scorer{llm: client}
 }
 
-// Score evaluates a CV against a project and returns the scored result.
-func (c *llmClient) Score(ctx context.Context, projectTitle, projectDescription, cvText string) (*models.MatchResultEvent, error) {
+// Score evaluates a CV against a project, translates the human-readable output
+// to EN+ES, and returns a MatchResultEvent ready to persist (caller fills in
+// identifiers, timestamps, and threshold flag).
+//
+// Returns the raw LLM content alongside any error for diagnostics.
+func (s *scorer) Score(
+	ctx context.Context,
+	projectTitle, projectDescription, cvText string,
+	logFields map[string]any,
+) (*models.MatchResultEvent, string, error) {
 	start := time.Now()
 
 	if len(cvText) > maxCVChars {
-		logrus.Warnf("CV text truncated from %d to %d chars before scoring", len(cvText), maxCVChars)
+		logrus.WithFields(logFields).Warnf("CV text truncated from %d to %d chars before scoring", len(cvText), maxCVChars)
 		cvText = cvText[:maxCVChars]
 	}
 
@@ -122,59 +133,34 @@ func (c *llmClient) Score(ctx context.Context, projectTitle, projectDescription,
 		"{{project_title}}", projectTitle,
 		"{{project_description}}", projectDescription,
 		"{{cv_text}}", cvText,
-	).Replace(userPromptTemplate)
+	).Replace(scoreUserPromptTemplate)
 
-	var resp struct {
-		Choices []struct {
-			Message struct {
-				Content string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
+	content, err := s.llm.Chat(ctx, scoreSystemPrompt, userPrompt)
+	if err != nil {
+		return nil, content, fmt.Errorf("llm score request: %w", err)
 	}
 
-	if err := c.http.Post(ctx, "/v1/chat/completions", ownhttp.Request{
-		Body: map[string]any{
-			"model": c.model,
-			"messages": []map[string]string{
-				{"role": "system", "content": systemPrompt},
-				{"role": "user", "content": userPrompt},
-			},
-			"temperature": 0.1,
-		},
-		Result: &resp,
-	}); err != nil {
-		return nil, fmt.Errorf("llm request: %w", err)
+	deJSON, err := llm.ParseSingleObject(fmt.Sprintf("%v", logFields["project_id"]), content)
+	if err != nil {
+		return nil, content, fmt.Errorf("parse score response: %w", err)
 	}
 
-	if len(resp.Choices) == 0 {
-		return nil, fmt.Errorf("llm returned no choices")
+	// Re-encode to typed struct for downstream mapping.
+	deBytes, _ := json.Marshal(deJSON)
+	var raw llmRaw
+	if err := json.Unmarshal(deBytes, &raw); err != nil {
+		return nil, content, fmt.Errorf("decode score response: %w", err)
 	}
 
-	content := resp.Choices[0].Message.Content
-
-	// Extract the JSON object — tolerate markdown fences or surrounding text.
-	jsonStart := strings.Index(content, "{")
-	jsonEnd := strings.LastIndex(content, "}")
-	if jsonStart == -1 || jsonEnd == -1 || jsonEnd <= jsonStart {
-		return nil, fmt.Errorf("no JSON object found in llm response (content: %.200s)", content)
-	}
-	content = content[jsonStart : jsonEnd+1]
-
-	var raw llmResponse
-	if err := json.Unmarshal([]byte(content), &raw); err != nil {
-		return nil, fmt.Errorf("parse llm response: %w (content: %.200s)", err, content)
-	}
-
-	logrus.WithFields(logrus.Fields{
-		"score": raw.Score,
-		"took":  time.Since(start).String(),
-	}).Info("LLM scored")
+	// Translate the German response to EN+ES in parallel. Failures fall back to
+	// the German text for that language — better degraded than empty.
+	enTexts, esTexts := s.translate(ctx, deBytes, logFields)
 
 	result := &models.MatchResultEvent{
 		Score:       raw.Score,
 		Label:       models.LabelFromScore(raw.Score),
-		LLMModel:    c.model,
-		LLMProvider: c.provider,
+		LLMModel:    s.llm.Model,
+		LLMProvider: s.llm.Provider,
 		Scores: models.MatchScores{
 			SkillsMatch:          raw.Scores.SkillsMatch,
 			SeniorityFit:         raw.Scores.SeniorityFit,
@@ -183,13 +169,115 @@ func (c *llmClient) Score(ctx context.Context, projectTitle, projectDescription,
 			ProjectRelevance:     raw.Scores.ProjectRelevance,
 			TechStackOverlap:     raw.Scores.TechStackOverlap,
 		},
-		MatchedSkills:   raw.MatchedSkills,
-		MissingSkills:   raw.MissingSkills,
+		MatchedSkills: raw.MatchedSkills,
+		MissingSkills: raw.MissingSkills,
+		Summary: map[string]string{
+			"de": raw.Summary,
+			"en": enTexts.Summary,
+			"es": esTexts.Summary,
+		},
+		PositivePoints: map[string][]string{
+			"de": raw.PositivePoints,
+			"en": enTexts.PositivePoints,
+			"es": esTexts.PositivePoints,
+		},
+		NegativePoints: map[string][]string{
+			"de": raw.NegativePoints,
+			"en": enTexts.NegativePoints,
+			"es": esTexts.NegativePoints,
+		},
+		ImprovementTips: map[string][]string{
+			"de": raw.ImprovementTips,
+			"en": enTexts.ImprovementTips,
+			"es": esTexts.ImprovementTips,
+		},
+	}
+
+	logrus.WithFields(logFields).WithFields(logrus.Fields{
+		"score": raw.Score,
+		"took":  time.Since(start).String(),
+	}).Info("LLM scored + translated")
+
+	return result, content, nil
+}
+
+// translatedTexts holds just the human-readable fields that are language-specific.
+type translatedTexts struct {
+	Summary         string
+	PositivePoints  []string
+	NegativePoints  []string
+	ImprovementTips []string
+}
+
+// translate runs EN and ES translations in parallel. On error for a given
+// language, falls back to the German source to keep the record consistent.
+func (s *scorer) translate(ctx context.Context, deJSON []byte, logFields map[string]any) (en, es translatedTexts) {
+	var deFallback llmRaw
+	_ = json.Unmarshal(deJSON, &deFallback)
+
+	fallback := translatedTexts{
+		Summary:         deFallback.Summary,
+		PositivePoints:  deFallback.PositivePoints,
+		NegativePoints:  deFallback.NegativePoints,
+		ImprovementTips: deFallback.ImprovementTips,
+	}
+
+	var wg sync.WaitGroup
+	var enOut, esOut translatedTexts
+
+	runOne := func(targetLang, targetName string, out *translatedTexts) {
+		defer wg.Done()
+		translated, err := s.translateOne(ctx, deJSON, targetLang, targetName, logFields)
+		if err != nil {
+			logrus.WithFields(logFields).Warnf("translate %s failed (%v), falling back to de", targetLang, err)
+			*out = fallback
+			return
+		}
+		*out = translated
+	}
+
+	wg.Add(2)
+	go runOne("en", "English", &enOut)
+	go runOne("es", "Spanish", &esOut)
+	wg.Wait()
+
+	return enOut, esOut
+}
+
+func (s *scorer) translateOne(
+	ctx context.Context,
+	deJSON []byte,
+	targetLang, targetName string,
+	logFields map[string]any,
+) (translatedTexts, error) {
+	userPrompt := fmt.Sprintf(
+		"Translate the human-readable strings in this match-result JSON from German to %s. Return only the translated JSON object.\n\n%s",
+		targetName, string(deJSON))
+
+	content, err := s.llm.Chat(ctx, translateSystemPrompt, userPrompt)
+	if err != nil {
+		return translatedTexts{}, fmt.Errorf("llm translate request: %w", err)
+	}
+
+	obj, err := llm.ParseSingleObject(
+		fmt.Sprintf("%v-translate-%s", logFields["project_id"], targetLang),
+		content,
+	)
+	if err != nil {
+		return translatedTexts{}, fmt.Errorf("parse translate response: %w", err)
+	}
+
+	// Re-encode to typed struct.
+	b, _ := json.Marshal(obj)
+	var raw llmRaw
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return translatedTexts{}, fmt.Errorf("decode translate response: %w", err)
+	}
+
+	return translatedTexts{
+		Summary:         raw.Summary,
 		PositivePoints:  raw.PositivePoints,
 		NegativePoints:  raw.NegativePoints,
 		ImprovementTips: raw.ImprovementTips,
-		Summary:         raw.Summary,
-	}
-
-	return result, nil
+	}, nil
 }

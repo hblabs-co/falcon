@@ -13,7 +13,12 @@ func main() {
 
 	system.InitBus(system.StreamMatches())
 
-	svc, err := match.NewService()
+	ctx := system.Ctx()
+	if err := system.InitStorage(ctx); err != nil {
+		logrus.Fatalf("storage init: %v", err)
+	}
+
+	svc, err := match.NewService(ctx)
 	if err != nil {
 		logrus.Fatalf("service init: %v", err)
 	}

@@ -5,6 +5,7 @@ import (
 	"hblabs.co/falcon/api/admin"
 	"hblabs.co/falcon/api/auth"
 	"hblabs.co/falcon/api/cv"
+	"hblabs.co/falcon/api/matches"
 	"hblabs.co/falcon/api/me"
 	"hblabs.co/falcon/api/projects"
 	"hblabs.co/falcon/api/scrape"
@@ -36,6 +37,7 @@ func main() {
 		cv.Routes{},
 		signal.Routes{},
 		projects.Routes{},
+		matches.Routes{},
 		me.Routes{},
 	); err != nil {
 		logrus.Fatalf("server: %v", err)

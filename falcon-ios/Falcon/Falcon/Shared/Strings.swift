@@ -2,7 +2,7 @@ import Foundation
 
 enum StringKey {
     // Tabs
-    case tabJobs, tabAlerts, tabSettings, tabProfile
+    case tabJobs, tabMatches, tabSettings, tabProfile
 
     // Settings sections
     case sectionNotifications, sectionConfiguration, sectionDeviceToken
@@ -27,7 +27,13 @@ enum StringKey {
     case langAppLabel
 
     // Alerts view
-    case alertsEmpty, alertsEmptyDescription, alertsBannerTagline
+    case matchesEmpty, matchesEmptyDescription, matchesBannerTagline, matchesBannerTotal
+    case matchLabelApplyImmediately, matchLabelTopCandidate
+    case matchLabelAcceptable, matchLabelNotSuitable
+    case matchesDetails, matchesViewJob, matchesSkillsYouHave, matchesMissingSkills
+    case matchesScoreBreakdown, matchesPositivePoints, matchesNegativePoints, matchesImprovementTips
+    case matchesScoreSkillsMatch, matchesScoreSeniorityFit, matchesScoreDomainExperience
+    case matchesScoreCommunicationClarity, matchesScoreProjectRelevance, matchesScoreTechStackOverlap
 
     // Jobs view — placeholder
     case jobsTitle
@@ -91,6 +97,7 @@ enum StringKey {
     case detailHighlights, detailMustHave, detailShouldHave, detailNiceToHave
     case detailResponsibilities, detailContact, detailViewOriginal, detailShowMore
     case detailCallContact, detailCallCTA
+    case detailEmailContact, detailEmailCTA
 }
 
 enum Strings {
@@ -102,7 +109,7 @@ enum Strings {
     private static let table: [AppLanguage: [StringKey: String]] = [
         .english: [
             .tabJobs: "Jobs",
-            .tabAlerts: "Matches",
+            .tabMatches: "Matches",
             .tabSettings: "Settings",
 
             .sectionNotifications: "Notifications",
@@ -132,9 +139,28 @@ enum Strings {
 
             .langAppLabel: "App Language",
 
-            .alertsEmpty: "No Matches Yet",
-            .alertsEmptyDescription: "Projects matching your profile will appear here.",
-            .alertsBannerTagline: "AI Matching",
+            .matchesEmpty: "No Matches Yet",
+            .matchesEmptyDescription: "Projects matching your profile will appear here.",
+            .matchesBannerTagline: "AI Matching",
+            .matchesBannerTotal: "total matches",
+            .matchLabelApplyImmediately: "Apply Immediately",
+            .matchLabelTopCandidate: "Top Candidate",
+            .matchLabelAcceptable: "Acceptable",
+            .matchLabelNotSuitable: "Not Suitable",
+            .matchesDetails: "Match details",
+            .matchesViewJob: "View job",
+            .matchesSkillsYouHave: "Skills you have",
+            .matchesMissingSkills: "Missing skills",
+            .matchesScoreBreakdown: "Score breakdown",
+            .matchesPositivePoints: "What fits",
+            .matchesNegativePoints: "Concerns",
+            .matchesImprovementTips: "How to improve",
+            .matchesScoreSkillsMatch: "Skills",
+            .matchesScoreSeniorityFit: "Seniority",
+            .matchesScoreDomainExperience: "Domain",
+            .matchesScoreCommunicationClarity: "Communication",
+            .matchesScoreProjectRelevance: "Relevance",
+            .matchesScoreTechStackOverlap: "Tech stack",
 
             .jobsTitle: "Jobs",
 
@@ -251,12 +277,14 @@ enum Strings {
             .detailViewOriginal: "View Original Posting",
             .detailShowMore: "Show more",
             .detailCallContact: "Call",
-            .detailCallCTA: "Call Contact Person",
+            .detailCallCTA: "Call",
+            .detailEmailContact: "Send email",
+            .detailEmailCTA: "Send email",
         ],
 
         .german: [
             .tabJobs: "Jobs",
-            .tabAlerts: "Treffer",
+            .tabMatches: "Treffer",
             .tabSettings: "Einstellungen",
 
             .sectionNotifications: "Benachrichtigungen",
@@ -286,9 +314,28 @@ enum Strings {
 
             .langAppLabel: "App-Sprache",
 
-            .alertsEmpty: "Noch keine Treffer",
-            .alertsEmptyDescription: "Projekte, die zu deinem Profil passen, erscheinen hier.",
-            .alertsBannerTagline: "KI-gestützte Treffer",
+            .matchesEmpty: "Noch keine Treffer",
+            .matchesEmptyDescription: "Projekte, die zu deinem Profil passen, erscheinen hier.",
+            .matchesBannerTagline: "KI-gestützte Treffer",
+            .matchesBannerTotal: "Treffer gesamt",
+            .matchesDetails: "Treffer-Details",
+            .matchesViewJob: "Zum Job",
+            .matchesSkillsYouHave: "Vorhandene Fähigkeiten",
+            .matchesMissingSkills: "Fehlende Fähigkeiten",
+            .matchesScoreBreakdown: "Bewertung im Detail",
+            .matchesPositivePoints: "Stärken",
+            .matchesNegativePoints: "Bedenken",
+            .matchesImprovementTips: "Verbesserungsvorschläge",
+            .matchesScoreSkillsMatch: "Fähigkeiten",
+            .matchesScoreSeniorityFit: "Seniorität",
+            .matchesScoreDomainExperience: "Branche",
+            .matchesScoreCommunicationClarity: "Kommunikation",
+            .matchesScoreProjectRelevance: "Relevanz",
+            .matchesScoreTechStackOverlap: "Tech-Stack",
+            .matchLabelApplyImmediately: "Sofort bewerben",
+            .matchLabelTopCandidate: "Top-Kandidat",
+            .matchLabelAcceptable: "Akzeptabel",
+            .matchLabelNotSuitable: "Ungeeignet",
 
             .jobsTitle: "Jobs",
 
@@ -404,13 +451,15 @@ enum Strings {
             .detailContact: "Kontakt",
             .detailViewOriginal: "Original-Ausschreibung öffnen",
             .detailShowMore: "Mehr anzeigen",
-            .detailCallContact: "Anrufen:",
-            .detailCallCTA: "Kontaktperson anrufen",
+            .detailCallContact: "Anrufen",
+            .detailCallCTA: "Anrufen",
+            .detailEmailContact: "E-Mail senden",
+            .detailEmailCTA: "E-Mail senden",
         ],
 
         .spanish: [
             .tabJobs: "Empleos",
-            .tabAlerts: "Coincidencias",
+            .tabMatches: "Coincidencias",
             .tabSettings: "Ajustes",
 
             .sectionNotifications: "Notificaciones",
@@ -440,9 +489,28 @@ enum Strings {
 
             .langAppLabel: "Idioma de la app",
 
-            .alertsEmpty: "Sin coincidencias aún",
-            .alertsEmptyDescription: "Los proyectos que coincidan con tu perfil aparecerán aquí.",
-            .alertsBannerTagline: "Coincidencias con IA",
+            .matchesEmpty: "Sin coincidencias aún",
+            .matchesEmptyDescription: "Los proyectos que coincidan con tu perfil aparecerán aquí.",
+            .matchesBannerTagline: "Coincidencias con IA",
+            .matchesBannerTotal: "coincidencias totales",
+            .matchesDetails: "Detalles de la coincidencia",
+            .matchesViewJob: "Ver oferta",
+            .matchesSkillsYouHave: "Habilidades que tienes",
+            .matchesMissingSkills: "Habilidades que faltan",
+            .matchesScoreBreakdown: "Puntuación detallada",
+            .matchesPositivePoints: "Lo que encaja",
+            .matchesNegativePoints: "Puntos de atención",
+            .matchesImprovementTips: "Cómo mejorar",
+            .matchesScoreSkillsMatch: "Habilidades",
+            .matchesScoreSeniorityFit: "Seniority",
+            .matchesScoreDomainExperience: "Sector",
+            .matchesScoreCommunicationClarity: "Comunicación",
+            .matchesScoreProjectRelevance: "Relevancia",
+            .matchesScoreTechStackOverlap: "Tech stack",
+            .matchLabelApplyImmediately: "Aplica ya",
+            .matchLabelTopCandidate: "Top candidato",
+            .matchLabelAcceptable: "Aceptable",
+            .matchLabelNotSuitable: "No apto",
 
             .jobsTitle: "Empleos",
 
@@ -474,7 +542,7 @@ enum Strings {
             .profileAnonymous: "Anónimo",
             .profileCVTitle: "Currículum Vitae",
             .profileCVNone: "Sin CV cargado",
-            .profileCVHint: "Sube tu CV para comenzar a hacer matches",
+            .profileCVHint: "Sube tu CV para empezar a recibir coincidencias",
             .profileCVUpload: "Subir CV",
             .profileCVUploadPending: "Próximamente via falcon-api",
             .profileCVDropzone: "Toca para seleccionar tu CV",
@@ -510,7 +578,7 @@ enum Strings {
             .profileStep1Body: "Comparte tu experiencia y habilidades en un documento Word.",
             .profileStep2Title: "Análisis con IA",
             .profileStep2Body: "Falcon extrae automáticamente tus habilidades, experiencia y stack tecnológico.",
-            .profileStep3Title: "Recibe matches",
+            .profileStep3Title: "Recibe coincidencias",
             .profileStep3Body: "Recibe recomendaciones de proyectos personalizadas según tu perfil.",
             .profileSkillsTitle: "Tus habilidades",
             .profileSkillsNone: "Las habilidades aparecerán cuando tu CV sea procesado",
@@ -558,8 +626,10 @@ enum Strings {
             .detailContact: "Contacto",
             .detailViewOriginal: "Ver publicación original",
             .detailShowMore: "Ver más",
-            .detailCallContact: "Llamar a",
-            .detailCallCTA: "Llamar al contacto",
+            .detailCallContact: "Llamar",
+            .detailCallCTA: "Llamar",
+            .detailEmailContact: "Enviar email",
+            .detailEmailCTA: "Enviar email",
         ],
     ]
     // swiftlint:enable line_length

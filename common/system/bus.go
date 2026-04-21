@@ -86,10 +86,7 @@ func SubscribeCore(subject string, handler func(data []byte) (any, error)) error
 // Reads NATS_URL from the environment — fatals if not set.
 func InitBus(streams []jetstream.StreamConfig) {
 	busOnce.Do(func() {
-		url, err := helpers.ReadEnv("NATS_URL")
-		if err != nil {
-			logrus.Fatalf("bus init: %v", err)
-		}
+		url := MustEnv("NATS_URL")
 
 		nc, err := natsio.Connect(url)
 		if err != nil {

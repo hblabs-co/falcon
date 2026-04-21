@@ -238,15 +238,18 @@ func (p *PersistedProject) applySource(src interfaces.Project) {
 // PlatformUpdatedAt remains the honest source of truth from the publisher.
 // DisplayUpdatedAt is what the UI should sort and render on.
 func (p *PersistedProject) computeDisplayUpdatedAt(existing *PersistedProject) {
-	if p.PlatformUpdatedAt.IsZero() {
-		// Could not parse — fall back to scraped time so the job is still sortable.
-		p.DisplayUpdatedAt = p.ScrapedAt
+	// Re-scrape with same platform date → preserve previous display time.
+	// Covers the "both zero" case too (platforms without a publication date,
+	// like contractor.de): once we've recorded ScrapedAt as DisplayUpdatedAt,
+	// subsequent re-scrapes must not bump it to a newer ScrapedAt.
+	if existing != nil && helpers.SameDate(existing.PlatformUpdatedAt, p.PlatformUpdatedAt) {
+		p.DisplayUpdatedAt = existing.DisplayUpdatedAt
 		return
 	}
 
-	// Re-scrape with same date → preserve previous display time-of-day.
-	if existing != nil && helpers.SameDate(existing.PlatformUpdatedAt, p.PlatformUpdatedAt) {
-		p.DisplayUpdatedAt = existing.DisplayUpdatedAt
+	if p.PlatformUpdatedAt.IsZero() {
+		// No platform date — fall back to scraped time so the job is still sortable.
+		p.DisplayUpdatedAt = p.ScrapedAt
 		return
 	}
 

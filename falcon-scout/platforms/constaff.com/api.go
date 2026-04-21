@@ -118,7 +118,7 @@ func projectToCandidate(p apiProject) *ProjectCandidate {
 
 	return &ProjectCandidate{
 		PlatformID:  strconv.Itoa(p.ID),
-		URL:         fmt.Sprintf("%s/?p=%d", baseURL, p.ID), // best-effort detail URL
+		URL:         detailPageURL(strconv.Itoa(p.ID)),
 		Source:      Source,
 		Title:       strings.TrimSpace(p.JobTitle),
 		Description: strings.TrimSpace(p.JobDescriptionHTML),

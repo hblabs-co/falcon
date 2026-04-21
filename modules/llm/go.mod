@@ -1,4 +1,4 @@
-module hblabs.co/falcon/modules/embeddings
+module hblabs.co/falcon/modules/llm
 
 replace hblabs.co/falcon/common => ../../common
 

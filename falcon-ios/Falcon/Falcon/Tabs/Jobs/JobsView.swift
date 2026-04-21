@@ -1,12 +1,5 @@
 import SwiftUI
 
-// MARK: - Scroll offset tracking
-
-private struct BannerVisibilityKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
-}
-
 // MARK: - JobsView
 
 struct JobsView: View {
@@ -14,7 +7,7 @@ struct JobsView: View {
     @Environment(\.scenePhase) var scenePhase
     @State private var vm = JobsViewModel()
     @State private var bannerVisible = true
-    @State private var scrollToTop = false
+    @Binding var scrollToTop: Bool
 
     var body: some View {
         NavigationStack {
@@ -29,11 +22,17 @@ struct JobsView: View {
                     .padding(.top, 8)
                     .padding(.bottom, 110)
                 }
+                .onScrollGeometryChange(for: CGFloat.self) { geo in
+                    geo.contentOffset.y
+                } action: { _, newOffset in
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        bannerVisible = newOffset < 30
+                    }
+                }
                 .onChange(of: scrollToTop) { _, _ in
                     withAnimation { proxy.scrollTo("top", anchor: .top) }
                 }
             }
-            .coordinateSpace(name: "jobsScroll")
             .background(Color(UIColor.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -50,11 +49,34 @@ struct JobsView: View {
                     Task { await vm.loadInitial() }
                 }
             }
-            .onPreferenceChange(BannerVisibilityKey.self) { minY in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    bannerVisible = minY > -20
-                }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            scrollToTopButton
+        }
+    }
+
+    // MARK: - Floating scroll-to-top button
+
+    @ViewBuilder
+    private var scrollToTopButton: some View {
+        if !bannerVisible {
+            Button {
+                scrollToTop.toggle()
+            } label: {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        Circle()
+                            .fill(Color.accentColor)
+                            .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
+                    )
             }
+            .buttonStyle(.plain)
+            .padding(.trailing, 20)
+            .padding(.bottom, 130)
+            .transition(.scale.combined(with: .opacity))
         }
     }
 
@@ -72,20 +94,22 @@ struct JobsView: View {
                     scrollToTop.toggle()
                     Task { await vm.refresh() }
                 } label: {
-                    FalconIconView(size: 22, cornerRadius: 5)
+                    FalconIconView(size: 32, cornerRadius: 7)
                 }
                 .buttonStyle(.plain)
-                Text(lm.t(.tabJobs))
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                if vm.todayCount > 0 {
-                    Text("·")
-                        .foregroundStyle(.tertiary)
-                    Text("\(vm.todayCount)")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(.primary)
-                    Text(lm.t(.jobsBannerMatchCount))
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(lm.t(.tabJobs))
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    if vm.todayCount > 0 {
+                        HStack(spacing: 3) {
+                            Text("\(vm.todayCount)")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundStyle(.primary)
+                            Text(lm.t(.jobsBannerMatchCount))
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
             .transition(.move(edge: .top).combined(with: .opacity))
@@ -122,16 +146,6 @@ struct JobsView: View {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(.background)
                 .shadow(color: .black.opacity(0.07), radius: 14, x: 0, y: 4)
-        )
-        // Track banner position relative to the scroll view's own coordinate space.
-        // minY == 8 at rest (top padding); goes negative as the user scrolls up.
-        .background(
-            GeometryReader { geo in
-                Color.clear.preference(
-                    key: BannerVisibilityKey.self,
-                    value: geo.frame(in: .named("jobsScroll")).minY
-                )
-            }
         )
     }
 

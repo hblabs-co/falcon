@@ -63,7 +63,11 @@ func (p *Project) GetURL() string               { return p.URL }
 func (p *Project) GetPlatform() string          { return Source }
 func (p *Project) GetPlatformId() string        { return p.PlatformID }
 func (p *Project) GetReferenceId() string       { return p.PlatformID }
-func (p *Project) GetPlatformUpdatedAt() string { return p.StartDate }
+// contractor.de listings don't expose a publication date — only the project's
+// start_date (which can be in the future). Returning empty makes the persisted
+// project's DisplayUpdatedAt fall back to ScrapedAt, so listings sort by when
+// we discovered them, not by an unrelated future start.
+func (p *Project) GetPlatformUpdatedAt() string { return "" }
 func (p *Project) GetTitle() string             { return p.Title }
 func (p *Project) GetDescription() string       { return p.Description }
 func (p *Project) GetStartDate() string         { return p.StartDate }

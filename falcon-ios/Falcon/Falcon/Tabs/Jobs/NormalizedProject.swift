@@ -44,7 +44,7 @@ struct RecruiterRodeoStats: Decodable {
 struct ProjectItem: Decodable, Identifiable {
     let projectId: String
     let platform: String
-    let platformUpdatedAt: String
+    let displayUpdatedAt: String
     let companyName: String
     let companyLogoUrl: String
     let recruiterRodeoStats: RecruiterRodeoStats?
@@ -56,7 +56,7 @@ struct ProjectItem: Decodable, Identifiable {
     enum CodingKeys: String, CodingKey {
         case projectId           = "project_id"
         case platform
-        case platformUpdatedAt   = "platform_updated_at"
+        case displayUpdatedAt    = "display_updated_at"
         case companyName         = "company_name"
         case companyLogoUrl      = "company_logo_url"
         case recruiterRodeoStats = "recruiter_rodeo_stats"
@@ -104,11 +104,11 @@ struct ProjectItem: Decodable, Identifiable {
     }
 
     func relativeDate(for language: AppLanguage) -> String? {
-        guard !platformUpdatedAt.isEmpty else { return nil }
+        guard !displayUpdatedAt.isEmpty else { return nil }
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let date = iso.date(from: platformUpdatedAt)
-            ?? ISO8601DateFormatter().date(from: platformUpdatedAt)
+        let date = iso.date(from: displayUpdatedAt)
+            ?? ISO8601DateFormatter().date(from: displayUpdatedAt)
         guard let date else { return nil }
         let fmt = RelativeDateTimeFormatter()
         fmt.locale = Locale(identifier: language.localeIdentifier)
@@ -348,6 +348,7 @@ struct ProjectContact: Decodable {
     let email:   String?
     let phone:   String?
     let role:    String?
+    let image:   String?
 }
 
 // MARK: - Helpers

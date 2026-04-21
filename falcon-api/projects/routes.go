@@ -1,14 +1,13 @@
 package projects
 
 import (
-	"math"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"hblabs.co/falcon/api/server"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
@@ -21,36 +20,71 @@ type Routes struct{}
 
 func (Routes) Mount(r *gin.Engine) {
 	r.GET("/projects", handleListProjects)
+	r.GET("/projects/:id", handleGetProject)
 }
 
 type projectItem struct {
-	ProjectID            string                       `json:"project_id"`
-	Platform             string                       `json:"platform"`
-	PlatformUpdatedAt    string                       `json:"platform_updated_at"`
-	CompanyName          string                       `json:"company_name"`
-	CompanyLogoURL       string                       `json:"company_logo_url"`
-	RecruiterRodeoStats  *models.RecruiterRodeoStats  `json:"recruiter_rodeo_stats,omitempty"`
-	NormalizedAt         string                       `json:"normalized_at"`
-	Data                 map[string]any               `json:"data"` // English normalized content
-}
-
-type paginationMeta struct {
-	Page       int   `json:"page"`
-	PageSize   int   `json:"page_size"`
-	Total      int64 `json:"total"`
-	TotalPages int   `json:"total_pages"`
+	ProjectID           string                      `json:"project_id"`
+	Platform            string                      `json:"platform"`
+	CompanyName         string                      `json:"company_name"`
+	CompanyLogoURL      string                      `json:"company_logo_url"`
+	RecruiterRodeoStats *models.RecruiterRodeoStats `json:"recruiter_rodeo_stats,omitempty"`
+	DisplayUpdatedAt    string                      `json:"display_updated_at"`
+	NormalizedAt        string                      `json:"normalized_at"`
+	Data                map[string]any              `json:"data"` // Normalized content in the requested language
 }
 
 // normalizedDoc is the minimal projection we decode from projects_normalized.
 type normalizedDoc struct {
-	ProjectID         string         `bson:"project_id"`
-	Platform          string         `bson:"platform"`
-	PlatformUpdatedAt string         `bson:"platform_updated_at"`
-	CompanyName       string         `bson:"company_name"`
-	En                map[string]any `bson:"en"`
-	De                map[string]any `bson:"de"`
-	Es                map[string]any `bson:"es"`
-	NormalizedAt      time.Time      `bson:"normalized_at"`
+	ProjectID        string         `bson:"project_id"`
+	CompanyID        string         `bson:"company_id"`
+	DisplayUpdatedAt time.Time      `bson:"display_updated_at"`
+	En               map[string]any `bson:"en"`
+	De               map[string]any `bson:"de"`
+	Es               map[string]any `bson:"es"`
+	NormalizedAt     time.Time      `bson:"normalized_at"`
+}
+
+// nestedString walks a nested map path and returns the string at the end,
+// or "" if any step is missing or the terminal value is not a string.
+func nestedString(m map[string]any, keys ...string) string {
+	cur := m
+	for i, k := range keys {
+		v, ok := cur[k]
+		if !ok {
+			return ""
+		}
+		if i == len(keys)-1 {
+			s, _ := v.(string)
+			return s
+		}
+		cur, ok = v.(map[string]any)
+		if !ok {
+			return ""
+		}
+	}
+	return ""
+}
+
+// buildProjectItem composes the response shape from a normalized doc and an
+// optional company (nil when unknown). Shared by the list and single endpoints
+// so both return identical JSON for the same project.
+func buildProjectItem(d *normalizedDoc, lang string, company *models.Company) projectItem {
+	data := d.langContent(lang)
+	item := projectItem{
+		ProjectID:        d.ProjectID,
+		Platform:         nestedString(data, "source", "platform"),
+		DisplayUpdatedAt: d.DisplayUpdatedAt.Format(time.RFC3339),
+		NormalizedAt:     d.NormalizedAt.Format(time.RFC3339),
+		Data:             data,
+	}
+	if company != nil {
+		item.Platform = company.Source
+		item.CompanyName = company.CompanyName
+		item.CompanyLogoURL = company.LogoMinioURL
+		item.RecruiterRodeoStats = company.RecruiterRodeoStats
+	}
+	return item
 }
 
 // langContent returns the localized content map for the requested language,
@@ -79,12 +113,7 @@ func (d *normalizedDoc) langContent(lang string) map[string]any {
 }
 
 func handleListProjects(c *gin.Context) {
-	page := 1
-	if p := c.Query("page"); p != "" {
-		if n, err := strconv.Atoi(p); err == nil && n > 0 {
-			page = n
-		}
-	}
+	page := server.ParsePage(c)
 
 	lang := c.Query("lang")
 	if lang != "de" && lang != "es" {
@@ -96,69 +125,96 @@ func handleListProjects(c *gin.Context) {
 
 	var docs []normalizedDoc
 	total, err := store.FindPage(ctx, constants.MongoNormalizedProjectsCollection,
-		bson.M{}, "platform_updated_at", true, page, pageSize, &docs)
+		bson.M{}, "display_updated_at", true, page, pageSize, &docs)
 	if err != nil {
 		logrus.Errorf("list projects page=%d: %v", page, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch projects"})
 		return
 	}
 
-	// Batch-fetch company logos by company name.
-	nameSet := make(map[string]struct{}, len(docs))
+	// Batch-fetch companies by id so we can attach logo, stats, and name.
+	idSet := make(map[string]struct{}, len(docs))
 	for _, d := range docs {
-		if d.CompanyName != "" {
-			nameSet[d.CompanyName] = struct{}{}
+		if d.CompanyID != "" {
+			idSet[d.CompanyID] = struct{}{}
 		}
 	}
-	logoMap := make(map[string]string, len(nameSet))
-	statsMap := make(map[string]*models.RecruiterRodeoStats, len(nameSet))
-	if len(nameSet) > 0 {
-		names := make([]string, 0, len(nameSet))
-		for n := range nameSet {
-			names = append(names, n)
+	companyMap := make(map[string]*models.Company, len(idSet))
+	if len(idSet) > 0 {
+		ids := make([]string, 0, len(idSet))
+		for id := range idSet {
+			ids = append(ids, id)
 		}
 		var companies []models.Company
-		if err := store.GetManyByField(ctx, constants.MongoCompaniesCollection, "company_name", names, &companies); err != nil {
-			logrus.Warnf("fetch company data: %v", err)
+		if err := store.GetManyByField(ctx, constants.MongoCompaniesCollection, "company_id", ids, &companies); err != nil {
+			logrus.Warnf("fetch companies: %v", err)
 		}
-		for _, co := range companies {
-			logoMap[co.CompanyName] = co.LogoMinioURL
-			if co.RecruiterRodeoStats != nil {
-				statsMap[co.CompanyName] = co.RecruiterRodeoStats
-			}
+		for i := range companies {
+			companyMap[companies[i].CompanyID] = &companies[i]
 		}
 	}
 
 	items := make([]projectItem, len(docs))
-	for i, d := range docs {
-		items[i] = projectItem{
-			ProjectID:           d.ProjectID,
-			Platform:            d.Platform,
-			PlatformUpdatedAt:   d.PlatformUpdatedAt,
-			CompanyName:         d.CompanyName,
-			CompanyLogoURL:      logoMap[d.CompanyName],
-			RecruiterRodeoStats: statsMap[d.CompanyName],
-			NormalizedAt:        d.NormalizedAt.Format(time.RFC3339),
-			Data:                d.langContent(lang),
-		}
+	for i := range docs {
+		items[i] = buildProjectItem(&docs[i], lang, companyMap[docs[i].CompanyID])
 	}
 
-	// Count projects normalized today.
-	now := time.Now().UTC()
-	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	// Count projects normalized today (Berlin local day, not UTC — otherwise the
+	// day rolls over at 2am Berlin in summer / 1am in winter, which surprises users).
+	//
+	// TODO: when the user base grows beyond Europe (LATAM/Asia), accept an optional
+	// `?tz=` query param (e.g. tz=America/Bogota) and use that instead of Berlin.
+	// Client (iOS) can send TimeZone.current.identifier. Default stays Berlin so
+	// existing clients keep working unchanged.
+	berlin, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		berlin = time.UTC
+	}
+	nowBerlin := time.Now().In(berlin)
+	startOfDay := time.Date(nowBerlin.Year(), nowBerlin.Month(), nowBerlin.Day(), 0, 0, 0, 0, berlin)
 	todayCount, _ := store.Count(ctx, constants.MongoNormalizedProjectsCollection, bson.M{
 		"normalized_at": bson.M{"$gte": startOfDay},
 	})
 
-	totalPages := int(math.Ceil(float64(total) / float64(pageSize)))
 	c.JSON(http.StatusOK, gin.H{
 		"data":        items,
 		"today_count": todayCount,
-		"pagination": paginationMeta{
-			Page:       page,
-			PageSize:   pageSize,
-			Total:      total,
-			TotalPages: totalPages,
-		},
+		"pagination":  server.Paginate(page, pageSize, total),
 	})
+}
+
+// handleGetProject returns a single normalized project, formatted exactly like
+// one item from the list endpoint so iOS can reuse JobDetailView unchanged.
+func handleGetProject(c *gin.Context) {
+	projectID := c.Param("id")
+	if projectID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+		return
+	}
+
+	lang := c.Query("lang")
+	if lang != "de" && lang != "es" {
+		lang = "en"
+	}
+
+	ctx := c.Request.Context()
+	store := system.GetStorage()
+
+	var doc normalizedDoc
+	if err := store.Get(ctx, constants.MongoNormalizedProjectsCollection,
+		bson.M{"project_id": projectID}, &doc); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
+		return
+	}
+
+	var companyPtr *models.Company
+	if doc.CompanyID != "" {
+		var company models.Company
+		if err := store.Get(ctx, constants.MongoCompaniesCollection,
+			bson.M{"company_id": doc.CompanyID}, &company); err == nil && company.CompanyID != "" {
+			companyPtr = &company
+		}
+	}
+
+	c.JSON(http.StatusOK, buildProjectItem(&doc, lang, companyPtr))
 }

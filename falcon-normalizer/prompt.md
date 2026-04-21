@@ -22,7 +22,7 @@ title, company, description,
 start_date, end_date, location,
 skills[], required_skills[],
 rate { raw, amount, currency, type },
-contact { company, name, role, email, phone, address },
+contact { company, name, role, email, phone, address, image },
 is_remote, is_direct_client, is_anue,
 scraped_at
 ```
@@ -261,7 +261,7 @@ Array of short sentences (in German) extracted from the tasks/Aufgaben section. 
 ```
 
 ### contact
-Map directly from the input `contact` field.
+Map directly from the input `contact` field. `image` is the recruiter's photo URL — pass through as-is when present.
 ```json
 {
   "company": null,
@@ -269,7 +269,8 @@ Map directly from the input `contact` field.
   "role": null,
   "email": null,
   "phone": null,
-  "address": null
+  "address": null,
+  "image": null
 }
 ```
 
