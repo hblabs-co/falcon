@@ -1,0 +1,50 @@
+## kubectl apply -f deployment/30-signal.yaml
+# kubectl replace --force -f deployment/30-signal.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-signal
+  namespace: falcon
+  labels: {app: falcon-signal}
+spec:
+  # Single replica: signal holds in-memory alert-buffer state for the
+  # flush loop. Running >1 would double-send admin alerts.
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: falcon-signal}}
+  template:
+    metadata:
+      labels: {app: falcon-signal}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-signal
+          image: registry.4the.company/falcon-signal:1.0.0
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          volumeMounts:
+            # APNs .p8 key projected from the Secret at the path
+            # APNS_KEY_PATH expects. readOnly because the app only
+            # reads it at startup via token.AuthKeyFromFile().
+            - {name: apns-key, mountPath: /etc/apns, readOnly: true}
+          resources:
+            requests: {cpu: "100m", memory: "128Mi"}
+            limits:   {cpu: "300m", memory: "256Mi"}
+      volumes:
+        - name: apns-key
+          secret:
+            secretName: falcon-secrets
+            # Map the single APNS_AUTH_KEY key from the Secret onto
+            # /etc/apns/AuthKey.p8 — the filename matches APNS_KEY_PATH.
+            items:
+              - {key: APNS_AUTH_KEY, path: AuthKey.p8}
+            # 0444 = world-readable. Secret volumes are always owned by
+            # root; with 0400 the non-root `app` user in the container
+            # can't read the key. Secret-level access is already gated
+            # by RBAC on the k8s API, so making it readable inside the
+            # pod is not a real security boundary.
+            defaultMode: 0444

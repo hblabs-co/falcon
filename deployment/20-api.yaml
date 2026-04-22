@@ -1,0 +1,49 @@
+## kubectl apply -f deployment/20-api.yaml
+## kubectl delete -f deployment/20-api.yaml
+# kubectl replace --force -f deployment/20-api.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-api
+  namespace: falcon
+  labels: {app: falcon-api}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: falcon-api}}
+  template:
+    metadata:
+      labels: {app: falcon-api}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-api
+          image: registry.4the.company/falcon-api:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - {name: http, containerPort: 8080}
+          envFrom:
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests: {cpu: "100m", memory: "128Mi"}
+            limits:   {cpu: "500m", memory: "256Mi"}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falcon-api
+  namespace: falcon
+spec:
+  selector: {app: falcon-api}
+  ports:
+    - {name: http, port: 80, targetPort: 8080}

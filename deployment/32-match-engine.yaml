@@ -1,0 +1,28 @@
+# kubectl apply -f deployment/32-match-engine.yaml
+# kubectl replace --force -f deployment/32-match-engine.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-match-engine
+  namespace: falcon
+  labels: {app: falcon-match-engine}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: falcon-match-engine}}
+  template:
+    metadata:
+      labels: {app: falcon-match-engine}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-match-engine
+          image: registry.4the.company/falcon-match-engine:1.0.0
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          resources:
+            requests: {cpu: "100m", memory: "256Mi"}
+            limits:   {cpu: "500m", memory: "512Mi"}

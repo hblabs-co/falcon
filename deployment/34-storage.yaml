@@ -1,0 +1,35 @@
+# kubectl apply -f deployment/34-storage.yaml
+# kubectl delete -f deployment/34-storage.yaml
+# kubectl replace --force -f deployment/34-storage.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-storage
+  namespace: falcon
+  labels: {app: falcon-storage}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: falcon-storage}}
+  template:
+    metadata:
+      labels: {app: falcon-storage}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-storage
+          image: registry.4the.company/falcon-storage:1.0.0
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          env:
+            - {name: MINIO_BUCKET, value: "cvs"}
+            - {name: MINIO_USE_SSL, value: "false"}
+            - {name: QDRANT_COLLECTION, value: "cvs"}
+            - {name: QDRANT_VECTOR_DIM, value: "1536"}
+          resources:
+            requests: {cpu: "100m", memory: "128Mi"}
+            limits:   {cpu: "500m", memory: "512Mi"}
+

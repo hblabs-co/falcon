@@ -1,0 +1,7 @@
+## kubectl apply -f deployment/00-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: falcon
+  labels:
+    app.kubernetes.io/name: falcon

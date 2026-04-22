@@ -1,0 +1,30 @@
+## kubectl apply -f deployment/31-normalizer.yaml
+# kubectl replace --force -f deployment/31-normalizer.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-normalizer
+  namespace: falcon
+  labels: {app: falcon-normalizer}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: falcon-normalizer}}
+  template:
+    metadata:
+      labels: {app: falcon-normalizer}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-normalizer
+          image: registry.4the.company/falcon-normalizer:1.0.0
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          resources:
+            # Normalizer holds large LLM prompts + responses in memory;
+            # bump memory limit if you hit OOMs on big CVs.
+            requests: {cpu: "100m", memory: "256Mi"}
+            limits:   {cpu: "500m", memory: "512Mi"}

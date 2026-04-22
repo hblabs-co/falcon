@@ -1,0 +1,39 @@
+# kubectl apply -f deployment/35-scout.yaml
+# kubectl delete -f deployment/35-scout.yaml
+# kubectl replace --force -f deployment/35-scout.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-scout
+  namespace: falcon
+  labels: {app: falcon-scout}
+spec:
+  # Single replica: each scout runs the full platform list on a timer.
+  # Multiple replicas would re-scrape the same sites → waste + bans.
+  # Scale by enabling more PLATFORM entries in scout/main.go, not pods.
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: falcon-scout}}
+  template:
+    metadata:
+      labels: {app: falcon-scout}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-scout
+          image: registry.4the.company/falcon-scout:1.0.0
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          env:
+            # Scraping interval — override per platform via their own
+            # env if needed. 30s is the common.system default.
+            - {name: POLL_INTERVAL, value: "5m"}
+          resources:
+            # Colly holds a pool of HTTP clients and DOM parsers per
+            # platform — bump memory as more platforms get enabled.
+            requests: {cpu: "200m", memory: "256Mi"}
+            limits:   {cpu: "1000m", memory: "1Gi"}

@@ -1,0 +1,63 @@
+## kubectl apply -f deployment/21-realtime.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-realtime
+  namespace: falcon
+  labels: {app: falcon-realtime}
+spec:
+  # Every replica subscribes to the NATS stream independently via a^
+  # per-pod consumer name (REALTIME_REPLICA_ID from metadata.name), so
+  # scaling just adds capacity — no sharding needed. If you bump this,
+  # also size the ingress WS backend accordingly (sticky sessions
+  # recommended but not required).
+  replicas: 1
+  selector: {matchLabels: {app: falcon-realtime}}
+  template:
+    metadata:
+      labels: {app: falcon-realtime}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-realtime
+          image: registry.4the.company/falcon-realtime:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - {name: ws, containerPort: 8090}
+          envFrom:
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          env:
+            # Unique NATS consumer name per pod → every replica gets
+            # every message (fan-out), not round-robin.
+            - name: REALTIME_REPLICA_ID
+              valueFrom:
+                fieldRef: {fieldPath: metadata.name}
+          readinessProbe:
+            httpGet: {path: /healthz, port: ws}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /healthz, port: ws}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests: {cpu: "100m", memory: "128Mi"}
+            limits:   {cpu: "500m", memory: "256Mi"}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falcon-realtime
+  namespace: falcon
+  annotations:
+    # Sticky session: once a client is routed to a pod, keep it there.
+    # WS connections are long-lived; round-robin on every reconnect is fine
+    # but reduces ping/pong churn when the same client reconnects.
+    service.beta.kubernetes.io/aws-load-balancer-attributes: stickiness.enabled=true,stickiness.type=source_ip
+spec:
+  selector: {app: falcon-realtime}
+  ports:
+    - {name: ws, port: 80, targetPort: 8090}
