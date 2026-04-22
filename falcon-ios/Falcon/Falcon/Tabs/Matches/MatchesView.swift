@@ -1,7 +1,7 @@
 import SwiftUI
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "matches")
+private let log = FalconLog.make(category: "matches")
 
 /// Density modes for the match cards in the list.
 /// - full:    current card — score, title, breakdown bars, skills, both CTAs.

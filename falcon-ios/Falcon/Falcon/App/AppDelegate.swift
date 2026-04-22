@@ -5,7 +5,7 @@ import OSLog
 /// "Wait for the executable to be launched" — print()/NSLog() go silent
 /// in that mode. All interpolations must be `privacy: .public` or the
 /// value redacts to "<private>".
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "launch")
+private let log = FalconLog.make(category: "launch")
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 

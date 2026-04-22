@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "login")
+private let log = FalconLog.make(category: "login")
 
 struct ProfileView: View {
     @Environment(LanguageManager.self) var lm

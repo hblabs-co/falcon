@@ -4,7 +4,7 @@ import UIKit
 import ActivityKit
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "notifications")
+private let log = FalconLog.make(category: "notifications")
 
 @Observable
 final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {

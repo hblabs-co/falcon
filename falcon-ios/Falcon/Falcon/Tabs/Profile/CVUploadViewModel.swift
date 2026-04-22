@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "cv")
+private let log = FalconLog.make(category: "cv")
 
 @Observable
 final class CVUploadViewModel {

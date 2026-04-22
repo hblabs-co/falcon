@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "auth")
+private let log = FalconLog.make(category: "auth")
 
 /// Handles the `falcon://auth?token=xxx` deep link produced by the magic-link email.
 /// Calls `GET /api/auth/verify?token=xxx`, extracts the JWT, and persists it via SessionManager.

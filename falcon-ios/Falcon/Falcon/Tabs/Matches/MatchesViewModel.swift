@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "matches")
+private let log = FalconLog.make(category: "matches")
 
 @Observable
 final class MatchesViewModel {

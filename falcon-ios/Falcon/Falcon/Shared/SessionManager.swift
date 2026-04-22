@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "session")
+private let log = FalconLog.make(category: "session")
 
 /// Owns the authenticated user identity for the current session.
 ///

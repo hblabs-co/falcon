@@ -7,7 +7,7 @@ import OSLog
 /// works in Xcode's "Wait for the executable to be launched" mode AND in
 /// Console.app. All interpolated values must be `privacy: .public` or they
 /// render as "<private>".
-private let rtLog = Logger(subsystem: "co.hblabs.falcon", category: "realtime")
+private let rtLog = FalconLog.make(category: "realtime")
 
 /// Event-name vocabulary shared with falcon-realtime. Kept in lockstep
 /// with common/models/realtime.go — if you add/rename here, do the same
