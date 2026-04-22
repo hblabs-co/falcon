@@ -12,6 +12,10 @@ struct MainTabView: View {
     @State private var selectedTab: AppTab = .jobs
     @State private var contactDrawer: ContactDrawerInfo? = nil
     @State private var cvUploadVM = CVUploadViewModel()
+    /// Hoisted from MatchesView so the tab bar can read unreadCount for
+    /// the badge regardless of which tab is currently active. Created
+    /// once in .task once SessionManager is available.
+    @State private var matchesVM: MatchesViewModel?
     @State private var jobsScrollToTop = false
     @State private var matchesScrollToTop = false
 
@@ -27,7 +31,10 @@ struct MainTabView: View {
                 // Other tabs are created on demand and torn down when leaving.
                 Group {
                     switch selectedTab {
-                    case .matches:     MatchesView(selectedTab: $selectedTab, scrollToTop: $matchesScrollToTop)
+                    case .matches:
+                        if let matchesVM {
+                            MatchesView(vm: matchesVM, selectedTab: $selectedTab, scrollToTop: $matchesScrollToTop)
+                        }
                     case .profile:     ProfileView()
                     case .settings:    SettingsView(contactDrawer: $contactDrawer)
                     case .actions:     ActionsView()
@@ -51,6 +58,15 @@ struct MainTabView: View {
         .ignoresSafeArea(edges: .bottom)
         .task {
             await nm.refreshStatus()
+            // Bootstrap the shared matches VM so the tab badge has
+            // data even before the user opens the Matches tab.
+            if matchesVM == nil {
+                let vm = MatchesViewModel(session: session)
+                matchesVM = vm
+                if session.isAuthenticated {
+                    await vm.loadInitial()
+                }
+            }
             // Cold-launch via notification tap: didReceive fires BEFORE this
             // view mounts, so .onChange never sees the transition. Check the
             // initial value explicitly.
@@ -72,8 +88,10 @@ struct MainTabView: View {
         .task(id: session.isAuthenticated) {
             if session.isAuthenticated {
                 await cvUploadVM.restoreFromServer()
+                await matchesVM?.loadInitial()
             } else {
                 cvUploadVM.reset()
+                matchesVM?.reset()
             }
         }
         // When the user taps a MATCH_RESULT push, NotificationManager fills
@@ -101,7 +119,7 @@ struct MainTabView: View {
     private var floatingTabBar: some View {
         HStack(spacing: 0) {
             tabItem(icon: "bell.fill",           label: lm.t(.tabActions),   tab: .actions, badge: actionsPendingCount)
-            tabItem(icon: "sparkles",             label: lm.t(.tabMatches),   tab: .matches)
+            tabItem(icon: "sparkles",             label: lm.t(.tabMatches),   tab: .matches, badge: matchesVM?.unreadCount ?? 0)
             // tabItem(icon: "chart.bar.fill",      label: lm.t(.tabStats),     tab: .stats)
             tabItem(icon: "briefcase.fill",      label: lm.t(.tabJobs),      tab: .jobs)
             tabItem(icon: "person.fill",         label: lm.t(.tabProfile),   tab: .profile)

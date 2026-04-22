@@ -232,6 +232,19 @@ func (s *Storage) BulkUpdate(ctx context.Context, collection string, filter bson
 	return res.ModifiedCount, nil
 }
 
+// UpdateOne applies update to AT MOST one document matching filter. Does
+// NOT upsert (unlike Set/RawUpdate), so a non-existent match yields
+// modifiedCount=0 instead of creating a phantom document. Returns
+// modifiedCount so callers can distinguish "row missing" from "row
+// updated" when that matters (e.g. to respond 404 vs 200).
+func (s *Storage) UpdateOne(ctx context.Context, collection string, filter bson.M, update bson.M) (int64, error) {
+	res, err := s.db.Collection(collection).UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+	return res.ModifiedCount, nil
+}
+
 // FindPage returns one page of documents sorted by sortField.
 // Pass sortDesc=true for newest-first. Returns total matching count alongside results.
 // results must be a pointer to a slice.

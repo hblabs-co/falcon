@@ -80,6 +80,12 @@ type MatchResultEvent struct {
 	// LLM metadata — identifies which model produced this score.
 	LLMModel    string `json:"llm_model"    bson:"llm_model"`
 	LLMProvider string `json:"llm_provider" bson:"llm_provider"`
+
+	// Viewed flips to true when the user opens MatchDetailView for this
+	// match. Drives the "unread dot" on cards and the tab-icon badge
+	// count. Pre-existing rows without the field decode as false
+	// (Go zero-value), so they're treated as unread until opened.
+	Viewed bool `json:"viewed" bson:"viewed"`
 }
 
 // LabelFromScore derives the UI label from the overall score.

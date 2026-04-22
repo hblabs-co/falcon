@@ -29,7 +29,7 @@ enum StringKey {
 
     // Alerts view
     case matchesEmpty, matchesEmptyDescription, matchesBannerTagline, matchesBannerTotal
-    case matchesInfoBadge, matchesInfoBadgeTitle
+    case matchesInfoBadge, matchesInfoBadgeTitle, matchesNewBadge
     case matchLabelApplyImmediately, matchLabelTopCandidate
     case matchLabelAcceptable, matchLabelNotSuitable
     case matchesDetails, matchesViewJob, matchesSkillsYouHave, matchesMissingSkills
@@ -151,6 +151,7 @@ enum Strings {
             .matchesBannerTotal: "total matches",
             .matchesInfoBadge: "Matches are projects the AI thinks fit your profile, ranked by score.",
             .matchesInfoBadgeTitle: "What are matches?",
+            .matchesNewBadge: "NEW",
             .matchLabelApplyImmediately: "Apply Immediately",
             .matchLabelTopCandidate: "Top Candidate",
             .matchLabelAcceptable: "Acceptable",
@@ -336,6 +337,7 @@ enum Strings {
             .matchesBannerTotal: "Treffer gesamt",
             .matchesInfoBadge: "Treffer sind Projekte, die laut KI zu deinem Profil passen, sortiert nach Punktzahl.",
             .matchesInfoBadgeTitle: "Was sind Treffer?",
+            .matchesNewBadge: "NEU",
             .matchesDetails: "Treffer-Details",
             .matchesViewJob: "Zum Job",
             .matchesSkillsYouHave: "Vorhandene Fähigkeiten",
@@ -521,6 +523,7 @@ enum Strings {
             .matchesBannerTotal: "coincidencias totales",
             .matchesInfoBadge: "Las coincidencias son proyectos que según la IA encajan con tu perfil, ordenadas por puntuación.",
             .matchesInfoBadgeTitle: "¿Qué son las coincidencias?",
+            .matchesNewBadge: "NUEVO",
             .matchesDetails: "Ver detalles",
             .matchesViewJob: "Ver oferta",
             .matchesSkillsYouHave: "Habilidades que tienes",

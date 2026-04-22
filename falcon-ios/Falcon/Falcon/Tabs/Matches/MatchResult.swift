@@ -6,6 +6,22 @@ import SwiftUI
 struct MatchesResponse: Decodable {
     let data: [MatchResult]
     let pagination: MatchesPagination
+    /// Server-calculated count of matches with viewed=false for the user
+    /// (across all pages, not just this one). Powers the tab-icon badge.
+    let unreadCount: Int
+
+    enum CodingKeys: String, CodingKey {
+        case data
+        case pagination
+        case unreadCount = "unread_count"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        data        = try c.decode([MatchResult].self,     forKey: .data)
+        pagination  = try c.decode(MatchesPagination.self, forKey: .pagination)
+        unreadCount = (try? c.decodeIfPresent(Int.self,    forKey: .unreadCount)) ?? 0
+    }
 }
 
 struct MatchesPagination: Decodable {
@@ -42,6 +58,10 @@ struct MatchResult: Decodable, Identifiable {
     let passedThreshold:  Bool
     let scoredAt:         String
     let summaryAll:       [String: String]
+    /// Mirrors the server `viewed` flag — flips to true after the user
+    /// opens MatchDetailView. Kept as `var` so we can optimistic-update
+    /// locally without refetching the whole list.
+    var isViewed:         Bool
 
     // Composite id so SwiftUI's diffing handles re-matches of the same project
     // with a different CV (and re-matches of the same CV after a re-score).
@@ -65,6 +85,7 @@ struct MatchResult: Decodable, Identifiable {
         case passedThreshold  = "passed_threshold"
         case scoredAt         = "scored_at"
         case summaryAll       = "summary"
+        case isViewed         = "viewed"
     }
 
     init(from decoder: Decoder) throws {
@@ -86,6 +107,7 @@ struct MatchResult: Decodable, Identifiable {
         passedThreshold    = (try? c.decodeIfPresent(Bool.self,                forKey: .passedThreshold))    ?? false
         scoredAt           = (try? c.decodeIfPresent(String.self,              forKey: .scoredAt))           ?? ""
         summaryAll         = (try? c.decodeIfPresent([String: String].self,    forKey: .summaryAll))         ?? [:]
+        isViewed           = (try? c.decodeIfPresent(Bool.self,                forKey: .isViewed))           ?? false
     }
 
     // MARK: - Language-aware accessors (fallback chain: requested → de → en → es)

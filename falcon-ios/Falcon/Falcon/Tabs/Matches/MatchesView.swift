@@ -9,16 +9,22 @@ struct MatchesView: View {
     @Environment(SessionManager.self) var session
     @Environment(CVUploadViewModel.self) var cvVM
     @Environment(\.scenePhase) var scenePhase
+    /// Owned by MainTabView so the tab-bar badge can read unreadCount
+    /// regardless of which tab is currently visible.
+    var vm: MatchesViewModel
     @Binding var selectedTab: AppTab
     @Binding var scrollToTop: Bool
-
-    @State private var vm: MatchesViewModel?
     @State private var openedProject: ProjectItem?
     @State private var openedMatch: MatchResult?
     @State private var loadingProjectID: String?
     @State private var bannerVisible = true
     // matchID to briefly highlight after scrolling to it (notification tap flow).
     @State private var highlightedMatchID: String?
+    /// 0 → 1 progress multiplier for the score breakdown bars. Animates
+    /// from 0 to 1 every time the tab appears, giving each match card a
+    /// "bars fill up" effect so the user notices the variance instead of
+    /// seeing static numbers.
+    @State private var barsProgress: Double = 0
 
     var body: some View {
         NavigationStack {
@@ -56,13 +62,26 @@ struct MatchesView: View {
                     guard let payload else { return }
                     handleMatchNavigation(payload: payload, proxy: proxy)
                 }
-                .onChange(of: vm?.matches.count ?? 0) { _, count in
+                .onChange(of: vm.matches.count) { _, count in
                     guard count > 0, let payload = nm.pendingMatchNavigation else { return }
                     handleMatchNavigation(payload: payload, proxy: proxy)
                 }
                 .onAppear {
                     if let payload = nm.pendingMatchNavigation {
                         handleMatchNavigation(payload: payload, proxy: proxy)
+                    }
+                    // Replay the bar-fill animation every time the tab
+                    // reappears. The first render must commit with
+                    // barsProgress=0; if we flip to 1 in the same frame,
+                    // SwiftUI collapses the change and no animation
+                    // runs. Deferring to the next runloop lets the
+                    // initial frame render at 0, then the animation
+                    // drives the width from 0 → 1.
+                    barsProgress = 0
+                    DispatchQueue.main.async {
+                        withAnimation(.easeOut(duration: 0.7)) {
+                            barsProgress = 1
+                        }
                     }
                 }
             }
@@ -75,22 +94,28 @@ struct MatchesView: View {
             }
             .withLoginToolbar()
             .task {
-                if vm == nil {
-                    vm = MatchesViewModel(session: session)
-                }
-                await vm?.loadInitial()
+                // VM is owned by MainTabView; load if empty.
+                if vm.matches.isEmpty { await vm.loadInitial() }
             }
-            .refreshable { await vm?.refresh() }
+            .refreshable { await vm.refresh() }
             .onChange(of: scenePhase) { _, phase in
-                if phase == .active, vm?.error != nil {
-                    Task { await vm?.loadInitial() }
+                if phase == .active, vm.error != nil {
+                    Task { await vm.loadInitial() }
                 }
             }
             .sheet(item: $openedProject) { project in
                 JobDetailView(project: project, source: "matches").environment(lm)
             }
             .sheet(item: $openedMatch) { match in
-                MatchDetailView(match: match).environment(lm)
+                MatchDetailView(match: match)
+                    .environment(lm)
+                    .onAppear {
+                        // Mark the match as viewed: updates the dot on
+                        // the card, decrements the tab badge, and PATCHes
+                        // the server. Optimistic — the UI reflects the
+                        // change immediately even if the network is slow.
+                        vm.markViewed(projectId: match.projectId, cvId: match.cvId)
+                    }
             }
         }
         .overlay(alignment: .bottomTrailing) {
@@ -110,7 +135,7 @@ struct MatchesView: View {
             HStack(spacing: 8) {
                 Button {
                     scrollToTop.toggle()
-                    Task { await vm?.refresh() }
+                    Task { await vm.refresh() }
                 } label: {
                     FalconIconView(size: 32, cornerRadius: 7)
                 }
@@ -118,9 +143,9 @@ struct MatchesView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(lm.t(.tabMatches))
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    if let total = vm?.total, total > 0 {
+                    if vm.total > 0 {
                         HStack(spacing: 3) {
-                            Text("\(total)")
+                            Text("\(vm.total)")
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundStyle(.primary)
                             Text(lm.t(.matchesBannerTotal))
@@ -151,7 +176,7 @@ struct MatchesView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 2) {
-                Text((vm?.total ?? 0) > 0 ? "\(vm?.total ?? 0)" : "—")
+                Text(vm.total > 0 ? "\(vm.total)" : "—")
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                 Text(lm.t(.matchesBannerTotal))
                     .font(.system(size: 10, weight: .medium))
@@ -207,7 +232,7 @@ struct MatchesView: View {
             noSessionView
         } else if isCVFailed {
             cvFailedView
-        } else if let vm, vm.matches.isEmpty, !vm.isLoading, vm.error == nil {
+        } else if vm.matches.isEmpty, !vm.isLoading, vm.error == nil {
             if nm.authStatus != .authorized {
                 notificationsDisabledView
             } else {
@@ -215,14 +240,12 @@ struct MatchesView: View {
             }
         } else {
             VStack(spacing: 16) {
-                if let vm, vm.isLoading {
+                if vm.isLoading {
                     loadingView
-                } else if let vm, let err = vm.error {
+                } else if let err = vm.error {
                     errorView(err)
-                } else if let vm {
-                    matchListBody(vm)
                 } else {
-                    loadingView
+                    matchListBody(vm)
                 }
             }
         }
@@ -303,8 +326,7 @@ struct MatchesView: View {
 
     private func matchCard(_ match: MatchResult) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            topRow(match)
-            titleBlock(match)
+            headerRow(match)
             scoreBreakdown(match)
             skillsSection(match)
             actionRow(match)
@@ -317,20 +339,58 @@ struct MatchesView: View {
         )
     }
 
-    private func topRow(_ match: MatchResult) -> some View {
-        HStack(alignment: .center, spacing: 10) {
+    /// Two-column header:
+    ///  - Left  : score badge
+    ///  - Right : 3 stacked rows — label pill + date, title, company.
+    /// Keeps the vertical rhythm of the card predictable regardless of
+    /// whether the title wraps.
+    private func headerRow(_ match: MatchResult) -> some View {
+        HStack(alignment: .top, spacing: 12) {
             scoreBadge(match)
-            Text(match.labelText(lm: lm))
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(match.labelColor)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(Capsule().fill(match.labelColor.opacity(0.12)))
-            Spacer()
-            if let date = match.relativeDate(for: lm.appLanguage) {
-                Text(date)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
+            VStack(alignment: .leading, spacing: 4) {
+                // Row 1: label pill on the left. Right side combines
+                // "NEW" (when unread) with the relative date so the
+                // user can scan freshness in one place. NEW disappears
+                // after the user opens MatchDetailView (isViewed=true).
+                HStack(spacing: 10) {
+                    Text(match.labelText(lm: lm))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(match.labelColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(match.labelColor.opacity(0.12)))
+                    Spacer(minLength: 0)
+                    HStack(spacing: 6) {
+                        if !match.isViewed {
+                            Text(lm.t(.matchesNewBadge))
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(Color.accentColor))
+                        }
+                        if let date = match.relativeDate(for: lm.appLanguage) {
+                            Text(date)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+                // Row 2: project title.
+                Text(match.projectTitle)
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .lineLimit(2)
+                // Row 3: company.
+                Label {
+                    Text(match.companyName.nilIfEmpty ?? match.platform)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                } icon: {
+                    Image(systemName: "building.2")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.tertiary)
+                }
             }
         }
     }
@@ -341,23 +401,6 @@ struct MatchesView: View {
             .foregroundStyle(match.labelColor)
             .frame(width: 52, height: 52)
             .background(Circle().fill(match.labelColor.opacity(0.12)))
-    }
-
-    private func titleBlock(_ match: MatchResult) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(match.projectTitle)
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                .lineLimit(2)
-            Label {
-                Text(match.companyName.nilIfEmpty ?? match.platform)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.secondary)
-            } icon: {
-                Image(systemName: "building.2")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.tertiary)
-            }
-        }
     }
 
     // MARK: - Score breakdown (six bars)
@@ -392,7 +435,11 @@ struct MatchesView: View {
                         .frame(height: 6)
                     Capsule()
                         .fill(scoreColor(value))
-                        .frame(width: max(4, geo.size.width * CGFloat(value / 10)), height: 6)
+                        // barsProgress drives the fill width from 0 (on
+                        // tab appear) to 1 (fully extended) via the
+                        // withAnimation wrapper in .onAppear. Implicit
+                        // animation picks up the width change.
+                        .frame(width: max(4, geo.size.width * CGFloat(value / 10) * barsProgress), height: 6)
                 }
                 .frame(maxHeight: .infinity, alignment: .center)
             }
@@ -589,7 +636,7 @@ struct MatchesView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-            Button("Retry") { Task { await vm?.loadInitial() } }
+            Button("Retry") { Task { await vm.loadInitial() } }
                 .buttonStyle(.bordered)
         }
         .padding(.top, 40)
@@ -605,7 +652,7 @@ struct MatchesView: View {
         // Only consume the payload when we actually find the match. If matches
         // haven't loaded yet (cold-launch via notification), leave the payload
         // for the next trigger (onChange of matches.count) to retry.
-        guard let match = vm?.matches.first(where: { $0.id == payload.matchID }) else {
+        guard let match = vm.matches.first(where: { $0.id == payload.matchID }) else {
             log.info("notification match \(payload.matchID, privacy: .public) not loaded yet — will retry when list fills")
             return
         }

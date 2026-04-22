@@ -20,6 +20,7 @@ type Routes struct{}
 func (Routes) Mount(r *gin.Engine) {
 	g := r.Group("/matches", server.JWTMiddleware())
 	g.GET("", handleListMatches)
+	g.PATCH("/viewed", handleMarkViewed)
 }
 
 // handleListMatches returns the authenticated user's match results, ordered by
@@ -60,8 +61,66 @@ func handleListMatches(c *gin.Context) {
 		return
 	}
 
+	// Count unviewed matches for this user across ALL pages — drives the
+	// tab-icon badge. Missing `viewed` field counts as unread (pre-
+	// feature docs). Cheap on an indexed collection and avoids a second
+	// round-trip from the client.
+	unreadFilter := bson.M{
+		"user_id":  uid,
+		"platform": bson.M{"$ne": "freelance.de"},
+		"$or": []bson.M{
+			{"viewed": bson.M{"$exists": false}},
+			{"viewed": false},
+		},
+	}
+	unread, err := store.Count(ctx, constants.MongoMatchResultsCollection, unreadFilter)
+	if err != nil {
+		logrus.Warnf("count unread matches user=%s: %v", uid, err)
+		unread = 0
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"data":       docs,
-		"pagination": server.Paginate(page, pageSize, total),
+		"data":         docs,
+		"pagination":   server.Paginate(page, pageSize, total),
+		"unread_count": unread,
 	})
+}
+
+// handleMarkViewed flips the `viewed` flag to true for a single match.
+// Body: {"project_id": "...", "cv_id": "..."}. Scoped to the authenticated
+// user so one user can't mark another's match as viewed. Idempotent —
+// re-marking is a no-op.
+func handleMarkViewed(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	if userID == nil || userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	uid := userID.(string)
+
+	var body struct {
+		ProjectID string `json:"project_id" binding:"required"`
+		CVID      string `json:"cv_id"      binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx := c.Request.Context()
+	store := system.GetStorage()
+
+	// (user_id, project_id, cv_id) is unique per match → UpdateOne, not
+	// BulkUpdate. Non-upserting so a wrong id-pair doesn't create a
+	// phantom doc.
+	if _, err := store.UpdateOne(ctx, constants.MongoMatchResultsCollection,
+		bson.M{"user_id": uid, "project_id": body.ProjectID, "cv_id": body.CVID},
+		bson.M{"$set": bson.M{"viewed": true}},
+	); err != nil {
+		logrus.Errorf("mark viewed user=%s project=%s cv=%s: %v", uid, body.ProjectID, body.CVID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to mark viewed"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
