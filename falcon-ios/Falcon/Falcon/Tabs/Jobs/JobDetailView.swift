@@ -1,10 +1,10 @@
 import SwiftUI
 
-struct JobDetailView: View {
+struct ProjectDetailView: View {
     let project: ProjectItem
     /// Where this detail sheet was opened from — sent in project_viewed so
-    /// the backend can distinguish "Treffer → Ver oferta" from "Jobs tab
-    /// → card tap". Defaults to "unknown" when an unannotated call site
+    /// the backend can distinguish "Treffer → Ver proyecto" from "Projects
+    /// tab → card tap". Defaults to "unknown" when an unannotated call site
     /// hasn't been updated yet.
     var source: String = "unknown"
     @Environment(LanguageManager.self) var lm

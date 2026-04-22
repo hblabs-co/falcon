@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - JobsView
+// MARK: - ProjectsView
 
-struct JobsView: View {
+struct ProjectsView: View {
     @Environment(LanguageManager.self) var lm
     @Environment(NotificationManager.self) var nm
     @Environment(SessionManager.self) var session
@@ -10,7 +10,7 @@ struct JobsView: View {
     /// Owned by MainTabView so the realtime listener at that level can
     /// funnel project.normalized pushes into the VM — which keeps the
     /// banner counter working independent of how this view is mounted.
-    var vm: JobsViewModel
+    var vm: ProjectsViewModel
     @State private var bannerVisible = true
     @Binding var scrollToTop: Bool
 
@@ -24,7 +24,7 @@ struct JobsView: View {
                         if !session.isAuthenticated {
                             AlreadyHaveAccountBanner()
                         }
-                        jobsList
+                        projectsList
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
@@ -104,7 +104,7 @@ struct JobsView: View {
     @ViewBuilder
     private var navTitle: some View {
         if bannerVisible {
-            Text(lm.t(.tabJobs))
+            Text(lm.t(.tabProjects))
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         } else {
@@ -117,14 +117,14 @@ struct JobsView: View {
                 }
                 .buttonStyle(.plain)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(lm.t(.tabJobs))
+                    Text(lm.t(.tabProjects))
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                     if vm.todayCount > 0 {
                         HStack(spacing: 3) {
                             Text("\(vm.todayCount)")
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundStyle(.primary)
-                            Text(lm.t(.jobsBannerMatchCount))
+                            Text(lm.t(.projectsBannerMatchCount))
                                 .font(.system(size: 11, weight: .regular))
                                 .foregroundStyle(.secondary)
                         }
@@ -144,7 +144,7 @@ struct JobsView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Falcon")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                Text(lm.t(.jobsBannerTagline))
+                Text(lm.t(.projectsBannerTagline))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
             }
@@ -154,7 +154,7 @@ struct JobsView: View {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(vm.todayCount > 0 ? "\(vm.todayCount)" : "—")
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                Text(lm.t(.jobsBannerMatchCount))
+                Text(lm.t(.projectsBannerMatchCount))
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.secondary)
             }
@@ -171,7 +171,7 @@ struct JobsView: View {
     // MARK: - List
 
     @ViewBuilder
-    private var jobsList: some View {
+    private var projectsList: some View {
         if vm.isLoading {
             skeletonList
         } else if let error = vm.error {
@@ -179,7 +179,7 @@ struct JobsView: View {
         } else {
             LazyVStack(spacing: 14) {
                 ForEach(vm.projects) { project in
-                    JobCard(project: project)
+                    ProjectCard(project: project)
                         .onAppear {
                             if project.id == vm.projects.last?.id {
                                 Task { await vm.loadMore() }
@@ -197,7 +197,7 @@ struct JobsView: View {
     private var skeletonList: some View {
         LazyVStack(spacing: 14) {
             ForEach(0..<5, id: \.self) { _ in
-                JobCardSkeleton()
+                ProjectCardSkeleton()
             }
         }
     }
@@ -218,9 +218,9 @@ struct JobsView: View {
     }
 }
 
-// MARK: - Job Card
+// MARK: - Project Card
 
-struct JobCard: View {
+struct ProjectCard: View {
     let project: ProjectItem
     @Environment(LanguageManager.self) var lm
     @State private var showDetail = false
@@ -252,7 +252,7 @@ struct JobCard: View {
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .onTapGesture { showDetail = true }
         .sheet(isPresented: $showDetail) {
-            JobDetailView(project: project, source: "jobs")
+            ProjectDetailView(project: project, source: "projects")
                 .environment(lm)
         }
     }
@@ -460,7 +460,7 @@ struct JobCard: View {
 
 // MARK: - Skeleton
 
-struct JobCardSkeleton: View {
+struct ProjectCardSkeleton: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 12) {

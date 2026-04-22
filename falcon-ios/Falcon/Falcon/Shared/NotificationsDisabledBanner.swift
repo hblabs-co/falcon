@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Compact warning banner shown at the top of feeds (Jobs, Matches) when the
+/// Compact warning banner shown at the top of feeds (Projects, Matches) when the
 /// user has disabled notifications. Taps request permission (or open Settings
 /// if already denied). Use the full-screen `ContentUnavailableView` flavor in
 /// the empty-state branch instead.

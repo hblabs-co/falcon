@@ -21,7 +21,7 @@ struct SplashView: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .opacity(titleOpacity)
 
-                Text("Job Intelligence")
+                Text("Project Intelligence")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.secondary)
                     .opacity(subtitleOpacity)

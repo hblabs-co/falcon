@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Floating "N new X — tap to refresh" pill that slides in from the top
 /// whenever realtime pushes arrive while the user is in the tab. Kept
-/// generic so both Jobs (`project.normalized` stream) and Matches
+/// generic so both Projects (`project.normalized` stream) and Matches
 /// (`match.result` stream) can reuse it — each tab owns its own counter
 /// and passes the localized singular/plural strings.
 ///

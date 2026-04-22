@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Nudges unauthenticated users toward the login flow. The "Anmelden"
 /// button in the nav bar is easy to miss, so we also surface a banner
-/// inside the content area of every no-session screen (Matches, Jobs,
+/// inside the content area of every no-session screen (Matches, Projects,
 /// Profile). Tap opens the same LoginSheet the toolbar button does.
 /// Rendered only when the user is NOT authenticated — call sites should
 /// guard on `session.isAuthenticated`.

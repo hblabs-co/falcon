@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Sheet showing the LLM's full analysis for a match: summary + positive points,
 /// concerns, and improvement tips. Opened from the "Match details" button on
-/// each match card. Separate from JobDetailView (which shows the project itself).
+/// each match card. Separate from ProjectDetailView (which shows the project itself).
 struct MatchDetailView: View {
     let match: MatchResult
     @Environment(LanguageManager.self) var lm

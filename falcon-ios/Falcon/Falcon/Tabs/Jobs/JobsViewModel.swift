@@ -1,10 +1,10 @@
 import Foundation
 import OSLog
 
-private let log = Logger(subsystem: "co.hblabs.falcon", category: "jobs")
+private let log = Logger(subsystem: "co.hblabs.falcon", category: "projects")
 
 @Observable
-final class JobsViewModel {
+final class ProjectsViewModel {
     private(set) var projects:     [ProjectItem] = []
     private(set) var isLoading     = false
     private(set) var isLoadingMore = false
@@ -16,7 +16,7 @@ final class JobsViewModel {
     /// Counts `project.normalized` pushes that arrived since the user
     /// last tapped the "new projects" banner. Lives on the VM (not in
     /// the View) so the state survives any future restructuring of
-    /// MainTabView — if JobsView ever stops being kept-alive via
+    /// MainTabView — if ProjectsView ever stops being kept-alive via
     /// opacity(0), the counter keeps working.
     private(set) var newProjectCount = 0
 

@@ -113,7 +113,7 @@ struct MatchesView: View {
                 }
             }
             .sheet(item: $openedProject) { project in
-                JobDetailView(project: project, source: "matches").environment(lm)
+                ProjectDetailView(project: project, source: "matches").environment(lm)
             }
             .sheet(item: $openedMatch) { match in
                 MatchDetailView(match: match)
@@ -477,9 +477,9 @@ struct MatchesView: View {
                 .shadow(color: .black.opacity(0.06), radius: 14, x: 0, y: 4)
         )
         // Whole-card tap opens the match detail sheet. Inner buttons
-        // (Zum Job, Treffer-Details) and the ellipsis menu consume their
+        // (Zum Projekt, Treffer-Details) and the ellipsis menu consume their
         // own taps first — SwiftUI respects that hierarchy, so those
-        // elements keep doing their specific jobs.
+        // elements keep doing their specific actions.
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .onTapGesture { openedMatch = match }
     }
@@ -555,7 +555,7 @@ struct MatchesView: View {
                     Button {
                         Task { await openProject(match) }
                     } label: {
-                        Label(lm.t(.matchesViewJob), systemImage: "briefcase.fill")
+                        Label(lm.t(.matchesViewProject), systemImage: "briefcase.fill")
                     }
                     .disabled(waiting)
 
@@ -863,7 +863,7 @@ struct MatchesView: View {
                         }
                     }
                     .frame(width: 16, height: 16)
-                    Text(lm.t(.matchesViewJob))
+                    Text(lm.t(.matchesViewProject))
                         .font(.system(size: 13, weight: .semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)

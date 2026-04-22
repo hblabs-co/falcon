@@ -64,7 +64,7 @@ struct MatchResult: Decodable, Identifiable {
     var isViewed:         Bool
     /// Mirrors the server `normalized` flag. `false` means
     /// falcon-normalizer hasn't produced the UI-ready project doc yet,
-    /// so "Zum Job" must show a spinner instead of opening a
+    /// so "Zum Projekt" must show a spinner instead of opening a
     /// placeholder sheet. Flipped to `true` either server-side
     /// (match-engine sweep / event) or client-side when we receive a
     /// realtime `project.normalized` push for the matching project_id.

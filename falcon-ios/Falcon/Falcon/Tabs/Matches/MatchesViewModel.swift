@@ -101,7 +101,7 @@ final class MatchesViewModel {
 
     /// Marks every local match with the given project_id as normalized.
     /// Called from the MatchesView listener that watches falcon-realtime
-    /// `project.normalized` pushes so the "Zum Job" spinner clears the
+    /// `project.normalized` pushes so the "Zum Projekt" spinner clears the
     /// instant the normalizer finishes, without a refetch.
     func markProjectNormalized(projectId: String) {
         for i in matches.indices where matches[i].projectId == projectId && !matches[i].isNormalized {

@@ -2,7 +2,7 @@ import Foundation
 
 enum StringKey {
     // Tabs
-    case tabJobs, tabMatches, tabSettings, tabProfile, tabActions
+    case tabProjects, tabMatches, tabSettings, tabProfile, tabActions
     case actionsEmptyTitle, actionsEmptyBody
 
     // Settings sections
@@ -38,13 +38,13 @@ enum StringKey {
     case serverReconnectedTitle, serverReconnectedBody
     case matchLabelApplyImmediately, matchLabelTopCandidate
     case matchLabelAcceptable, matchLabelNotSuitable
-    case matchesDetails, matchesViewJob, matchesSkillsYouHave, matchesMissingSkills
+    case matchesDetails, matchesViewProject, matchesSkillsYouHave, matchesMissingSkills
     case matchesScoreBreakdown, matchesPositivePoints, matchesNegativePoints, matchesImprovementTips
     case matchesScoreSkillsMatch, matchesScoreSeniorityFit, matchesScoreDomainExperience
     case matchesScoreCommunicationClarity, matchesScoreProjectRelevance, matchesScoreTechStackOverlap
 
-    // Jobs view — placeholder
-    case jobsTitle
+    // Projects view — placeholder
+    case projectsTitle
 
     // About
     case aboutCraftedIn
@@ -53,8 +53,8 @@ enum StringKey {
     // Splash
     case splashSubtitle
 
-    // Jobs banner
-    case jobsBannerTagline, jobsBannerMatchCount
+    // Projects banner
+    case projectsBannerTagline, projectsBannerMatchCount
 
     // Profile
     case profileAnonymous
@@ -105,7 +105,7 @@ enum StringKey {
     // Live Activities disabled
     case liveActivitiesDisabledTitle, liveActivitiesDisabledBody
 
-    // Job detail
+    // Project detail
     case detailHighlights, detailMustHave, detailShouldHave, detailNiceToHave
     case detailResponsibilities, detailContact, detailViewOriginal, detailShowMore
     case detailCallContact, detailCallCTA
@@ -120,7 +120,7 @@ enum Strings {
     // swiftlint:disable line_length
     private static let table: [AppLanguage: [StringKey: String]] = [
         .english: [
-            .tabJobs: "Jobs",
+            .tabProjects: "Projects",
             .tabMatches: "Matches",
             .tabSettings: "Settings",
 
@@ -175,7 +175,7 @@ enum Strings {
             .matchLabelAcceptable: "Acceptable",
             .matchLabelNotSuitable: "Not Suitable",
             .matchesDetails: "Match details",
-            .matchesViewJob: "View job",
+            .matchesViewProject: "View project",
             .matchesSkillsYouHave: "Skills you have",
             .matchesMissingSkills: "Missing skills",
             .matchesScoreBreakdown: "Score breakdown",
@@ -189,13 +189,13 @@ enum Strings {
             .matchesScoreProjectRelevance: "Relevance",
             .matchesScoreTechStackOverlap: "Tech stack",
 
-            .jobsTitle: "Jobs",
+            .projectsTitle: "Projects",
 
             .aboutCraftedIn: "Crafted with ♥ in Hamburg",
             .aboutCreatedBy: "Created by",
             .aboutVersion: "Version",
             .aboutBuild: "Build",
-            .aboutGdprNote: "CV embeddings are generated on-premise (Ollama — no data leaves our servers). Job matching analysis is performed by Mistral AI, an external service based in France (EU). By using Falcon you consent to your CV data being processed by Mistral AI for matching purposes.",
+            .aboutGdprNote: "CV embeddings are generated on-premise (Ollama — no data leaves our servers). Project matching analysis is performed by Mistral AI, an external service based in France (EU). By using Falcon you consent to your CV data being processed by Mistral AI for matching purposes.",
             .aboutMistralPrivacy: "Mistral AI Privacy Policy",
             .aboutCreator: "Developer",
             .aboutCreatorBio: "Full Stack Developer with %d+ years of experience, specializing in building scalable real-time architectures.",
@@ -209,15 +209,15 @@ enum Strings {
             .aboutTermsOfUse: "Terms of Use",
             .aboutSourceCode: "Source Code",
 
-            .splashSubtitle: "Job Intelligence",
+            .splashSubtitle: "Project Intelligence",
 
             .tabProfile: "Profile",
             .tabStats: "Stats",
             .tabActions: "Actions",
             .actionsEmptyTitle: "Nothing to do",
             .actionsEmptyBody: "Your account and notifications are all set up.",
-            .jobsBannerTagline: "Job Intelligence",
-            .jobsBannerMatchCount: "job offers today",
+            .projectsBannerTagline: "Project Intelligence",
+            .projectsBannerMatchCount: "projects today",
 
             .profileAnonymous: "Anonymous",
             .profileCVTitle: "Curriculum Vitae",
@@ -274,7 +274,7 @@ enum Strings {
             .statsTopSkills: "Top Skills Demanded",
             .statsTopSkillsEmpty: "Data will appear after your first match",
 
-            .noCVWarningTitle: "No job alerts yet",
+            .noCVWarningTitle: "No project alerts yet",
             .noCVWarningBody: "Upload your CV so Falcon can match you with relevant projects and send you alerts.",
             .cvFailedAlertTitle: "CV processing failed",
             .cvFailedAlertBody: "Something went wrong while processing your CV. Please try uploading it again.",
@@ -283,7 +283,7 @@ enum Strings {
             .settingsLogout: "Log out",
             .processingFact1: "We use Mistral AI to ensure GDPR compliance",
             .processingFact2: "Your data stays on servers located in Germany",
-            .processingFact3: "We analyze public job listings to find matches",
+            .processingFact3: "We analyze public project listings to find matches",
             .processingFact4: "Your CV is processed securely and never shared",
             .processingFact5: "Matching happens automatically once your profile is ready",
             .reviewGood: "Good Recruiter",
@@ -318,7 +318,7 @@ enum Strings {
         ],
 
         .german: [
-            .tabJobs: "Jobs",
+            .tabProjects: "Projekte",
             .tabMatches: "Treffer",
             .tabSettings: "Einstellungen",
 
@@ -369,7 +369,7 @@ enum Strings {
             .liveNewMatchesPlural:    "%d neue Treffer",
             .liveTapToRefresh:        "Tippen zum Aktualisieren",
             .matchesDetails: "Treffer-Details",
-            .matchesViewJob: "Zum Job",
+            .matchesViewProject: "Zum Projekt",
             .matchesSkillsYouHave: "Vorhandene Fähigkeiten",
             .matchesMissingSkills: "Fehlende Fähigkeiten",
             .matchesScoreBreakdown: "Bewertung im Detail",
@@ -387,7 +387,7 @@ enum Strings {
             .matchLabelAcceptable: "Akzeptabel",
             .matchLabelNotSuitable: "Ungeeignet",
 
-            .jobsTitle: "Jobs",
+            .projectsTitle: "Projekte",
 
             .aboutCraftedIn: "Entwickelt Mit ♥ in Hamburg",
             .aboutCreatedBy: "Erstellt von",
@@ -407,15 +407,15 @@ enum Strings {
             .aboutTermsOfUse: "Nutzungsbedingungen",
             .aboutSourceCode: "Quellcode",
 
-            .splashSubtitle: "Job-Intelligenz",
+            .splashSubtitle: "Projekt-Intelligenz",
 
             .tabProfile: "Profil",
             .tabStats: "Statistiken",
             .tabActions: "Aktionen",
             .actionsEmptyTitle: "Nichts zu tun",
             .actionsEmptyBody: "Dein Konto und die Benachrichtigungen sind vollständig eingerichtet.",
-            .jobsBannerTagline: "Intelligente Jobsuche",
-            .jobsBannerMatchCount: "Stellenangebote heute",
+            .projectsBannerTagline: "Intelligente Projektsuche",
+            .projectsBannerMatchCount: "Projekte heute",
 
             .profileAnonymous: "Anonym",
             .profileCVTitle: "Lebenslauf",
@@ -426,7 +426,7 @@ enum Strings {
             .profileCVDropzone: "Lebenslauf auswählen",
             .profileCVFormats: "Word Document (.docx)",
             .profileCVEmailLabel: "E-Mail",
-            .profileCVEmailHint: "Damit schicken wir dir passende Job-Alerts",
+            .profileCVEmailHint: "Damit schicken wir dir passende Projekt-Alerts",
             .profileCVEmailPlaceholder: "deine@email.de",
             .profileCVUploadStart: "Lebenslauf hochladen",
             .profileCVUploading: "Wird hochgeladen…",
@@ -472,7 +472,7 @@ enum Strings {
             .statsTopSkills: "Gefragte Fähigkeiten",
             .statsTopSkillsEmpty: "Daten erscheinen nach dem ersten Treffer",
 
-            .noCVWarningTitle: "Noch keine Job-Benachrichtigungen",
+            .noCVWarningTitle: "Noch keine Projekt-Benachrichtigungen",
             .noCVWarningBody: "Lade deinen Lebenslauf hoch, damit Falcon passende Projekte für dich findet und dir Benachrichtigungen sendet.",
             .cvFailedAlertTitle: "Lebenslauf-Verarbeitung fehlgeschlagen",
             .cvFailedAlertBody: "Beim Verarbeiten deines Lebenslaufs ist ein Fehler aufgetreten. Bitte lade ihn erneut hoch.",
@@ -481,7 +481,7 @@ enum Strings {
             .settingsLogout: "Abmelden",
             .processingFact1: "Wir nutzen Mistral AI für DSGVO-Konformität",
             .processingFact2: "Deine Daten bleiben auf Servern in Deutschland",
-            .processingFact3: "Wir analysieren öffentliche Stellenangebote, um passende Treffer zu finden",
+            .processingFact3: "Wir analysieren öffentliche Projekte, um passende Treffer zu finden",
             .processingFact4: "Dein Lebenslauf wird sicher verarbeitet und nie weitergegeben",
             .processingFact5: "Passende Treffer werden automatisch ermittelt, sobald dein Profil bereit ist",
             .reviewGood: "Guter Vermittler",
@@ -516,7 +516,7 @@ enum Strings {
         ],
 
         .spanish: [
-            .tabJobs: "Empleos",
+            .tabProjects: "Proyectos",
             .tabMatches: "Coincidencias",
             .tabSettings: "Ajustes",
 
@@ -567,7 +567,7 @@ enum Strings {
             .liveNewMatchesPlural:    "%d nuevas coincidencias",
             .liveTapToRefresh:        "Toca para actualizar",
             .matchesDetails: "Ver detalles",
-            .matchesViewJob: "Ver oferta",
+            .matchesViewProject: "Ver proyecto",
             .matchesSkillsYouHave: "Habilidades que tienes",
             .matchesMissingSkills: "Habilidades que faltan",
             .matchesScoreBreakdown: "Puntuación detallada",
@@ -585,7 +585,7 @@ enum Strings {
             .matchLabelAcceptable: "Aceptable",
             .matchLabelNotSuitable: "No apto",
 
-            .jobsTitle: "Empleos",
+            .projectsTitle: "Proyectos",
 
             .aboutCraftedIn: "Hecho con ♥ en Hamburgo",
             .aboutCreatedBy: "Creado por",
@@ -612,8 +612,8 @@ enum Strings {
             .tabActions: "Acciones",
             .actionsEmptyTitle: "Nada pendiente",
             .actionsEmptyBody: "Tu cuenta y notificaciones están al día.",
-            .jobsBannerTagline: "Inteligencia laboral",
-            .jobsBannerMatchCount: "ofertas laborales hoy",
+            .projectsBannerTagline: "Inteligencia de proyectos",
+            .projectsBannerMatchCount: "proyectos hoy",
 
             .profileAnonymous: "Anónimo",
             .profileCVTitle: "Currículum Vitae",
@@ -624,7 +624,7 @@ enum Strings {
             .profileCVDropzone: "Toca para seleccionar tu CV",
             .profileCVFormats: "Word Document (.docx)",
             .profileCVEmailLabel: "Email",
-            .profileCVEmailHint: "Lo usaremos para enviarte alertas de empleo",
+            .profileCVEmailHint: "Lo usaremos para enviarte alertas de proyectos",
             .profileCVEmailPlaceholder: "tu@email.com",
             .profileCVUploadStart: "Subir CV",
             .profileCVUploading: "Subiendo…",
@@ -670,7 +670,7 @@ enum Strings {
             .statsTopSkills: "Skills más demandados",
             .statsTopSkillsEmpty: "Los datos aparecerán tras tu primera coincidencia",
 
-            .noCVWarningTitle: "Sin alertas de empleo",
+            .noCVWarningTitle: "Sin alertas de proyectos",
             .noCVWarningBody: "Sube tu CV para que Falcon te conecte con proyectos relevantes y te envíe alertas.",
             .cvFailedAlertTitle: "Error al procesar tu CV",
             .cvFailedAlertBody: "Algo salió mal al procesar tu hoja de vida. Intenta subirla de nuevo.",
@@ -679,7 +679,7 @@ enum Strings {
             .settingsLogout: "Cerrar sesión",
             .processingFact1: "Usamos Mistral AI para cumplir con el GDPR",
             .processingFact2: "Tus datos permanecen en servidores en Alemania",
-            .processingFact3: "Analizamos ofertas laborales públicas para encontrar coincidencias",
+            .processingFact3: "Analizamos proyectos públicos para encontrar coincidencias",
             .processingFact4: "Tu CV se procesa de forma segura y nunca se comparte",
             .processingFact5: "Las coincidencias comienzan automáticamente cuando tu perfil esté listo",
             .reviewGood: "Buen Reclutador",
