@@ -3,6 +3,15 @@ import OSLog
 
 private let log = Logger(subsystem: "co.hblabs.falcon", category: "matches")
 
+/// Density modes for the match cards in the list.
+/// - full:    current card — score, title, breakdown bars, skills, both CTAs.
+/// - compact: header + CTAs only — no breakdown, no skills.
+/// - minimal: 2-column grid, score + title + date + icon-only CTAs.
+/// Raw-value-backed so @AppStorage can persist it across launches.
+enum MatchCardMode: String {
+    case full, compact, minimal
+}
+
 struct MatchesView: View {
     @Environment(LanguageManager.self) var lm
     @Environment(NotificationManager.self) var nm
@@ -25,10 +34,6 @@ struct MatchesView: View {
     /// "bars fill up" effect so the user notices the variance instead of
     /// seeing static numbers.
     @State private var barsProgress: Double = 0
-    /// Drives the "All / Unread" filter chip above the list. Client-side
-    /// only — API still returns everything; this just hides already-
-    /// opened cards so the user can focus on what's new.
-    @State private var showOnlyUnread: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -128,6 +133,11 @@ struct MatchesView: View {
                 singularKey: .liveNewMatchesSingular,
                 pluralKey:   .liveNewMatchesPlural
             ) {
+                // Drop the filter so the user lands on the full list —
+                // a new match might be unread but the surrounding
+                // context (label pills, score ordering) reads better
+                // when everything is visible after tapping "new".
+                vm.clearFilter()
                 vm.clearNewMatchCount()
                 scrollToTop.toggle()
                 Task { await vm.refresh() }
@@ -314,36 +324,34 @@ struct MatchesView: View {
     // MARK: - List body (no wrapping ScrollView — parent handles scrolling)
 
     private func matchListBody(_ vm: MatchesViewModel) -> some View {
-        let visibleMatches = showOnlyUnread
-            ? vm.matches.filter { !$0.isViewed }
-            : vm.matches
-        return LazyVStack(spacing: 14) {
+        LazyVStack(spacing: 14) {
             infoBadge
-            filterChip
-            if showOnlyUnread && visibleMatches.isEmpty {
+            controlRow
+            if vm.showOnlyUnread && vm.matches.isEmpty && !vm.isLoading {
                 Text(lm.t(.matchesFilterEmptyUnread))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             }
-            ForEach(visibleMatches) { match in
-                matchCard(match)
-                    .id(match.id)
-                    .scaleEffect(highlightedMatchID == match.id ? 1.015 : 1.0)
-                    .shadow(
-                        color: highlightedMatchID == match.id ? Color.accentColor.opacity(0.35) : .clear,
-                        radius: highlightedMatchID == match.id ? 18 : 0
-                    )
-                    .animation(.spring(response: 0.35, dampingFraction: 0.7), value: highlightedMatchID)
-                    .onAppear {
-                        // Pagination continues based on the FULL list,
-                        // not the filtered view — otherwise hiding read
-                        // matches would also stop pagination prematurely.
-                        if match.id == vm.matches.last?.id {
-                            Task { await vm.loadMore() }
+            if vm.cardMode == .minimal {
+                minimalGrid(vm)
+            } else {
+                ForEach(vm.matches) { match in
+                    cardForMode(match)
+                        .id(match.id)
+                        .scaleEffect(highlightedMatchID == match.id ? 1.015 : 1.0)
+                        .shadow(
+                            color: highlightedMatchID == match.id ? Color.accentColor.opacity(0.35) : .clear,
+                            radius: highlightedMatchID == match.id ? 18 : 0
+                        )
+                        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: highlightedMatchID)
+                        .onAppear {
+                            if match.id == vm.matches.last?.id {
+                                Task { await vm.loadMore() }
+                            }
                         }
-                    }
+                }
             }
             if vm.isLoadingMore {
                 ProgressView().padding(.vertical, 12)
@@ -351,14 +359,79 @@ struct MatchesView: View {
         }
     }
 
-    /// Two-state filter chip: "All" vs "Unread". Client-side filter only —
-    /// the /matches API always returns the full set; we just hide viewed
-    /// ones locally so the user can zero in on what's new.
-    private var filterChip: some View {
+    /// 2-column grid for `.minimal` — dense at-a-glance scrolling.
+    private func minimalGrid(_ vm: MatchesViewModel) -> some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), spacing: 10),
+                GridItem(.flexible(), spacing: 10),
+            ],
+            spacing: 10
+        ) {
+            ForEach(vm.matches) { match in
+                minimalCard(match)
+                    .id(match.id)
+                    .onAppear {
+                        if match.id == vm.matches.last?.id {
+                            Task { await vm.loadMore() }
+                        }
+                    }
+            }
+        }
+    }
+
+    /// Filter chips + card-density switcher on the same row.
+    private var controlRow: some View {
         HStack(spacing: 8) {
-            filterOption(title: lm.t(.matchesFilterAll),    active: !showOnlyUnread) { showOnlyUnread = false }
-            filterOption(title: lm.t(.matchesFilterUnread), active:  showOnlyUnread, badge: vm.unreadCount) { showOnlyUnread = true }
+            filterOption(title: lm.t(.matchesFilterAll),    active: !vm.showOnlyUnread) {
+                Task { await vm.setFilter(onlyUnread: false) }
+            }
+            filterOption(title: lm.t(.matchesFilterUnread), active:  vm.showOnlyUnread, badge: vm.unreadCount) {
+                Task { await vm.setFilter(onlyUnread: true) }
+            }
             Spacer(minLength: 0)
+            modeSwitcher
+        }
+    }
+
+    /// Three-segment density picker. Each segment shows an SF Symbol that
+    /// conveys how dense the layout becomes — ascending from "lots of
+    /// detail per row" to "many cells per screen".
+    private var modeSwitcher: some View {
+        HStack(spacing: 2) {
+            modeButton(icon: "rectangle.grid.1x2.fill", mode: .full)
+            modeButton(icon: "list.bullet",             mode: .compact)
+            modeButton(icon: "square.grid.2x2.fill",    mode: .minimal)
+        }
+        .padding(2)
+        .background(Capsule().fill(Color.accentColor.opacity(0.10)))
+    }
+
+    @ViewBuilder
+    private func modeButton(icon: String, mode: MatchCardMode) -> some View {
+        let active = vm.cardMode == mode
+        Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                vm.cardMode = mode
+            }
+        } label: {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(active ? .white : Color.accentColor)
+                .frame(width: 28, height: 24)
+                .background(
+                    Capsule().fill(active ? Color.accentColor : Color.clear)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func cardForMode(_ match: MatchResult) -> some View {
+        switch vm.cardMode {
+        case .full:    matchCard(match)
+        case .compact: compactCard(match)
+        case .minimal: minimalCard(match)
         }
     }
 
@@ -403,6 +476,170 @@ struct MatchesView: View {
                 .fill(.background)
                 .shadow(color: .black.opacity(0.06), radius: 14, x: 0, y: 4)
         )
+        // Whole-card tap opens the match detail sheet. Inner buttons
+        // (Zum Job, Treffer-Details) and the ellipsis menu consume their
+        // own taps first — SwiftUI respects that hierarchy, so those
+        // elements keep doing their specific jobs.
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .onTapGesture { openedMatch = match }
+    }
+
+    /// Compact card: header (score, label, date, title, company) + two
+    /// CTAs. Omits the 6-row score breakdown and skills chips — good
+    /// middle ground between at-a-glance and full detail.
+    /// Padding/radius/shadow deliberately match `matchCard` so toggling
+    /// Full ↔ Compact doesn't shift content horizontally; only the inner
+    /// vertical sections change, which reads as density, not layout jitter.
+    private func compactCard(_ match: MatchResult) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            headerRow(match)
+            actionRow(match)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(.background)
+                .shadow(color: .black.opacity(0.06), radius: 14, x: 0, y: 4)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .onTapGesture { openedMatch = match }
+    }
+
+    /// Minimal card (2-col grid cell). Layout top-down:
+    ///   row 1 : score ring  | (date, label pill)  | spacer | ⋯ menu
+    ///   row 2 : project title
+    ///   row 3 : AI summary (if any)
+    ///   row 4 : spacer pushing company to the bottom
+    ///   row 5 : company name — whisper-small
+    ///
+    /// Replaces the previous dual-blue-button footer with a single ⋯
+    /// menu (top-right) to cut visual noise. Tapping ⋯ reveals the
+    /// same two actions as the Full/Compact card. iOS's Menu handles
+    /// the "tap another card, close mine" behaviour out of the box:
+    /// any tap outside the menu's hit area dismisses it.
+    private func minimalCard(_ match: MatchResult) -> some View {
+        let waiting = !match.isNormalized
+        let summary = match.summaryAll[lm.appLanguage.rawValue] ?? ""
+
+        return VStack(alignment: .leading, spacing: 6) {
+            // Row 1: score ring | Spacer | [date+label pill] | ⋮ ghost.
+            // The date/label pair sits right-aligned next to the ⋮ button
+            // so all the "meta" lives in one corner of the card, letting
+            // the title + summary use the full width below.
+            HStack(alignment: .top, spacing: 6) {
+                scoreRingBadge(score: match.score, color: match.labelColor, size: 34)
+                Spacer(minLength: 0)
+                VStack(alignment: .trailing, spacing: 3) {
+                    HStack(spacing: 4) {
+                        if !match.isViewed {
+                            Circle()
+                                .fill(Color.accentColor)
+                                .frame(width: 6, height: 6)
+                        }
+                        if let date = match.relativeDate(for: lm.appLanguage) {
+                            Text(date)
+                                .font(.system(size: 9))
+                                .foregroundStyle(.tertiary)
+                                .lineLimit(1)
+                        }
+                    }
+                    Text(match.labelText(lm: lm))
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(match.labelColor)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(Capsule().fill(match.labelColor.opacity(0.14)))
+                        .lineLimit(1)
+                }
+                Menu {
+                    Button {
+                        Task { await openProject(match) }
+                    } label: {
+                        Label(lm.t(.matchesViewJob), systemImage: "briefcase.fill")
+                    }
+                    .disabled(waiting)
+
+                    Button {
+                        openedMatch = match
+                    } label: {
+                        Label(lm.t(.matchesDetails), systemImage: "sparkles")
+                    }
+                } label: {
+                    // Vertical 3-dot glyph inside a "ghost" circle so the
+                    // hit-area reads as a tappable control without the
+                    // visual weight of a solid button. Rotating the plain
+                    // `ellipsis` symbol 90° gives vertical dots without
+                    // needing a special SF Symbol.
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 12, weight: .bold))
+                        .rotationEffect(.degrees(90))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 26, height: 26)
+                        .background(Circle().stroke(Color.secondary.opacity(0.25), lineWidth: 1))
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
+
+            // Row 2: title.
+            Text(match.projectTitle)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Row 3: AI summary — up to 4 lines so the user gets real
+            // context at a glance without the card growing unboundedly.
+            if !summary.isEmpty {
+                Text(summary)
+                    .font(.system(size: 9))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(4)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            Spacer(minLength: 0)
+
+            // Row 5: initials avatar + company name — mirrors the Lock
+            // Screen Live Activity layout so the two surfaces feel
+            // visually of-a-kind.
+            if !match.companyName.isEmpty {
+                HStack(spacing: 5) {
+                    companyInitialsAvatar(name: match.companyName, size: 16)
+                    Text(match.companyName)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(.background)
+                .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 3)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .onTapGesture { openedMatch = match }
+    }
+
+    /// Circular avatar with the company's two first-letter initials.
+    /// Matches the `CompanyInitialsIcon` used in the Live Activity widget
+    /// so a user who sees "AC" (ACME Corp) on the Lock Screen sees the
+    /// same chip in the minimal match card.
+    private func companyInitialsAvatar(name: String, size: CGFloat) -> some View {
+        let words = name.split(separator: " ").prefix(2)
+        let initials = words.compactMap { $0.first }.map(String.init).joined().uppercased()
+        return ZStack {
+            Circle().fill(Color.accentColor.opacity(0.18))
+            Text(initials)
+                .font(.system(size: size * 0.48, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.accentColor)
+        }
+        .frame(width: size, height: size)
     }
 
     /// Two-column header:
@@ -446,27 +683,49 @@ struct MatchesView: View {
                 Text(match.projectTitle)
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .lineLimit(2)
-                // Row 3: company.
-                Label {
+                // Row 3: initials avatar + company — same treatment the
+                // minimal card and Live Activity Lock Screen use, so the
+                // same company reads as the same "chip" wherever it
+                // appears in the app.
+                HStack(spacing: 6) {
+                    companyInitialsAvatar(name: match.companyName.nilIfEmpty ?? match.platform, size: 18)
                     Text(match.companyName.nilIfEmpty ?? match.platform)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                } icon: {
-                    Image(systemName: "building.2")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.tertiary)
                 }
             }
         }
     }
 
     private func scoreBadge(_ match: MatchResult) -> some View {
-        Text(String(format: "%.1f", match.score))
-            .font(.system(size: 20, weight: .bold, design: .rounded))
-            .foregroundStyle(match.labelColor)
-            .frame(width: 52, height: 52)
-            .background(Circle().fill(match.labelColor.opacity(0.12)))
+        scoreRingBadge(score: match.score, color: match.labelColor, size: 52)
+    }
+
+    /// Reusable ring-around-the-number badge. Arc length ∝ score/10.
+    /// `barsProgress` drives the first-appear animation (same state that
+    /// powers the score-breakdown bars) so the ring fills from 0 → full
+    /// every time the user re-enters the tab. Any subsequent score update
+    /// (e.g. realtime push) animates between the old and new arc thanks
+    /// to `.animation(value: score)` — the ring visibly rises when the
+    /// score improves, shrinks when it drops.
+    private func scoreRingBadge(score: Double, color: Color, size: CGFloat) -> some View {
+        let lineWidth: CGFloat = max(2, size * 0.08)
+        let progress = min(1.0, max(0, score / 10))
+        return ZStack {
+            Circle().fill(color.opacity(0.12))
+            Circle()
+                .trim(from: 0, to: progress * barsProgress)
+                .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .padding(lineWidth / 2)
+                .animation(.easeOut(duration: 0.8), value: barsProgress)
+                .animation(.easeOut(duration: 0.5), value: score)
+            Text(String(format: "%.1f", score))
+                .font(.system(size: size * 0.38, weight: .bold, design: .rounded))
+                .foregroundStyle(color)
+        }
+        .frame(width: size, height: size)
     }
 
     // MARK: - Score breakdown (six bars)
@@ -727,6 +986,16 @@ struct MatchesView: View {
     /// MatchesView is alive) and .onAppear (payload arrived before this tab
     /// was rendered).
     private func handleMatchNavigation(payload: NotificationManager.MatchNotificationPayload, proxy: ScrollViewProxy) {
+        // Drop the filter if it's on — the user was sent here by a
+        // push/URL, so the landing state should show everything, not
+        // a filtered view that might omit context around the target
+        // match. A refresh is triggered on the view's regular .task
+        // / .onChange chain so we don't need to manually refetch.
+        if vm.showOnlyUnread {
+            vm.clearFilter()
+            Task { await vm.refresh() }
+        }
+
         // Only consume the payload when we actually find the match. If matches
         // haven't loaded yet (cold-launch via notification), leave the payload
         // for the next trigger (onChange of matches.count) to retry.

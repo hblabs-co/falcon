@@ -22,6 +22,18 @@ final class MatchesViewModel {
     /// counter inside it would reset on every tab re-entry and miss
     /// pushes that arrived while the user was on another tab.
     private(set) var newMatchCount = 0
+    /// Global "only show unread" filter — persists across tab switches
+    /// (so coming back to Matches keeps the user's choice) but resets
+    /// on logout, notification nav, and banner taps. Sent as
+    /// `?only_unread=true` to /matches so the actual DB query filters
+    /// server-side — no wasted bandwidth returning rows the UI will hide.
+    private(set) var showOnlyUnread = false
+    /// Current card density (full / compact / minimal). Lives here so
+    /// the choice survives tab switches and gets cleared on logout —
+    /// a user who logged out was likely handing the phone off, so
+    /// "reset to the most informative layout" is a safer default for
+    /// the next login.
+    var cardMode: MatchCardMode = .full
 
     var hasMore: Bool { currentPage < totalPages }
 
@@ -71,6 +83,22 @@ final class MatchesViewModel {
         newMatchCount = 0
     }
 
+    /// Flips the filter and re-fetches page 1 so the list reflects the
+    /// new server-side filter. No-op if the flag doesn't actually change.
+    func setFilter(onlyUnread: Bool) async {
+        guard showOnlyUnread != onlyUnread else { return }
+        showOnlyUnread = onlyUnread
+        await fetch(page: 1)
+    }
+
+    /// Resets the filter to "All" without triggering a fetch — the caller
+    /// is expected to follow up with `refresh()` if new data is needed.
+    /// Used on notification nav, banner taps, and anywhere we want a
+    /// clean "show everything" landing state.
+    func clearFilter() {
+        showOnlyUnread = false
+    }
+
     /// Marks every local match with the given project_id as normalized.
     /// Called from the MatchesView listener that watches falcon-realtime
     /// `project.normalized` pushes so the "Zum Job" spinner clears the
@@ -91,6 +119,8 @@ final class MatchesViewModel {
         total          = 0
         unreadCount    = 0
         newMatchCount  = 0
+        showOnlyUnread = false
+        cardMode       = .full
         isLoading      = false
         isLoadingMore  = false
         error          = nil
@@ -100,7 +130,11 @@ final class MatchesViewModel {
 
     private func fetch(page: Int) async {
         do {
-            let response = try await MatchesAPI.fetch(page: page, jwt: session.cachedJWT)
+            let response = try await MatchesAPI.fetch(
+                page: page,
+                onlyUnread: showOnlyUnread,
+                jwt: session.cachedJWT
+            )
             if page == 1 {
                 matches = response.data
             } else {
@@ -146,11 +180,15 @@ final class MatchesViewModel {
 // MARK: - API
 
 enum MatchesAPI {
-    static func fetch(page: Int, jwt: String?) async throws -> MatchesResponse {
+    static func fetch(page: Int, onlyUnread: Bool, jwt: String?) async throws -> MatchesResponse {
         guard let jwt, !jwt.isEmpty else {
             throw URLError(.userAuthenticationRequired)
         }
-        guard let url = URL(string: "\(NotificationManager.shared.apiURL)/matches?page=\(page)") else {
+        var comps = URLComponents(string: "\(NotificationManager.shared.apiURL)/matches")
+        var items: [URLQueryItem] = [URLQueryItem(name: "page", value: "\(page)")]
+        if onlyUnread { items.append(URLQueryItem(name: "only_unread", value: "true")) }
+        comps?.queryItems = items
+        guard let url = comps?.url else {
             throw URLError(.badURL)
         }
         var req = URLRequest(url: url)

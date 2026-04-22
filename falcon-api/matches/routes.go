@@ -69,13 +69,21 @@ func handleListMatches(c *gin.Context) {
 	// the paginated list).
 	threshold := currentScoreThreshold()
 
+	// Optional "unread only" client filter. `viewed: {$ne: true}`
+	// matches false, null, and missing — covers pre-feature docs that
+	// never got the field written, not just explicit `viewed: false`.
+	listFilter := bson.M{
+		"user_id":  uid,
+		"platform": bson.M{"$ne": "freelance.de"},
+		"score":    bson.M{"$gte": threshold},
+	}
+	if c.Query("only_unread") == "true" {
+		listFilter["viewed"] = bson.M{"$ne": true}
+	}
+
 	var docs []models.MatchResultEvent
 	total, err := store.FindPage(ctx, constants.MongoMatchResultsCollection,
-		bson.M{
-			"user_id":  uid,
-			"platform": bson.M{"$ne": "freelance.de"},
-			"score":    bson.M{"$gte": threshold},
-		},
+		listFilter,
 		"scored_at", true,
 		page, pageSize, &docs)
 	if err != nil {

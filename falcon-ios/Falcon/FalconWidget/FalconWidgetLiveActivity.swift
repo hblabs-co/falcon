@@ -148,16 +148,39 @@ private struct CompanyInitialsIcon: View {
 
 // MARK: - Score badge — compact circular indicator
 
+/// Score "gauge" shared by every surface: Lock Screen, Dynamic Island
+/// expanded, compact leading, and minimal. The ring's arc length is
+/// `score / 10` and its color tracks the score (red → orange → green).
+/// `.animation(value: score)` means a push that changes the score from
+/// e.g. 6.4 → 8.1 visually inflates the ring on the Lock Screen — iOS
+/// runs the tween for us, matching the user's "sube o baja" mental model.
+/// Same component scales for 20pt (minimal) up to 60pt (Lock Screen) by
+/// keeping every internal dimension proportional to `size`.
 private struct ScoreBadge: View {
     var score: Double
     var size: CGFloat
 
+    private var progress: Double { min(1.0, max(0, score / 10)) }
+    private var lineWidth: CGFloat { max(2, size * 0.08) }
+
     var body: some View {
-        Text(String(format: "%.1f", score))
-            .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
-            .foregroundStyle(scoreColor(score))
-            .frame(width: size, height: size)
-            .background(Circle().fill(scoreColor(score).opacity(0.18)))
+        ZStack {
+            Circle()
+                .fill(scoreColor(score).opacity(0.18))
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    scoreColor(score),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .padding(lineWidth / 2)
+                .animation(.easeOut(duration: 0.7), value: score)
+            Text(String(format: "%.1f", score))
+                .font(.system(size: size * 0.42, weight: .bold, design: .rounded))
+                .foregroundStyle(scoreColor(score))
+        }
+        .frame(width: size, height: size)
     }
 }
 
@@ -347,11 +370,24 @@ struct FalconWidgetLiveActivity: Widget {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 24)
-        .activityBackgroundTint(Color(.systemBackground))
+        // No activityBackgroundTint: iOS picks the Lock Screen background
+        // based on the user's wallpaper (dark tint over light wallpaper,
+        // vice versa). Forcing `systemBackground` here resolves against
+        // the system mode, not iOS's widget mode — creating white-on-
+        // white or black-on-black when the two disagree. Letting iOS
+        // choose means semantic colors (.primary/.secondary/.tertiary)
+        // auto-adapt to whatever tint Apple picked.
         .activitySystemActionForegroundColor(Color.accentColor)
     }
 
     // Compact CTA capsule placed in the top-right of the Lock Screen presentation.
+    //
+    // Uses semantic colors so iOS (not us) picks the contrast: `.primary`
+    // flips between black and white based on whatever tint the Live
+    // Activity got assigned. A 15% opacity fill gives the capsule
+    // enough shape to read as interactive without forcing an
+    // accent-color rectangle that clashes with Apple's chosen
+    // background (e.g. blue button over a blue-tinted Live Activity).
     @ViewBuilder
     private func ctaCompact(lang: String) -> some View {
         HStack(spacing: 4) {
@@ -360,10 +396,10 @@ struct FalconWidgetLiveActivity: Widget {
             Image(systemName: "chevron.right")
                 .font(.system(size: 9, weight: .bold))
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(.primary)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Capsule().fill(Color.accentColor))
+        .background(Capsule().fill(Color.primary.opacity(0.15)))
         .fixedSize()
     }
 

@@ -34,6 +34,8 @@ enum StringKey {
     case liveNewProjectsSingular, liveNewProjectsPlural
     case liveNewMatchesSingular,  liveNewMatchesPlural
     case liveTapToRefresh
+    case serverOfflineTitle, serverOfflineBody
+    case serverReconnectedTitle, serverReconnectedBody
     case matchLabelApplyImmediately, matchLabelTopCandidate
     case matchLabelAcceptable, matchLabelNotSuitable
     case matchesDetails, matchesViewJob, matchesSkillsYouHave, matchesMissingSkills
@@ -159,6 +161,10 @@ enum Strings {
             .matchesFilterAll:          "All",
             .matchesFilterUnread:       "Unread",
             .matchesFilterEmptyUnread:  "No unread matches",
+            .serverOfflineTitle:        "Houston, we have a problem",
+            .serverOfflineBody:         "Live updates won't be available",
+            .serverReconnectedTitle:    "Back online",
+            .serverReconnectedBody:     "Live updates resumed",
             .liveNewProjectsSingular: "%d new project",
             .liveNewProjectsPlural:   "%d new projects",
             .liveNewMatchesSingular:  "%d new match",
@@ -353,6 +359,10 @@ enum Strings {
             .matchesFilterAll:          "Alle",
             .matchesFilterUnread:       "Ungelesen",
             .matchesFilterEmptyUnread:  "Keine ungelesenen Treffer",
+            .serverOfflineTitle:        "Hamburg, wir haben ein Problem",
+            .serverOfflineBody:         "Echtzeit-Updates nicht möglich",
+            .serverReconnectedTitle:    "Wieder online",
+            .serverReconnectedBody:     "Echtzeit-Updates wieder aktiv",
             .liveNewProjectsSingular: "%d neues Projekt",
             .liveNewProjectsPlural:   "%d neue Projekte",
             .liveNewMatchesSingular:  "%d neuer Treffer",
@@ -547,6 +557,10 @@ enum Strings {
             .matchesFilterAll:          "Todos",
             .matchesFilterUnread:       "No leídos",
             .matchesFilterEmptyUnread:  "No hay coincidencias sin leer",
+            .serverOfflineTitle:        "Houston, tenemos un problema",
+            .serverOfflineBody:         "Actualizaciones en tiempo real no disponibles",
+            .serverReconnectedTitle:    "De vuelta en línea",
+            .serverReconnectedBody:     "Actualizaciones en tiempo real restablecidas",
             .liveNewProjectsSingular: "%d nuevo proyecto",
             .liveNewProjectsPlural:   "%d nuevos proyectos",
             .liveNewMatchesSingular:  "%d nueva coincidencia",

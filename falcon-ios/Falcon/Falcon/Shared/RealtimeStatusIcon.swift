@@ -17,15 +17,14 @@ struct RealtimeStatusIcon: View {
             Circle()
                 .fill(tint.opacity(0.22))
                 .frame(width: 22, height: 22)
-            Image(systemName: isConnected ? "dot.radiowaves.left.and.right" : "wifi.slash")
+            // Connected keeps the radar-sweep glyph whose multi-layer
+            // cascade reads best at small sizes. Offline uses
+            // `icloud.slash.fill` for wide iOS-version support and
+            // to mirror the ServerStatusBanner — two surfaces, one
+            // "our backend is down" metaphor.
+            Image(systemName: isConnected ? "dot.radiowaves.left.and.right" : "icloud.slash.fill")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(tint)
-                // Each layer of the symbol (center dot → inner wave →
-                // outer wave) lights up and fades out in sequence,
-                // progressing outward. No `.reversing`, so the motion
-                // is always directional — a radar ping, not breathing.
-                // `.speed(0.7)` keeps the cascade noticeable but not
-                // hectic. Only active while connected.
                 .symbolEffect(
                     .variableColor.iterative,
                     options: .repeating.speed(0.7),

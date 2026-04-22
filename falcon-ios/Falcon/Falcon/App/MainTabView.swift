@@ -61,6 +61,12 @@ struct MainTabView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .overlay(alignment: .top) {
+            // Global realtime health banner — appears on top of whatever
+            // tab is active. Debounces a 10s dropout before showing the
+            // "server offline" pill so brief reconnects don't flash.
+            ServerStatusBanner()
+        }
         .task {
             await nm.refreshStatus()
             // Bootstrap the shared matches VM so the tab badge has
