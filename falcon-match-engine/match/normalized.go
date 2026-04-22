@@ -48,8 +48,12 @@ func (s *Service) handleProjectNormalized(data []byte) error {
 	}
 
 	ctx := context.Background()
+	// `$ne: true` instead of `false` — older match_results created
+	// before the normalized flag existed have the field missing, and
+	// MongoDB does NOT treat a missing field as `false`. Using $ne:true
+	// covers false, null, and absent all at once.
 	modified, err := system.GetStorage().BulkUpdate(ctx, constants.MongoMatchResultsCollection,
-		bson.M{"project_id": evt.ProjectID, "normalized": false},
+		bson.M{"project_id": evt.ProjectID, "normalized": bson.M{"$ne": true}},
 		bson.M{"$set": bson.M{"normalized": true}})
 	if err != nil {
 		return err
@@ -75,8 +79,12 @@ func (s *Service) runNormalizedSweep(ctx context.Context) {
 	var unmarked []struct {
 		ProjectID string `bson:"project_id"`
 	}
+	// `$ne: true` covers normalized=false, null, and absent. Records
+	// created before the flag existed have no field at all, and
+	// `{normalized: false}` would skip them — the very rows the sweep
+	// was supposed to rescue.
 	if err := system.GetStorage().GetMany(ctx, constants.MongoMatchResultsCollection,
-		bson.M{"normalized": false}, &unmarked); err != nil {
+		bson.M{"normalized": bson.M{"$ne": true}}, &unmarked); err != nil {
 		logrus.Warnf("normalized sweep: list failed: %v", err)
 		return
 	}
@@ -98,7 +106,7 @@ func (s *Service) runNormalizedSweep(ctx context.Context) {
 			continue
 		}
 		modified, err := system.GetStorage().BulkUpdate(ctx, constants.MongoMatchResultsCollection,
-			bson.M{"project_id": projectID, "normalized": false},
+			bson.M{"project_id": projectID, "normalized": bson.M{"$ne": true}},
 			bson.M{"$set": bson.M{"normalized": true}})
 		if err != nil {
 			logrus.Warnf("normalized sweep: update for %s failed: %v", projectID, err)
@@ -107,6 +115,15 @@ func (s *Service) runNormalizedSweep(ctx context.Context) {
 		if modified > 0 {
 			flippedProjects++
 			flippedMatches += int(modified)
+			// Notify falcon-realtime so any iOS client still showing a
+			// "waiting for normalizer" spinner on this project clears
+			// immediately instead of waiting for a manual refresh.
+			// Dedicated subject (only realtime subscribes) — avoids
+			// re-triggering project.normalized side effects elsewhere.
+			if err := system.Publish(ctx, constants.SubjectMatchFlipped,
+				models.MatchFlippedEvent{ProjectID: projectID}); err != nil {
+				logrus.Warnf("normalized sweep: publish match.flipped for %s: %v", projectID, err)
+			}
 		}
 	}
 	if flippedMatches > 0 {

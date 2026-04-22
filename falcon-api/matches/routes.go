@@ -8,11 +8,23 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/api/server"
 	"hblabs.co/falcon/common/constants"
+	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 )
 
 const pageSize = 20
+
+// Default mirrors match-engine's defaultScoreThreshold. Read at request
+// time (not init) so a kubectl rollout-free env change takes effect
+// immediately. `passed_threshold` on old records is ignored — we filter
+// by live score instead, so raising or lowering the threshold on
+// match-engine is reflected in the API without needing to re-score.
+const defaultScoreThreshold = float32(6.0)
+
+func currentScoreThreshold() float32 {
+	return helpers.ParseFloat32("MATCH_ENGINE_SCORE_THRESHOLD", defaultScoreThreshold)
+}
 
 // Routes implements server.RouteGroup for match feed endpoints.
 type Routes struct{}
@@ -47,11 +59,22 @@ func handleListMatches(c *gin.Context) {
 	ctx := c.Request.Context()
 	store := system.GetStorage()
 
+	// Filter by live threshold (env var, re-read per request) instead
+	// of the persisted `passed_threshold` field — that flag is baked
+	// at score time and would lag behind a threshold change until every
+	// record is re-scored. Using `score >= threshold` means raising or
+	// lowering MATCH_ENGINE_SCORE_THRESHOLD takes effect immediately
+	// for everyone, and matches the set that match-engine currently
+	// publishes to NATS (so the realtime counter can't diverge from
+	// the paginated list).
+	threshold := currentScoreThreshold()
+
 	var docs []models.MatchResultEvent
 	total, err := store.FindPage(ctx, constants.MongoMatchResultsCollection,
 		bson.M{
 			"user_id":  uid,
 			"platform": bson.M{"$ne": "freelance.de"},
+			"score":    bson.M{"$gte": threshold},
 		},
 		"scored_at", true,
 		page, pageSize, &docs)
@@ -64,10 +87,12 @@ func handleListMatches(c *gin.Context) {
 	// Count unviewed matches for this user across ALL pages — drives the
 	// tab-icon badge. Missing `viewed` field counts as unread (pre-
 	// feature docs). Cheap on an indexed collection and avoids a second
-	// round-trip from the client.
+	// round-trip from the client. Uses the same live-threshold filter
+	// as the list so the badge never counts matches the user can't see.
 	unreadFilter := bson.M{
 		"user_id":  uid,
 		"platform": bson.M{"$ne": "freelance.de"},
+		"score":    bson.M{"$gte": threshold},
 		"$or": []bson.M{
 			{"viewed": bson.M{"$exists": false}},
 			{"viewed": false},

@@ -145,6 +145,24 @@ func (s *Service) handleMatchResult(data []byte) error {
 	return nil
 }
 
+// handleMatchFlipped fans out to every connected client the fact that
+// match-engine's sweep just set `normalized=true` on one or more match
+// rows for this project. We don't know which users have a match on
+// this project from here, and querying Mongo per event would be
+// wasteful — broadcasting is cheap (clients filter in-memory by
+// `projectId` matches they already hold).
+func (s *Service) handleMatchFlipped(data []byte) error {
+	var evt models.MatchFlippedEvent
+	if err := json.Unmarshal(data, &evt); err != nil {
+		return fmt.Errorf("unmarshal match.flipped: %w", err)
+	}
+	s.broadcastAll(envelope{
+		Type:    "match.flipped",
+		Payload: evt,
+	})
+	return nil
+}
+
 // broadcastAll sends the frame to every connection, regardless of user.
 // Used for events that concern all users (e.g. new normalized project).
 func (s *Service) broadcastAll(env envelope) {

@@ -62,5 +62,16 @@ func (m *Module) Register(ctx context.Context) error {
 	}
 	logrus.Infof("[realtime] subscribed → %s (replica=%s)", constants.SubjectMatchResult, replicaID)
 
+	if err := system.Subscribe(
+		ctx,
+		constants.StreamMatches,
+		"falcon-realtime-match-flipped-"+replicaID,
+		constants.SubjectMatchFlipped,
+		svc.handleMatchFlipped,
+	); err != nil {
+		return err
+	}
+	logrus.Infof("[realtime] subscribed → %s (replica=%s)", constants.SubjectMatchFlipped, replicaID)
+
 	return nil
 }

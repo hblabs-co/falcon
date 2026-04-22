@@ -30,6 +30,10 @@ enum StringKey {
     // Alerts view
     case matchesEmpty, matchesEmptyDescription, matchesBannerTagline, matchesBannerTotal
     case matchesInfoBadge, matchesInfoBadgeTitle, matchesNewBadge
+    case matchesFilterAll, matchesFilterUnread, matchesFilterEmptyUnread
+    case liveNewProjectsSingular, liveNewProjectsPlural
+    case liveNewMatchesSingular,  liveNewMatchesPlural
+    case liveTapToRefresh
     case matchLabelApplyImmediately, matchLabelTopCandidate
     case matchLabelAcceptable, matchLabelNotSuitable
     case matchesDetails, matchesViewJob, matchesSkillsYouHave, matchesMissingSkills
@@ -152,6 +156,14 @@ enum Strings {
             .matchesInfoBadge: "Matches are projects the AI thinks fit your profile, ranked by score.",
             .matchesInfoBadgeTitle: "What are matches?",
             .matchesNewBadge: "NEW",
+            .matchesFilterAll:          "All",
+            .matchesFilterUnread:       "Unread",
+            .matchesFilterEmptyUnread:  "No unread matches",
+            .liveNewProjectsSingular: "%d new project",
+            .liveNewProjectsPlural:   "%d new projects",
+            .liveNewMatchesSingular:  "%d new match",
+            .liveNewMatchesPlural:    "%d new matches",
+            .liveTapToRefresh:        "Tap to refresh",
             .matchLabelApplyImmediately: "Apply Immediately",
             .matchLabelTopCandidate: "Top Candidate",
             .matchLabelAcceptable: "Acceptable",
@@ -338,6 +350,14 @@ enum Strings {
             .matchesInfoBadge: "Treffer sind Projekte, die laut KI zu deinem Profil passen, sortiert nach Punktzahl.",
             .matchesInfoBadgeTitle: "Was sind Treffer?",
             .matchesNewBadge: "NEU",
+            .matchesFilterAll:          "Alle",
+            .matchesFilterUnread:       "Ungelesen",
+            .matchesFilterEmptyUnread:  "Keine ungelesenen Treffer",
+            .liveNewProjectsSingular: "%d neues Projekt",
+            .liveNewProjectsPlural:   "%d neue Projekte",
+            .liveNewMatchesSingular:  "%d neuer Treffer",
+            .liveNewMatchesPlural:    "%d neue Treffer",
+            .liveTapToRefresh:        "Tippen zum Aktualisieren",
             .matchesDetails: "Treffer-Details",
             .matchesViewJob: "Zum Job",
             .matchesSkillsYouHave: "Vorhandene Fähigkeiten",
@@ -524,6 +544,14 @@ enum Strings {
             .matchesInfoBadge: "Las coincidencias son proyectos que según la IA encajan con tu perfil, ordenadas por puntuación.",
             .matchesInfoBadgeTitle: "¿Qué son las coincidencias?",
             .matchesNewBadge: "NUEVO",
+            .matchesFilterAll:          "Todos",
+            .matchesFilterUnread:       "No leídos",
+            .matchesFilterEmptyUnread:  "No hay coincidencias sin leer",
+            .liveNewProjectsSingular: "%d nuevo proyecto",
+            .liveNewProjectsPlural:   "%d nuevos proyectos",
+            .liveNewMatchesSingular:  "%d nueva coincidencia",
+            .liveNewMatchesPlural:    "%d nuevas coincidencias",
+            .liveTapToRefresh:        "Toca para actualizar",
             .matchesDetails: "Ver detalles",
             .matchesViewJob: "Ver oferta",
             .matchesSkillsYouHave: "Habilidades que tienes",

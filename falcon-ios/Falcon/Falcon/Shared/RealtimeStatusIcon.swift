@@ -20,6 +20,17 @@ struct RealtimeStatusIcon: View {
             Image(systemName: isConnected ? "dot.radiowaves.left.and.right" : "wifi.slash")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(tint)
+                // Each layer of the symbol (center dot → inner wave →
+                // outer wave) lights up and fades out in sequence,
+                // progressing outward. No `.reversing`, so the motion
+                // is always directional — a radar ping, not breathing.
+                // `.speed(0.7)` keeps the cascade noticeable but not
+                // hectic. Only active while connected.
+                .symbolEffect(
+                    .variableColor.iterative,
+                    options: .repeating.speed(0.7),
+                    isActive: isConnected
+                )
         }
         .frame(width: 22, height: 22)
         .accessibilityLabel(isConnected ? "Realtime connected" : "Realtime offline")

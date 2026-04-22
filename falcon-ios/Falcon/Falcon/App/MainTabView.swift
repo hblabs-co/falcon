@@ -16,6 +16,11 @@ struct MainTabView: View {
     /// the badge regardless of which tab is currently active. Created
     /// once in .task once SessionManager is available.
     @State private var matchesVM: MatchesViewModel?
+    /// Hoisted from JobsView for symmetry with matchesVM: the realtime
+    /// listener at this level routes project.normalized pushes into the
+    /// VM counter so state survives if JobsView ever stops being kept
+    /// alive via opacity(0).
+    @State private var jobsVM = JobsViewModel()
     @State private var jobsScrollToTop = false
     @State private var matchesScrollToTop = false
 
@@ -24,7 +29,7 @@ struct MainTabView: View {
             ZStack {
                 // Jobs is always kept alive so scroll position, pagination and
                 // the loaded list survive switching to another tab.
-                JobsView(scrollToTop: $jobsScrollToTop)
+                JobsView(vm: jobsVM, scrollToTop: $jobsScrollToTop)
                     .opacity(selectedTab == .jobs ? 1 : 0)
                     .allowsHitTesting(selectedTab == .jobs)
 
@@ -101,6 +106,44 @@ struct MainTabView: View {
             guard payload != nil else { return }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 selectedTab = .matches
+            }
+        }
+        // Realtime fan-out lives here (not inside MatchesView) because
+        // MatchesView is destroyed when the user is on another tab —
+        // any listener there would miss match.result / project.normalized
+        // pushes that arrive while the user is browsing Jobs. The VM
+        // persists across tab switches, so state lands there and
+        // MatchesView just reflects it on next appear.
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeMessage)) { note in
+            guard let type = note.userInfo?["type"] as? String,
+                  let payload = note.userInfo?["payload"] as? [String: Any] else { return }
+            switch type {
+            case "project.normalized":
+                // Jobs: bump the banner counter + hero "heute" count.
+                // Matches: clear the "Zum Job" spinner for any loaded
+                // match that was waiting on this project to normalize.
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    jobsVM.bumpOnNewProject()
+                }
+                if let projectId = payload["project_id"] as? String {
+                    withAnimation { matchesVM?.markProjectNormalized(projectId: projectId) }
+                }
+            case "match.flipped":
+                // Safety-net broadcast from match-engine's periodic
+                // sweep: the original project.normalized may have been
+                // missed (socket down, app closed). Same handling as
+                // project.normalized but without the jobs-side bump —
+                // this event doesn't represent a new project, only a
+                // stale flag being corrected.
+                if let projectId = payload["project_id"] as? String {
+                    withAnimation { matchesVM?.markProjectNormalized(projectId: projectId) }
+                }
+            case "match.result":
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                    matchesVM?.bumpOnNewMatch()
+                }
+            default:
+                break
             }
         }
     }

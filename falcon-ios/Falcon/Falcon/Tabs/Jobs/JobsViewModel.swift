@@ -13,6 +13,12 @@ final class JobsViewModel {
     private(set) var totalPages    = 1
     private(set) var total         = 0
     private(set) var todayCount    = 0
+    /// Counts `project.normalized` pushes that arrived since the user
+    /// last tapped the "new projects" banner. Lives on the VM (not in
+    /// the View) so the state survives any future restructuring of
+    /// MainTabView — if JobsView ever stops being kept-alive via
+    /// opacity(0), the counter keeps working.
+    private(set) var newProjectCount = 0
 
     var hasMore: Bool { currentPage < totalPages }
 
@@ -43,6 +49,22 @@ final class JobsViewModel {
         isLoadingMore = true
         await fetch(page: currentPage + 1)
         isLoadingMore = false
+    }
+
+    /// Optimistic bump for a realtime `project.normalized` push. Updates
+    /// the hero-banner "today" count, the total, and the floating-banner
+    /// counter so the UI shows live growth without waiting for the next
+    /// refresh.
+    func bumpOnNewProject() {
+        todayCount      += 1
+        total           += 1
+        newProjectCount += 1
+    }
+
+    /// Resets the banner counter after the user taps the floating pill
+    /// (which also kicks off a refetch).
+    func clearNewProjectCount() {
+        newProjectCount = 0
     }
 
     // MARK: - Private

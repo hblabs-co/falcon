@@ -478,7 +478,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             score: 7.8,
             label: "top_candidate",
             lang: LanguageManager.shared.appLanguage.rawValue,
-            projectTitle: "Senior React Dev — Frankfurt",
+            projectTitle: "Senior React Dev Kotlin, Kuberntes, React, Java, Golang, C++ MongoDB — Frankfurt",
             companyName: "ACME GmbH",
             totalMatches: 12,
             summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS und Docker.",

@@ -25,6 +25,10 @@ struct MatchesView: View {
     /// "bars fill up" effect so the user notices the variance instead of
     /// seeing static numbers.
     @State private var barsProgress: Double = 0
+    /// Drives the "All / Unread" filter chip above the list. Client-side
+    /// only — API still returns everything; this just hides already-
+    /// opened cards so the user can focus on what's new.
+    @State private var showOnlyUnread: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -65,16 +69,6 @@ struct MatchesView: View {
                 .onChange(of: vm.matches.count) { _, count in
                     guard count > 0, let payload = nm.pendingMatchNavigation else { return }
                     handleMatchNavigation(payload: payload, proxy: proxy)
-                }
-                // falcon-realtime broadcasts project.normalized to every
-                // connected client. When we get one, flip isNormalized
-                // locally so the "Zum Job" spinner clears without a
-                // full /matches refetch.
-                .onReceive(NotificationCenter.default.publisher(for: .realtimeMessage)) { note in
-                    guard let type = note.userInfo?["type"] as? String, type == "project.normalized",
-                          let payload = note.userInfo?["payload"] as? [String: Any],
-                          let projectId = payload["project_id"] as? String else { return }
-                    withAnimation { vm.markProjectNormalized(projectId: projectId) }
                 }
                 .onAppear {
                     if let payload = nm.pendingMatchNavigation {
@@ -126,6 +120,17 @@ struct MatchesView: View {
                         // change immediately even if the network is slow.
                         vm.markViewed(projectId: match.projectId, cvId: match.cvId)
                     }
+            }
+        }
+        .overlay(alignment: .top) {
+            LiveNewItemsBanner(
+                count: vm.newMatchCount,
+                singularKey: .liveNewMatchesSingular,
+                pluralKey:   .liveNewMatchesPlural
+            ) {
+                vm.clearNewMatchCount()
+                scrollToTop.toggle()
+                Task { await vm.refresh() }
             }
         }
         .overlay(alignment: .bottomTrailing) {
@@ -309,9 +314,20 @@ struct MatchesView: View {
     // MARK: - List body (no wrapping ScrollView — parent handles scrolling)
 
     private func matchListBody(_ vm: MatchesViewModel) -> some View {
-        LazyVStack(spacing: 14) {
+        let visibleMatches = showOnlyUnread
+            ? vm.matches.filter { !$0.isViewed }
+            : vm.matches
+        return LazyVStack(spacing: 14) {
             infoBadge
-            ForEach(vm.matches) { match in
+            filterChip
+            if showOnlyUnread && visibleMatches.isEmpty {
+                Text(lm.t(.matchesFilterEmptyUnread))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+            }
+            ForEach(visibleMatches) { match in
                 matchCard(match)
                     .id(match.id)
                     .scaleEffect(highlightedMatchID == match.id ? 1.015 : 1.0)
@@ -321,6 +337,9 @@ struct MatchesView: View {
                     )
                     .animation(.spring(response: 0.35, dampingFraction: 0.7), value: highlightedMatchID)
                     .onAppear {
+                        // Pagination continues based on the FULL list,
+                        // not the filtered view — otherwise hiding read
+                        // matches would also stop pagination prematurely.
                         if match.id == vm.matches.last?.id {
                             Task { await vm.loadMore() }
                         }
@@ -330,6 +349,43 @@ struct MatchesView: View {
                 ProgressView().padding(.vertical, 12)
             }
         }
+    }
+
+    /// Two-state filter chip: "All" vs "Unread". Client-side filter only —
+    /// the /matches API always returns the full set; we just hide viewed
+    /// ones locally so the user can zero in on what's new.
+    private var filterChip: some View {
+        HStack(spacing: 8) {
+            filterOption(title: lm.t(.matchesFilterAll),    active: !showOnlyUnread) { showOnlyUnread = false }
+            filterOption(title: lm.t(.matchesFilterUnread), active:  showOnlyUnread, badge: vm.unreadCount) { showOnlyUnread = true }
+            Spacer(minLength: 0)
+        }
+    }
+
+    @ViewBuilder
+    private func filterOption(title: String, active: Bool, badge: Int = 0, action: @escaping () -> Void) -> some View {
+        Button(action: { withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { action() } }) {
+            HStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold))
+                if badge > 0 {
+                    Text("\(badge)")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(
+                            Capsule().fill(active ? Color.white.opacity(0.25) : Color.accentColor.opacity(0.18))
+                        )
+                }
+            }
+            .foregroundStyle(active ? .white : Color.accentColor)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                Capsule().fill(active ? Color.accentColor : Color.accentColor.opacity(0.12))
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Card

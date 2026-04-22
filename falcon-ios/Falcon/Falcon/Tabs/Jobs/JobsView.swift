@@ -7,7 +7,10 @@ struct JobsView: View {
     @Environment(NotificationManager.self) var nm
     @Environment(SessionManager.self) var session
     @Environment(\.scenePhase) var scenePhase
-    @State private var vm = JobsViewModel()
+    /// Owned by MainTabView so the realtime listener at that level can
+    /// funnel project.normalized pushes into the VM — which keeps the
+    /// banner counter working independent of how this view is mounted.
+    var vm: JobsViewModel
     @State private var bannerVisible = true
     @Binding var scrollToTop: Bool
 
@@ -53,6 +56,17 @@ struct JobsView: View {
                 if phase == .active, vm.error != nil {
                     Task { await vm.loadInitial() }
                 }
+            }
+        }
+        .overlay(alignment: .top) {
+            LiveNewItemsBanner(
+                count: vm.newProjectCount,
+                singularKey: .liveNewProjectsSingular,
+                pluralKey:   .liveNewProjectsPlural
+            ) {
+                vm.clearNewProjectCount()
+                scrollToTop.toggle()
+                Task { await vm.refresh() }
             }
         }
         .overlay(alignment: .bottomTrailing) {

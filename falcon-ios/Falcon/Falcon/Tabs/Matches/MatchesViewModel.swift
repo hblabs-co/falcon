@@ -16,6 +16,12 @@ final class MatchesViewModel {
     /// not just loaded pages. MainTabView reads this to render the red
     /// badge on the matches tab icon.
     private(set) var unreadCount   = 0
+    /// Counts `match.result` pushes that arrived since the user last
+    /// tapped the "new matches" banner. Lives on the VM (not in the
+    /// View) because MatchesView is created on demand — any @State
+    /// counter inside it would reset on every tab re-entry and miss
+    /// pushes that arrived while the user was on another tab.
+    private(set) var newMatchCount = 0
 
     var hasMore: Bool { currentPage < totalPages }
 
@@ -47,6 +53,24 @@ final class MatchesViewModel {
         isLoadingMore = false
     }
 
+    /// Optimistic bump for a realtime `match.result` push. Nudges the
+    /// visible counters (hero total, tab unread badge, banner count)
+    /// immediately so the user sees "live" feedback before the next
+    /// /matches refetch. The actual match doc arrives on refresh — we
+    /// don't fabricate one here.
+    func bumpOnNewMatch() {
+        total         += 1
+        unreadCount   += 1
+        newMatchCount += 1
+    }
+
+    /// Resets the banner counter after the user taps the floating pill
+    /// (which also kicks off a refetch). Kept separate from bumpOnNewMatch
+    /// so the banner's "0 → hidden" transition is driven explicitly.
+    func clearNewMatchCount() {
+        newMatchCount = 0
+    }
+
     /// Marks every local match with the given project_id as normalized.
     /// Called from the MatchesView listener that watches falcon-realtime
     /// `project.normalized` pushes so the "Zum Job" spinner clears the
@@ -61,14 +85,15 @@ final class MatchesViewModel {
     /// tab badge drops to 0 and the hero counter in MatchesView goes
     /// back to "—" instead of lingering with the previous user's data.
     func reset() {
-        matches       = []
-        currentPage   = 0
-        totalPages    = 1
-        total         = 0
-        unreadCount   = 0
-        isLoading     = false
-        isLoadingMore = false
-        error         = nil
+        matches        = []
+        currentPage    = 0
+        totalPages     = 1
+        total          = 0
+        unreadCount    = 0
+        newMatchCount  = 0
+        isLoading      = false
+        isLoadingMore  = false
+        error          = nil
     }
 
     // MARK: - Private
