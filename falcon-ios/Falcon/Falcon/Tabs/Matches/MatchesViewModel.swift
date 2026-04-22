@@ -47,6 +47,16 @@ final class MatchesViewModel {
         isLoadingMore = false
     }
 
+    /// Marks every local match with the given project_id as normalized.
+    /// Called from the MatchesView listener that watches falcon-realtime
+    /// `project.normalized` pushes so the "Zum Job" spinner clears the
+    /// instant the normalizer finishes, without a refetch.
+    func markProjectNormalized(projectId: String) {
+        for i in matches.indices where matches[i].projectId == projectId && !matches[i].isNormalized {
+            matches[i].isNormalized = true
+        }
+    }
+
     /// Clears all loaded state. Called by MainTabView on logout so the
     /// tab badge drops to 0 and the hero counter in MatchesView goes
     /// back to "—" instead of lingering with the previous user's data.

@@ -62,6 +62,13 @@ struct MatchResult: Decodable, Identifiable {
     /// opens MatchDetailView. Kept as `var` so we can optimistic-update
     /// locally without refetching the whole list.
     var isViewed:         Bool
+    /// Mirrors the server `normalized` flag. `false` means
+    /// falcon-normalizer hasn't produced the UI-ready project doc yet,
+    /// so "Zum Job" must show a spinner instead of opening a
+    /// placeholder sheet. Flipped to `true` either server-side
+    /// (match-engine sweep / event) or client-side when we receive a
+    /// realtime `project.normalized` push for the matching project_id.
+    var isNormalized:     Bool
 
     // Composite id so SwiftUI's diffing handles re-matches of the same project
     // with a different CV (and re-matches of the same CV after a re-score).
@@ -86,6 +93,7 @@ struct MatchResult: Decodable, Identifiable {
         case scoredAt         = "scored_at"
         case summaryAll       = "summary"
         case isViewed         = "viewed"
+        case isNormalized     = "normalized"
     }
 
     init(from decoder: Decoder) throws {
@@ -108,6 +116,7 @@ struct MatchResult: Decodable, Identifiable {
         scoredAt           = (try? c.decodeIfPresent(String.self,              forKey: .scoredAt))           ?? ""
         summaryAll         = (try? c.decodeIfPresent([String: String].self,    forKey: .summaryAll))         ?? [:]
         isViewed           = (try? c.decodeIfPresent(Bool.self,                forKey: .isViewed))           ?? false
+        isNormalized       = (try? c.decodeIfPresent(Bool.self,                forKey: .isNormalized))       ?? false
     }
 
     // MARK: - Language-aware accessors (fallback chain: requested → de → en → es)

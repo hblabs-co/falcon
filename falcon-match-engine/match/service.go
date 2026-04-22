@@ -69,7 +69,19 @@ func (s *Service) Run() error {
 	}
 	logrus.Infof("subscribed to %s", constants.SubjectMatchPending)
 
+	// Flip match_results.normalized=true when normalizer finishes a
+	// project. Event-driven path — fastest reaction to normalization.
+	if err := system.Subscribe(ctx, constants.StreamProjects, "match-engine-normalized",
+		constants.SubjectProjectNormalized, s.handleProjectNormalized); err != nil {
+		return fmt.Errorf("subscribe project.normalized: %w", err)
+	}
+	logrus.Infof("subscribed to %s", constants.SubjectProjectNormalized)
+
 	s.startRetryWorker(ctx)
+	// Safety net for the event-driven path: if the project.normalized
+	// event was missed (pod restart, consumer drift) this sweep fixes
+	// stale flags on its own schedule.
+	s.startNormalizedSweep(ctx)
 
 	system.Wait()
 	return nil
@@ -114,9 +126,15 @@ func (s *Service) handleMatchPending(data []byte) error {
 		return fmt.Errorf("fetch project: %w", err)
 	}
 
+	// Prefer the normalizer's cleaned display title (no "Projekt-Nr:
+	// 62737 -" prefixes, no "(m/w/d)") if it's already available.
+	// match-engine can race ahead of the normalizer — fall back to the
+	// raw scraped title in that case.
+	displayTitle := cleanProjectTitle(ctx, event.ProjectID, project.Title)
+
 	log.Info("scoring CV/project pair")
 
-	result, rawContent, err := s.scorer.Score(ctx, project.Title, project.Description, cv.ExtractedText, logrus.Fields{
+	result, rawContent, err := s.scorer.Score(ctx, displayTitle, project.Description, cv.ExtractedText, logrus.Fields{
 		"cv_id":      event.CVID,
 		"project_id": event.ProjectID,
 	})
@@ -132,11 +150,27 @@ func (s *Service) handleMatchPending(data []byte) error {
 	result.CVID = event.CVID
 	result.UserID = event.UserID
 	result.ProjectID = event.ProjectID
-	result.ProjectTitle = project.Title
+	// Title fallback chain:
+	//   1. normalized display      (projects_normalized.<lang>.title.display)
+	//   2. LLM-cleaned title       (result.ProjectTitle set by scorer.Score)
+	//   3. raw scraped title       (last resort)
+	// cleanProjectTitle returns (1) or falls back to raw. When it fell
+	// back (normalizer lost the race), prefer the LLM-cleaned value that
+	// came out of this same scoring pass.
+	if displayTitle == project.Title && result.ProjectTitle != "" {
+		// keep LLM-cleaned result.ProjectTitle
+	} else {
+		result.ProjectTitle = displayTitle
+	}
 	result.Platform = event.Platform
 	result.CompanyName = companyName
 	result.PassedThreshold = result.Score >= s.threshold
 	result.ScoredAt = time.Now()
+	// The normalizer can still be working when match-engine already has
+	// enough to score (title + description come from the raw doc). Mark
+	// the match unnormalized if projects_normalized.<project_id> is
+	// missing; the event handler or periodic sweep flips it later.
+	result.Normalized = isProjectNormalized(ctx, event.ProjectID)
 
 	// Upsert by (cv_id, project_id) so re-scoring (e.g. project updated) overwrites
 	// the previous result instead of creating duplicates. Unique compound index on
@@ -163,6 +197,39 @@ func (s *Service) handleMatchPending(data []byte) error {
 
 // resolveCompanyName returns the authoritative company name for the project,
 // or empty if unknown. Matches the pattern used by falcon-normalizer.
+// cleanProjectTitle returns the normalized display title from
+// projects_normalized.<lang>.title.display when it exists, falling
+// back to rawTitle otherwise. "de" is preferred because the original
+// German stays closest to what the scraper captured; if missing we
+// step through en/es. Called by the match-engine so the LLM prompt
+// and the stored match_result both use the human-readable title
+// rather than the raw scrape (which often carries platform job-
+// number prefixes like "Projekt-Nr: 62737 -").
+func cleanProjectTitle(ctx context.Context, projectID, rawTitle string) string {
+	var doc struct {
+		De map[string]any `bson:"de"`
+		En map[string]any `bson:"en"`
+		Es map[string]any `bson:"es"`
+	}
+	if err := system.GetStorage().Get(ctx, constants.MongoNormalizedProjectsCollection,
+		bson.M{"project_id": projectID}, &doc); err != nil {
+		return rawTitle
+	}
+	for _, lang := range []map[string]any{doc.De, doc.En, doc.Es} {
+		if lang == nil {
+			continue
+		}
+		title, _ := lang["title"].(map[string]any)
+		if title == nil {
+			continue
+		}
+		if display, ok := title["display"].(string); ok && display != "" {
+			return display
+		}
+	}
+	return rawTitle
+}
+
 func resolveCompanyName(ctx context.Context, project *models.PersistedProject) string {
 	if project.CompanyID == "" {
 		return ""

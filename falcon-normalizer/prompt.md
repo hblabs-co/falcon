@@ -92,7 +92,11 @@ Set `urgency.level` to `"high"` if deadline ≤ 7 days from scraped_at, `"medium
 ```
 
 ### title
-Remove gender suffixes `(m/w/d)`, `(w/m/d)`, `(d/m/w)`. Remove location tail after ` - ` if it duplicates `location`. Keep core job title and key tech stack in `display`.
+Clean the title for `display`:
+- Remove gender suffixes `(m/w/d)`, `(w/m/d)`, `(d/m/w)`.
+- Remove platform job-number prefixes like `Projekt-Nr: 62737 -`, `Job-Nr. 12345 -`, `Ref: ABC-123 -`, `ID: XYZ -`, `#62737 -`. These are internal IDs that add no value.
+- Remove location tail after ` - ` if it duplicates `location`.
+- Keep core job title and key tech stack in `display`.
 ```json
 {
   "raw": "<original title>",

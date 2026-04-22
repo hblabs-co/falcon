@@ -58,7 +58,8 @@ Respond ONLY with this JSON (no markdown, no extra fields):
   "positive_points": [<2-4 honest sentences about genuine strengths for this specific project>],
   "negative_points": [<1-3 honest sentences about real gaps or concerns — required if score < 8>],
   "improvement_tips": [<up to 3 concrete, specific actions the candidate could take to improve chances on similar projects>],
-  "summary": "<single sentence in German, max 120 chars, for iOS push notification>"
+  "summary": "<single sentence in German, max 120 chars, for iOS push notification>",
+  "project_title": "<cleaned project title — strip platform ID prefixes like 'Projekt-Nr: 62737 - ', 'Job-Nr. 12345 - ', 'Ref: ABC-123 - ', '#62737 - '; strip gender suffixes '(m/w/d)', '(w/m/d)', '(d/m/w)'; remove trailing location if it repeats the location field; keep the core role + key tech stack; stay in German>"
 }
 
 PROJECT:
@@ -100,6 +101,11 @@ type llmRaw struct {
 	NegativePoints  []string `json:"negative_points"`
 	ImprovementTips []string `json:"improvement_tips"`
 	Summary         string   `json:"summary"`
+	// Clean title stripped of platform job-number prefixes and gender
+	// suffixes. Provides a fallback when the normalizer hasn't processed
+	// this project yet (race condition): service.go chains
+	//   normalized.display → raw stripped → project.Title.
+	ProjectTitle    string   `json:"project_title"`
 }
 
 // scorer wraps the shared LLM client with match-specific prompts and a translate
@@ -157,10 +163,14 @@ func (s *scorer) Score(
 	enTexts, esTexts := s.translate(ctx, deBytes, logFields)
 
 	result := &models.MatchResultEvent{
-		Score:       raw.Score,
-		Label:       models.LabelFromScore(raw.Score),
-		LLMModel:    s.llm.Model,
-		LLMProvider: s.llm.Provider,
+		Score:        raw.Score,
+		Label:        models.LabelFromScore(raw.Score),
+		LLMModel:     s.llm.Model,
+		LLMProvider:  s.llm.Provider,
+		// LLM-cleaned title — used as fallback when the normalizer hasn't
+		// produced projects_normalized.<lang>.title.display yet. service.go
+		// resolves the final title via normalized → this → raw chain.
+		ProjectTitle: raw.ProjectTitle,
 		Scores: models.MatchScores{
 			SkillsMatch:          raw.Scores.SkillsMatch,
 			SeniorityFit:         raw.Scores.SeniorityFit,

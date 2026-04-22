@@ -66,6 +66,16 @@ struct MatchesView: View {
                     guard count > 0, let payload = nm.pendingMatchNavigation else { return }
                     handleMatchNavigation(payload: payload, proxy: proxy)
                 }
+                // falcon-realtime broadcasts project.normalized to every
+                // connected client. When we get one, flip isNormalized
+                // locally so the "Zum Job" spinner clears without a
+                // full /matches refetch.
+                .onReceive(NotificationCenter.default.publisher(for: .realtimeMessage)) { note in
+                    guard let type = note.userInfo?["type"] as? String, type == "project.normalized",
+                          let payload = note.userInfo?["payload"] as? [String: Any],
+                          let projectId = payload["project_id"] as? String else { return }
+                    withAnimation { vm.markProjectNormalized(projectId: projectId) }
+                }
                 .onAppear {
                     if let payload = nm.pendingMatchNavigation {
                         handleMatchNavigation(payload: payload, proxy: proxy)
@@ -516,7 +526,15 @@ struct MatchesView: View {
     // MARK: - Action row
 
     private func actionRow(_ match: MatchResult) -> some View {
-        HStack(spacing: 8) {
+        // `waiting` = normalizer hasn't finished yet; tapping would 404.
+        // `loading` = user tapped and we're fetching the project page.
+        // Both show a spinner + disabled button, but waiting cares about
+        // server-side normalization while loading is a transient in-flight.
+        let waiting = !match.isNormalized
+        let loading = loadingProjectID == match.projectId
+        let showSpinner = waiting || loading
+
+        return HStack(spacing: 8) {
             Button {
                 Task { await openProject(match) }
             } label: {
@@ -524,8 +542,8 @@ struct MatchesView: View {
                     ZStack {
                         Image(systemName: "briefcase.fill")
                             .font(.system(size: 11, weight: .semibold))
-                            .opacity(loadingProjectID == match.projectId ? 0 : 1)
-                        if loadingProjectID == match.projectId {
+                            .opacity(showSpinner ? 0 : 1)
+                        if showSpinner {
                             ProgressView().scaleEffect(0.6).tint(.white)
                         }
                     }
@@ -537,10 +555,14 @@ struct MatchesView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.accentColor))
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color.accentColor.opacity(waiting ? 0.55 : 1))
+                )
                 .foregroundStyle(.white)
             }
             .buttonStyle(.plain)
+            .disabled(waiting)
 
             Button {
                 openedMatch = match

@@ -43,7 +43,8 @@ Respond ONLY with this JSON structure (no markdown, no extra fields):
   "missing_skills": [<up to 5 skills the project needs that are absent from the CV, empty array if none>],
   "positive_points": [<2–4 short sentences about what makes this candidate a good fit>],
   "negative_points": [<1–3 short sentences about gaps or concerns, empty array if none>],
-  "improvement_tips": [<up to 3 concrete things the candidate could add to their CV to improve chances on similar projects>]
+  "improvement_tips": [<up to 3 concrete things the candidate could add to their CV to improve chances on similar projects>],
+  "project_title": "<cleaned project title — strip platform ID prefixes like 'Projekt-Nr: 62737 - ', 'Job-Nr. 12345 - ', 'Ref: ABC-123 - ', '#62737 - '; strip gender suffixes '(m/w/d)', '(w/m/d)', '(d/m/w)'; remove trailing location if it repeats the location field; keep the core role + key tech stack; stay in German>"
 }
 
 PROJECT:

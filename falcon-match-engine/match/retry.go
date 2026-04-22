@@ -110,7 +110,11 @@ func (s *Service) retryOne(ctx context.Context, svcErr models.ServiceError) {
 
 	log.Info("[match-retry] retrying scoring")
 
-	result, rawContent, err := s.scorer.Score(ctx, project.Title, project.Description, cv.ExtractedText, logrus.Fields{
+	// Use the normalized display title when available — same cleaning
+	// as the primary scoring path in service.go.
+	displayTitle := cleanProjectTitle(ctx, svcErr.ProjectID, project.Title)
+
+	result, rawContent, err := s.scorer.Score(ctx, displayTitle, project.Description, cv.ExtractedText, logrus.Fields{
 		"cv_id":      svcErr.CVID,
 		"project_id": svcErr.ProjectID,
 	})
@@ -123,10 +127,16 @@ func (s *Service) retryOne(ctx context.Context, svcErr models.ServiceError) {
 	result.CVID = svcErr.CVID
 	result.UserID = svcErr.UserID
 	result.ProjectID = svcErr.ProjectID
-	result.ProjectTitle = project.Title
+	// Same fallback chain as service.go: normalized → LLM-cleaned → raw.
+	if displayTitle == project.Title && result.ProjectTitle != "" {
+		// keep LLM-cleaned result.ProjectTitle
+	} else {
+		result.ProjectTitle = displayTitle
+	}
 	result.Platform = svcErr.Platform
 	result.CompanyName = resolveCompanyName(ctx, &project)
 	result.PassedThreshold = result.Score >= s.threshold
+	result.Normalized = isProjectNormalized(ctx, svcErr.ProjectID)
 	result.ScoredAt = time.Now()
 
 	filter := bson.M{"cv_id": svcErr.CVID, "project_id": svcErr.ProjectID}

@@ -86,6 +86,15 @@ type MatchResultEvent struct {
 	// count. Pre-existing rows without the field decode as false
 	// (Go zero-value), so they're treated as unread until opened.
 	Viewed bool `json:"viewed" bson:"viewed"`
+
+	// Normalized tracks whether projects_normalized has the UI-ready
+	// copy of this match's project. Match-engine can race ahead of the
+	// normalizer, which means /matches/:id → 404 if the iOS app taps
+	// "Zum Job" too early. The iOS client uses this flag to show a
+	// spinner on the CTA instead of opening an empty sheet. Flipped
+	// to true by: (a) the `project.normalized` NATS event handler,
+	// or (b) the periodic sweep in match-engine.
+	Normalized bool `json:"normalized" bson:"normalized"`
 }
 
 // LabelFromScore derives the UI label from the overall score.
