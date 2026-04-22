@@ -1,6 +1,8 @@
 package system
 
 import (
+	"errors"
+	"io/fs"
 	"log"
 	"time"
 
@@ -19,11 +21,17 @@ func MustEnv(key string) string {
 	return v
 }
 
+// LoadEnvs reads a local .env file into the process environment.
+// Missing file is intentionally NOT fatal: in container / k8s
+// deployments env vars come from the platform, not a file on disk.
+// Any OTHER error (permission denied, malformed file) still fatals
+// because that's a real misconfiguration.
 func LoadEnvs() {
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if err == nil || errors.Is(err, fs.ErrNotExist) {
+		return
 	}
+	log.Fatalf("error loading .env file: %v", err)
 }
 
 // Platform returns the PLATFORM environment variable. Fatals if not set.

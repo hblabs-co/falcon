@@ -270,21 +270,21 @@ struct FalconWidgetLiveActivity: Widget {
     @ViewBuilder
     private func lockScreenView(_ context: ActivityViewContext<FalconMatchAttributes>) -> some View {
         let state = context.state
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 7) {
             // ─────── UPPER SECTION ───────
             // Score on the left (full height of the upper), header + label
             // row on the right.
-            HStack(alignment: .top, spacing: 14) {
-                ScoreBadge(score: state.score, size: 64)
+            HStack(alignment: .top, spacing: 10) {
+                ScoreBadge(score: state.score, size: 60)
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 5) {
                     // Row 1: [Logo] [Falcon + ✨ count] [Spacer] [CTA bottom-right].
-                    HStack(alignment: .bottom, spacing: 10) {
-                        AppLogo(size: 32)
+                    HStack(alignment: .bottom, spacing: 8) {
+                        AppLogo(size: 30)
                         VStack(alignment: .leading, spacing: 1) {
                             Text("Falcon")
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
-                            HStack(spacing: 4) {
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                            HStack(spacing: 3) {
                                 Image(systemName: "sparkles")
                                     .font(.system(size: 9, weight: .semibold))
                                     .foregroundStyle(.tertiary)
@@ -299,16 +299,16 @@ struct FalconWidgetLiveActivity: Widget {
                     }
 
                     // Row 2: label pill + company icon + company name.
-                    HStack(spacing: 10) {
+                    HStack(spacing: 7) {
                         Text(labelText(state.label, lang: state.lang))
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(scoreColor(state.score))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
                             .background(Capsule().fill(scoreColor(state.score).opacity(0.15)))
                         if !state.companyName.isEmpty {
-                            HStack(spacing: 5) {
-                                CompanyInitialsIcon(name: state.companyName, size: 18)
+                            HStack(spacing: 4) {
+                                CompanyInitialsIcon(name: state.companyName, size: 16)
                                 Text(state.companyName)
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(.secondary)
@@ -330,23 +330,23 @@ struct FalconWidgetLiveActivity: Widget {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            VStack(spacing: 5) {
-                HStack(spacing: 12) {
+            VStack(spacing: 3) {
+                HStack(spacing: 10) {
                     scoreRow(scoreDimensionLabel("skills",    lang: state.lang), value: state.skillsMatch)
                     scoreRow(scoreDimensionLabel("domain",    lang: state.lang), value: state.domainExperience)
                 }
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     scoreRow(scoreDimensionLabel("seniority",     lang: state.lang), value: state.seniorityFit)
                     scoreRow(scoreDimensionLabel("communication", lang: state.lang), value: state.communicationClarity)
                 }
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     scoreRow(scoreDimensionLabel("relevance", lang: state.lang), value: state.projectRelevance)
                     scoreRow(scoreDimensionLabel("techstack", lang: state.lang), value: state.techStackOverlap)
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 24)
         .activityBackgroundTint(Color(.systemBackground))
         .activitySystemActionForegroundColor(Color.accentColor)
     }

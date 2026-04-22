@@ -3,6 +3,7 @@ package cv
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -158,31 +159,51 @@ func (s *service) index(ctx context.Context, evt models.CVIndexRequestedEvent) e
 	}
 	log.Infof("extracted %d chars from %s", len(text), cv.Filename)
 
-	// 4. Embed — transient failure, retry.
-	vector, err := s.embeddings.Embed(ctx, text)
+	// 4. Embed — split into paragraph-aligned chunks and embed each.
+	//    Multi-vector layout in Qdrant: one point per chunk, all sharing
+	//    payload.cv_id so downstream search can group chunks by CV. Clean
+	//    up any prior run first so we don't leave stale points when a
+	//    retry happens after a partial failure.
+	if err := s.qdrant.DeleteByPayload(ctx, "cv_id", cv.ID); err != nil {
+		log.Warnf("pre-clean qdrant chunks for cv=%s: %v", cv.ID, err)
+	}
+	chunks, err := s.embeddings.EmbedChunks(ctx, text)
 	if err != nil {
 		return fmt.Errorf("embed: %w", err)
 	}
-	log.Infof("embedding generated (%d dims)", len(vector))
+	log.Infof("embedded %d chunk(s)", len(chunks))
 
-	// 5. Upsert into Qdrant — transient failure, retry.
-	qdrantID := uuid.New().String()
-	payload := map[string]string{"cv_id": cv.ID, "user_id": userID, "filename": cv.Filename}
-	if err := s.qdrant.Upsert(ctx, qdrantID, vector, payload); err != nil {
+	// 5. Bulk upsert all chunks in one request.
+	points := make([]qdrant.Point, len(chunks))
+	for i, ch := range chunks {
+		points[i] = qdrant.Point{
+			ID:     uuid.New().String(),
+			Vector: ch.Embedding,
+			Payload: map[string]string{
+				"cv_id":      cv.ID,
+				"user_id":    userID,
+				"filename":   cv.Filename,
+				"chunk_idx":  strconv.Itoa(ch.Index),
+			},
+		}
+	}
+	if err := s.qdrant.UpsertMany(ctx, points); err != nil {
 		return fmt.Errorf("qdrant upsert: %w", err)
 	}
 
-	// 6. Mark indexed in MongoDB.
+	// 6. Mark indexed in MongoDB. qdrant_id is no longer a single UUID;
+	//    we track just the count for debugging — actual cleanup on next
+	//    re-index uses DeleteByPayload(cv_id) instead.
 	_ = system.GetStorage().SetById(ctx, constants.MongoCVsCollection, cv.ID, bson.M{
 		"status":         models.CVStatusIndexed,
-		"qdrant_id":      qdrantID,
+		"qdrant_chunks":  len(chunks),
 		"extracted_text": text,
 		"error":          "",
 		"updated_at":     time.Now(),
 	})
 
 	// 7. Publish cv.indexed and transition to normalizing.
-	out := models.CVIndexedEvent{CVID: cv.ID, UserID: userID, QdrantID: qdrantID}
+	out := models.CVIndexedEvent{CVID: cv.ID, UserID: userID}
 	if err := system.Publish(ctx, constants.SubjectCVIndexed, out); err != nil {
 		log.Warnf("publish cv.indexed: %v", err)
 	} else {
@@ -215,11 +236,11 @@ func (s *service) replaceExistingCV(ctx context.Context, userID, currentCVID str
 			}
 		}
 
-		// Delete from Qdrant.
-		if old.QdrantID != "" {
-			if err := s.qdrant.Delete(ctx, old.QdrantID); err != nil {
-				log.Warnf("delete old qdrant point %s: %v", old.QdrantID, err)
-			}
+		// Delete from Qdrant. With multi-vector storage we don't track
+		// individual point IDs anymore; every chunk carries payload.cv_id
+		// so one filter call removes them all.
+		if err := s.qdrant.DeleteByPayload(ctx, "cv_id", old.ID); err != nil {
+			log.Warnf("delete old qdrant chunks for cv %s: %v", old.ID, err)
 		}
 
 		// Delete from MongoDB.

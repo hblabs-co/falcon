@@ -88,17 +88,28 @@ func (c *Client) EnsureCollection(ctx context.Context) error {
 	})
 }
 
-type point struct {
+// Point is a single (id, vector, payload) tuple for bulk upserts.
+type Point struct {
 	ID      string            `json:"id"`
 	Vector  []float32         `json:"vector"`
 	Payload map[string]string `json:"payload"`
 }
 
-// Upsert stores or replaces a point in Qdrant. id must be a UUID.
+// Upsert stores or replaces a single point in Qdrant. id must be a UUID.
 func (c *Client) Upsert(ctx context.Context, id string, vector []float32, payload map[string]string) error {
+	return c.UpsertMany(ctx, []Point{{ID: id, Vector: vector, Payload: payload}})
+}
+
+// UpsertMany stores or replaces multiple points in one request. Used by
+// the multi-vector indexing path (one point per CV chunk) so a full
+// re-indexing of a single CV is one round-trip instead of N.
+func (c *Client) UpsertMany(ctx context.Context, points []Point) error {
+	if len(points) == 0 {
+		return nil
+	}
 	path := "/collections/" + c.collection + "/points"
 	return c.http.Put(ctx, path, ownhttp.Request{
-		Body: map[string]any{"points": []point{{ID: id, Vector: vector, Payload: payload}}},
+		Body: map[string]any{"points": points},
 	})
 }
 
@@ -107,6 +118,23 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	path := "/collections/" + c.collection + "/points/delete"
 	return c.http.Post(ctx, path, ownhttp.Request{
 		Body: map[string]any{"points": []string{id}},
+	})
+}
+
+// DeleteByPayload removes every point whose payload field matches the
+// given value. The cleanup path for multi-vector storage: when a user
+// re-uploads a CV, we delete all chunks of the previous version with
+// one filter call instead of tracking N individual IDs.
+func (c *Client) DeleteByPayload(ctx context.Context, field, value string) error {
+	path := "/collections/" + c.collection + "/points/delete"
+	return c.http.Post(ctx, path, ownhttp.Request{
+		Body: map[string]any{
+			"filter": map[string]any{
+				"must": []map[string]any{
+					{"key": field, "match": map[string]any{"value": value}},
+				},
+			},
+		},
 	})
 }
 

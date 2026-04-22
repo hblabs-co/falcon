@@ -13,7 +13,7 @@
         "Debug Dispatch",
         "Debug Realtime",
         "Debug Match Engine",
-        // "Debug Storage",
+        "Debug Storage",
         "Debug Normalizer"
       ],
       "stopAll": true,
