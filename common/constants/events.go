@@ -9,6 +9,14 @@ const (
 	StreamMatches       = "MATCHES"
 	SubjectMatchPending = "match.pending"
 	SubjectMatchResult  = "match.result"
+	// SubjectMatchFlipped is emitted by falcon-match-engine when its
+	// periodic sweep catches a match whose `normalized` flag was stale
+	// and flips it to true. Only falcon-realtime subscribes — it
+	// forwards to iOS clients so any visible "waiting for normalizer"
+	// spinner clears without needing a refresh. Separate subject so
+	// signal/etc. don't re-process a project.normalized event we're
+	// only using to reach the app.
+	SubjectMatchFlipped = "match.flipped"
 
 	StreamScrape           = "SCRAPE"
 	SubjectScrapeRequested = "scrape.requested" // full subject: scrape.requested.{platform}

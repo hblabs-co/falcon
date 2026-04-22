@@ -24,6 +24,15 @@ variable "GO_VERSION" {
   default = "1.26"
 }
 
+// BUILD_TIME — RFC3339 timestamp stamped at bake-invocation time. The
+// same value is shared across every target of a single `bake` run, so
+// all services in a deploy report a consistent build time. Read at
+// runtime by common/system/context.go and logged on startup; makes it
+// trivial to confirm whether a pod is running a freshly-pushed image.
+variable "BUILD_TIME" {
+  default = timestamp()
+}
+
 group "default" {
   // What `bake` builds when no target is specified. Scout is commented
   // out by default — it ships with every platform scraper, so builds
@@ -51,6 +60,7 @@ target "_defaults" {
   provenance = false
   args = {
     GO_VERSION = "${GO_VERSION}"
+    BUILD_TIME = "${BUILD_TIME}"
   }
 }
 

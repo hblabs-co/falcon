@@ -10,3 +10,6 @@ falcon-import/recruiter_rodeo/recruiters.html
 
 falcon-scout/scout/scout
 see_later
+
+deployment/11-secret.yaml
+deployment/12-registry-access.yaml

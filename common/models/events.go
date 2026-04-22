@@ -88,6 +88,15 @@ type ProjectNormalizedEvent struct {
 	Title     string `json:"title"`
 }
 
+// MatchFlippedEvent is published to "match.flipped" by falcon-match-engine
+// when its periodic sweep flips stale `normalized=false` match_results to
+// true. Used only to notify iOS clients (via falcon-realtime) that any
+// visible "Zum Job" spinner for this project can clear — no side effects
+// elsewhere.
+type MatchFlippedEvent struct {
+	ProjectID string `json:"project_id"`
+}
+
 // MagicLinkRequestedEvent is published to "signal.magic_link" by falcon-api
 // so that falcon-signal can deliver the email.
 type MagicLinkRequestedEvent struct {

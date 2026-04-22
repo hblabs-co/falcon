@@ -275,6 +275,7 @@ func StreamMatches() []jetstream.StreamConfig {
 		constants.StreamMatches,
 		constants.SubjectMatchPending,
 		constants.SubjectMatchResult,
+		constants.SubjectMatchFlipped,
 	)
 }
 

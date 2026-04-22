@@ -121,45 +121,49 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# Per-service runtime images. All share the same shape: alpine base,
-# non-root user, ca-certificates so outbound TLS works (APNs, Mistral,
-# MinIO, etc.). Each exposes a relevant port via metadata only — the
-# actual listen happens in the binary.
+# Shared runtime base. Centralises the alpine deps (user, ca-certs) and
+# the BUILD_TIME env that every Go service logs on startup — lets you
+# tell at a glance whether a running pod is the image you just pushed.
+# BUILD_TIME is injected by docker-bake at build time via a bake HCL
+# timestamp() default; falls back to "unknown" if built without bake.
 # ─────────────────────────────────────────────────────────────────────────
-FROM alpine:3.20 AS falcon-api
+FROM alpine:3.20 AS runtime-base
+ARG BUILD_TIME=unknown
+ENV BUILD_TIME=${BUILD_TIME}
 RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+
+# ─────────────────────────────────────────────────────────────────────────
+# Per-service runtime images — all inherit from runtime-base. Each
+# EXPOSEs a relevant port via metadata only; actual listen is in-binary.
+# ─────────────────────────────────────────────────────────────────────────
+FROM runtime-base AS falcon-api
 COPY --from=main-builder /out/falcon-api /app
 USER app
 EXPOSE 8080
 ENTRYPOINT ["/app"]
 
-FROM alpine:3.20 AS falcon-dispatch
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+FROM runtime-base AS falcon-dispatch
 COPY --from=main-builder /out/falcon-dispatch /app
 USER app
 ENTRYPOINT ["/app"]
 
-FROM alpine:3.20 AS falcon-match-engine
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+FROM runtime-base AS falcon-match-engine
 COPY --from=main-builder /out/falcon-match-engine /app
 USER app
 ENTRYPOINT ["/app"]
 
-FROM alpine:3.20 AS falcon-normalizer
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+FROM runtime-base AS falcon-normalizer
 COPY --from=main-builder /out/falcon-normalizer /app
 USER app
 ENTRYPOINT ["/app"]
 
-FROM alpine:3.20 AS falcon-realtime
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+FROM runtime-base AS falcon-realtime
 COPY --from=main-builder /out/falcon-realtime /app
 USER app
 EXPOSE 8090
 ENTRYPOINT ["/app"]
 
-FROM alpine:3.20 AS falcon-signal
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+FROM runtime-base AS falcon-signal
 COPY --from=main-builder /out/falcon-signal /app
 # email/config.go reads assets at startup from the path packageDir()
 # returns — which is the directory of email/config.go at compile time:
@@ -169,14 +173,12 @@ COPY --from=main-builder --chown=app:app /src/falcon-signal/email/assets /src/fa
 USER app
 ENTRYPOINT ["/app"]
 
-FROM alpine:3.20 AS falcon-storage
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+FROM runtime-base AS falcon-storage
 COPY --from=main-builder /out/falcon-storage /app
 USER app
 ENTRYPOINT ["/app"]
 
-FROM alpine:3.20 AS falcon-scout
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+FROM runtime-base AS falcon-scout
 COPY --from=main-builder /out/falcon-scout /app
 USER app
 ENTRYPOINT ["/app"]
