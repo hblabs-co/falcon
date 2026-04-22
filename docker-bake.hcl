@@ -41,6 +41,7 @@ group "default" {
   targets = [
     "falcon-api",
     "falcon-dispatch",
+    "falcon-landing",
     "falcon-match-engine",
     "falcon-normalizer",
     "falcon-realtime",
@@ -74,6 +75,12 @@ target "falcon-dispatch" {
   inherits = ["_defaults"]
   target   = "falcon-dispatch"
   tags     = ["${REGISTRY}/falcon-dispatch:${TAG}"]
+}
+
+target "falcon-landing" {
+  inherits = ["_defaults"]
+  target   = "falcon-landing"
+  tags     = ["${REGISTRY}/falcon-landing:${TAG}"]
 }
 
 target "falcon-match-engine" {

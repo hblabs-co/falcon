@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "titleSuffix": "Soporte",
+    "description": "Falcon — Coincidencias con IA entre tu CV y proyectos freelance.",
+    "tagline": "Inteligencia de proyectos · Coincidencias freelance con IA"
+  },
+  "nav": {
+    "about": "Acerca",
+    "screenshots": "Capturas",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "legal": "Legal",
+    "contact": "Contacto"
+  },
+  "screenshots": {
+    "title": "Capturas de pantalla",
+    "subtitle": "Toca una imagen para ampliar. Usa las flechas o desliza para navegar."
+  },
+  "about": {
+    "title": "Acerca de",
+    "intro": "Falcon monitoriza plataformas de proyectos freelance, puntúa cada proyecto nuevo contra tu CV usando IA, y entrega una notificación push en el momento que aparece algo interesante. Sin navegar, sin filtrar — solo proyectos relevantes llegando solos.",
+    "howItWorksTitle": "Cómo funciona",
+    "howItWorksBody": "Los embeddings del CV se generan localmente con Ollama (bge-m3). El análisis de coincidencia lo realiza Mistral AI en Francia (UE). Sin entrenamiento con tus datos, sin redes publicitarias, sin analítica de terceros. El código es abierto en GitHub.",
+    "stackTitle": "Stack",
+    "stackBody": "Microservicios en Go · NATS JetStream · MongoDB · Qdrant · Traefik · Kubernetes. App iOS en SwiftUI. Live Activities + notificaciones push via APNs. Todo el procesamiento de embeddings corre on-premise para cumplir con RGPD.",
+    "footer": "Hecho con ♥ en Hamburgo · Creado por Helmer Barcos · HB Labs SAS"
+  },
+  "contact": {
+    "title": "Contacto",
+    "creatorBio": "Desarrollador Full-Stack con 10+ años de experiencia, especializado en arquitecturas en tiempo real escalables.",
+    "companyBio": "Un equipo de primer nivel de diseño y desarrollo web, ayudando a empresas a crear experiencias de producto significativas e interactivas.",
+    "supportTitle": "Soporte",
+    "supportBody": "Reportes de bugs, ideas, solicitudes de eliminación — escribe a general@hblabs.co y responderemos en un par de días."
+  },
+  "privacy": {
+    "title": "Política de privacidad",
+    "lastUpdated": "Última actualización · abril de 2025",
+    "sections": [
+      {"title": "1. Quiénes somos", "body": "Falcon es desarrollado y operado por HB Labs SAS, una empresa registrada en Francia. Si tiene preguntas sobre esta política, contáctenos en general@hblabs.co."},
+      {"title": "2. Datos que recopilamos", "body": "Falcon recopila únicamente los datos mínimos necesarios para operar:\n\n• ID de usuario anónimo — un identificador generado aleatoriamente (nanoid) almacenado localmente en su dispositivo. Nunca se vincula a su nombre, correo electrónico ni a ninguna identidad personal.\n• Token de dispositivo APNs — un token emitido por Apple que se usa exclusivamente para entregar notificaciones push a su dispositivo.\n• Preferencia de idioma de notificaciones — su idioma elegido para las notificaciones push, almacenado en nuestro servidor junto con su token de dispositivo.\n• Texto del CV — si sube un currículum vitae, el texto extraído se almacena en nuestro servidor y se procesa localmente para generar embeddings."},
+      {"title": "3. Cómo usamos sus datos", "body": "• Los embeddings del CV se generan localmente con Ollama (modelo bge-m3). Su texto del CV no sale de nuestros servidores en este paso.\n• El análisis de coincidencia de proyectos es realizado por Mistral AI, un servicio externo con sede en Francia (UE). Su CV y las descripciones de proyectos se envían a Mistral AI únicamente para calcular una puntuación de coincidencia y un resumen breve. Los datos no se usan para entrenamiento.\n• Las notificaciones push se envían a través de la infraestructura APNs de Apple usando su token de dispositivo.\n\nNo vendemos, compartimos ni usamos sus datos con fines publicitarios."},
+      {"title": "4. Terceros", "body": "• Mistral AI (mistral.ai) — París, Francia. Utilizado para el análisis de coincidencia basado en LLM. Sujeto a la Política de privacidad de Mistral AI (https://legal.mistral.ai/terms/privacy-policy).\n• Apple Inc. — entrega de notificaciones push APNs.\n• Recruiter Rodeo (recruiter.rodeo) — Las valoraciones de reclutadores mostradas en la app provienen de datos públicos disponibles en https://recruiter.rodeo/recruiters. No se comparte ningún dato personal con este servicio.\n\nNingún otro servicio de terceros recibe sus datos."},
+      {"title": "5. Retención de datos", "body": "Los tokens de dispositivo y las preferencias de idioma se conservan mientras use la app. Los datos del CV se retienen para facilitar el matching continuo. Puede solicitar la eliminación en cualquier momento escribiendo a general@hblabs.co."},
+      {"title": "6. Sus derechos (RGPD)", "body": "Si se encuentra en el Espacio Económico Europeo, tiene derecho a:\n\n• Acceder a los datos personales que conservamos sobre usted.\n• Solicitar la corrección o eliminación de sus datos.\n• Oponerse o restringir el procesamiento de sus datos.\n• Presentar una reclamación ante su autoridad local de protección de datos.\n\nPara ejercer cualquiera de estos derechos, contáctenos en general@hblabs.co."},
+      {"title": "7. Seguridad", "body": "Los datos se almacenan en servidores privados. Los embeddings del CV y los tokens de dispositivo no están expuestos públicamente. Aplicamos medidas técnicas y organizativas razonables para proteger sus datos."},
+      {"title": "8. Cambios en esta política", "body": "Podemos actualizar esta Política de privacidad periódicamente. Los cambios se reflejarán en la app. El uso continuado de Falcon tras los cambios implica la aceptación de la política revisada."},
+      {"title": "9. Contacto", "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"}
+    ]
+  },
+  "terms": {
+    "title": "Términos de uso",
+    "lastUpdated": "Última actualización · abril de 2025",
+    "sections": [
+      {"title": "1. Aceptación", "body": "Al instalar o usar Falcon, acepta estos Términos de uso. Si no está de acuerdo, no utilice la app."},
+      {"title": "2. Descripción del servicio", "body": "Falcon monitorea plataformas de proyectos freelance, analiza proyectos contra su CV mediante coincidencia basada en IA, y envía notificaciones push cuando se encuentran coincidencias relevantes. El servicio se proporciona tal cual y está destinado a uso personal y no comercial."},
+      {"title": "3. Requisitos de uso", "body": "Debe tener al menos 16 años para usar Falcon. Al usar la app confirma que cumple este requisito."},
+      {"title": "4. Sus datos del CV", "body": "Al subir un CV, otorga a HB Labs SAS una licencia limitada para procesar ese contenido con el único propósito de generar resultados de coincidencia de proyectos para usted. Usted conserva la propiedad total de su CV. No compartimos su CV con empleadores ni con terceros, excepto con Mistral AI para el análisis de coincidencia (consulte la Política de privacidad)."},
+      {"title": "5. Sin garantía", "body": "Falcon se proporciona \"tal cual\" sin garantías de ningún tipo. No garantizamos:\n\n• La precisión o integridad de las puntuaciones de coincidencia.\n• El funcionamiento ininterrumpido o sin errores del servicio.\n• Que los proyectos sean actuales, precisos o estén disponibles.\n\nLos resultados de coincidencia son generados por un modelo de IA y no deben ser la única base para ninguna decisión profesional o financiera."},
+      {"title": "6. Limitación de responsabilidad", "body": "En la máxima medida permitida por la ley, HB Labs SAS no será responsable de daños indirectos o consecuentes derivados del uso de Falcon, incluyendo pérdida de datos, oportunidades de proyectos perdidas o dependencia de resultados generados por IA."},
+      {"title": "7. Uso aceptable", "body": "Usted se compromete a no:\n\n• Realizar ingeniería inversa, descompilar o manipular la app o sus servicios backend.\n• Usar el servicio para extraer, recopilar o redistribuir datos de proyectos.\n• Intentar eludir límites de velocidad o controles de acceso.\n• Cargar contenido ilegal, dañino o que infrinja derechos de terceros."},
+      {"title": "8. Propiedad intelectual", "body": "El nombre Falcon, el logotipo y el diseño de la app son propiedad de HB Labs SAS. El código fuente está disponible bajo su respectiva licencia de código abierto. Nada en estos términos le otorga derechos para usar las marcas comerciales de HB Labs SAS."},
+      {"title": "9. Terminación", "body": "Nos reservamos el derecho de suspender o cancelar el acceso al servicio en cualquier momento, con o sin previo aviso, si consideramos que se han incumplido estos términos."},
+      {"title": "10. Ley aplicable", "body": "Estos términos se rigen por las leyes de Francia. Cualquier disputa estará sujeta a la jurisdicción exclusiva de los tribunales de París, Francia."},
+      {"title": "11. Cambios", "body": "Podemos actualizar estos Términos de uso en cualquier momento. El uso continuado de Falcon tras los cambios implica la aceptación de los términos actualizados."},
+      {"title": "12. Contacto", "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"}
+    ]
+  },
+  "legal": {
+    "title": "Legal",
+    "gdprTitle": "RGPD",
+    "gdprBody": "Los embeddings del CV se generan localmente (Ollama — sin datos fuera de nuestros servidores). El análisis de coincidencia de proyectos lo realiza Mistral AI, un servicio externo con sede en Francia (UE). Al usar Falcon acepta que sus datos del CV sean procesados por Mistral AI con fines de matching.",
+    "mistralLink": "🔒 Política de privacidad de Mistral AI →",
+    "dataRequestsTitle": "Solicitudes de datos",
+    "dataRequestsBody": "Para acceder, corregir o eliminar sus datos, escriba a general@hblabs.co. Respondemos en un plazo de 30 días, según el Art. 12 del RGPD.",
+    "sourceTitle": "Código fuente",
+    "sourceBody": "Falcon es open-source. El backend completo + cliente iOS están disponibles en",
+    "imprintTitle": "Aviso legal"
+  },
+  "foot": "Falcon es descubrimiento freelance con IA."
+}

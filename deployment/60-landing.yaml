@@ -1,0 +1,79 @@
+# kubectl replace --force -f deployment/60-landing.yaml
+#
+# Falcon support/landing page — single Go binary (falcon-landing). Templates,
+# per-language locale JSONs and the logo are all go-embedded into the image,
+# so the pod ships as one self-contained artefact. To update the content:
+#   1. Edit files under falcon-landing/ (index.html.tmpl, locales/*.json, etc).
+#   2. docker buildx bake falcon-landing --push
+#   3. kubectl rollout restart deploy/falcon-landing -n falcon
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-landing
+  namespace: falcon
+  labels: {app: falcon-landing}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: falcon-landing}}
+  template:
+    metadata:
+      labels: {app: falcon-landing}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: landing
+          image: registry.4the.company/falcon-landing:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - {name: http, containerPort: 8080}
+          env:
+            - {name: PORT, value: "8080"}
+          readinessProbe:
+            httpGet: {path: /healthz, port: 8080}
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /healthz, port: 8080}
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests: {cpu: "10m", memory: "24Mi"}
+            limits:   {cpu: "200m", memory: "128Mi"}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falcon-landing
+  namespace: falcon
+  labels: {app: falcon-landing}
+spec:
+  type: ClusterIP
+  selector: {app: falcon-landing}
+  ports:
+    - {name: http, port: 80, targetPort: 8080}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: falcon-landing
+  namespace: falcon
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["falcon.hblabs.co"]
+      secretName: falcon-landing-cert
+  rules:
+    - host: falcon.hblabs.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: falcon-landing
+                port: {number: 80}

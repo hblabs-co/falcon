@@ -47,6 +47,7 @@ COPY modules/          /src/modules/
 # keys off file contents, not the COPY instruction itself.
 COPY falcon-api/          /src/falcon-api/
 COPY falcon-dispatch/     /src/falcon-dispatch/
+COPY falcon-landing/      /src/falcon-landing/
 COPY falcon-match-engine/ /src/falcon-match-engine/
 COPY falcon-normalizer/   /src/falcon-normalizer/
 COPY falcon-realtime/     /src/falcon-realtime/
@@ -74,6 +75,18 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     go mod tidy && \
     go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/falcon-dispatch .
+
+# falcon-landing — single-binary static site server (Go templates + embed).
+# The base64-encoded logo lives at falcon-signal/email/assets/falcon_logo.txt;
+# we refresh the copy in falcon-landing/landing/static/ right before building
+# so the go:embed pulls in the freshest asset without needing a checked-in
+# binary PNG.
+WORKDIR /src/falcon-landing
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    cp /src/falcon-signal/email/assets/falcon_logo.txt landing/static/falcon_logo.txt && \
+    go mod tidy && \
+    go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/falcon-landing .
 
 WORKDIR /src/falcon-match-engine
 RUN --mount=type=cache,target=/root/.cache/go-build \
@@ -145,6 +158,12 @@ ENTRYPOINT ["/app"]
 FROM runtime-base AS falcon-dispatch
 COPY --from=main-builder /out/falcon-dispatch /app
 USER app
+ENTRYPOINT ["/app"]
+
+FROM runtime-base AS falcon-landing
+COPY --from=main-builder /out/falcon-landing /app
+USER app
+EXPOSE 8080
 ENTRYPOINT ["/app"]
 
 FROM runtime-base AS falcon-match-engine

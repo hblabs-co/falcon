@@ -85,5 +85,12 @@
       "mode": "auto",
       "program": "${workspaceFolder}/falcon-realtime"
     },
+    {
+      "name": "Debug Landing",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-landing"
+    },
   ]
 }

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{{.T.meta.description}}" />
+  <meta name="theme-color" content="#0E0E10" />
+  <title>Falcon · {{.T.meta.titleSuffix}}</title>
+  <link rel="icon" type="image/png" href="/favicon.png?v={{.V}}" />
+  <link rel="apple-touch-icon" href="/favicon.png?v={{.V}}" />
+
+  <!-- Link-preview cards. One 1200×630 image covers every major
+       platform (Facebook / WhatsApp / Slack / Teams / LinkedIn /
+       iMessage read og:*; Twitter/X reads twitter:*; Discord reads
+       both). og:locale uses the underscore form (en_US, de_DE,
+       es_ES) which is what crawlers expect. -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:site_name"   content="Falcon" />
+  <meta property="og:title"       content="Falcon — {{.T.meta.tagline}}" />
+  <meta property="og:description" content="{{.T.meta.description}}" />
+  <meta property="og:image"       content="https://falcon.hblabs.co/static/og-image.png?v={{.V}}" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"   content="Falcon" />
+  <meta property="og:locale"      content="{{if eq .Lang "de"}}de_DE{{else if eq .Lang "es"}}es_ES{{else}}en_US{{end}}" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:locale:alternate" content="de_DE" />
+  <meta property="og:locale:alternate" content="es_ES" />
+
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Falcon — {{.T.meta.tagline}}" />
+  <meta name="twitter:description" content="{{.T.meta.description}}" />
+  <meta name="twitter:image"       content="https://falcon.hblabs.co/static/og-image.png?v={{.V}}" />
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --card: #ffffff;
+      --text: #1a1a1d;
+      --muted: #6b6b75;
+      --border: rgba(0,0,0,0.08);
+      --accent: #2563eb;
+      --accent-bg: rgba(37,99,235,0.10);
+      --shadow: 0 10px 30px rgba(0,0,0,0.06);
+      --radius: 18px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0e0e10;
+        --card: #18181b;
+        --text: #f3f3f5;
+        --muted: #9ca3af;
+        --border: rgba(255,255,255,0.08);
+        --accent: #60a5fa;
+        --accent-bg: rgba(96,165,250,0.14);
+        --shadow: 0 10px 30px rgba(0,0,0,0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
+                   "Segoe UI", Roboto, sans-serif;
+      font-size: 15px; line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    .shell {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 32px 20px 140px;
+    }
+    .card {
+      width: 100%; max-width: 720px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .card-body { padding: 40px 36px; }
+    @media (max-width: 520px) {
+      .shell { padding: 16px 12px 140px; }
+      .card-body { padding: 28px 22px; }
+    }
+
+    .hero {
+      text-align: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .hero img { width: 68px; height: 68px; border-radius: 16px; }
+    .hero h1 { margin: 12px 0 4px; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+    .hero .tagline { margin: 0 0 18px; color: var(--muted); font-size: 13px; font-weight: 500; }
+
+    h2 { margin: 0 0 18px; font-size: 18px; font-weight: 700; letter-spacing: -0.015em; }
+    h3 { margin: 24px 0 8px; font-size: 14px; font-weight: 600; }
+    p  { margin: 0 0 14px; color: var(--text); }
+    .muted { color: var(--muted); font-size: 13px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    .pill {
+      display: inline-block; padding: 2px 10px;
+      font-size: 11px; font-weight: 600;
+      border-radius: 999px;
+      background: var(--accent-bg); color: var(--accent);
+    }
+
+    .contact-row {
+      display: flex; gap: 16px; align-items: center;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 14px;
+    }
+    /* Real photos now (not initials). `object-fit: cover` crops square
+       without distortion for Helmer's non-square portrait. Rounded
+       corners match the iOS contact-drawer aesthetic. */
+    .avatar {
+      width: 72px; height: 72px;
+      border-radius: 16px;
+      flex-shrink: 0;
+      object-fit: cover;
+      background: var(--accent-bg);
+    }
+    .contact-meta h3 { margin: 0 0 4px; font-size: 15px; }
+    .contact-meta p  { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+    .contact-links   { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+
+    .legal-section { white-space: pre-wrap; }
+
+    /* Language switcher — top-right of the card column. */
+    .lang-switch {
+      width: 100%; max-width: 720px;
+      display: flex; justify-content: flex-end;
+      gap: 4px; margin-bottom: 10px;
+    }
+    .lang-switch a {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.04em;
+      border-radius: 999px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .lang-switch a:hover { color: var(--text); text-decoration: none; }
+    .lang-switch a.active {
+      background: var(--accent); color: white; border-color: var(--accent);
+    }
+
+    /* Section nav — ghost pill at the bottom. */
+    .nav {
+      position: fixed;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 6px; padding: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      z-index: 10;
+      max-width: calc(100vw - 24px);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav button {
+      appearance: none; background: transparent; border: none;
+      color: var(--muted);
+      padding: 8px 16px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      border-radius: 999px;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .nav button:hover { color: var(--text); }
+    .nav button.active { background: var(--accent); color: white; }
+
+    .section { display: none; animation: fade 0.22s ease; }
+    .section.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+    /* Screenshot gallery — fluid grid of iPhone-framed thumbnails. */
+    .shots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .shots-grid img {
+      width: 100%;
+      aspect-ratio: 9 / 19.5;
+      object-fit: cover;
+      border-radius: 18px;
+      background: var(--accent-bg);
+      cursor: zoom-in;
+      border: 1px solid var(--border);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .shots-grid img:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+    /* Lightbox — full-viewport overlay with prev/next buttons. */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100;
+      padding: 40px 16px;
+      animation: fade 0.2s ease;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .lightbox-btn {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      font-size: 22px; font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.15s;
+    }
+    .lightbox-btn:hover { background: rgba(255,255,255,0.22); }
+    .lightbox-prev { left: 16px; }
+    .lightbox-next { right: 16px; }
+    .lightbox-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      font-size: 20px; font-weight: 500;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.22); }
+    .lightbox-counter {
+      position: absolute;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      font-weight: 500;
+    }
+    @media (max-width: 520px) {
+      .lightbox-btn { width: 40px; height: 40px; font-size: 18px; }
+      .lightbox-prev { left: 8px; }
+      .lightbox-next { right: 8px; }
+    }
+
+    .foot { text-align: center; color: var(--muted); font-size: 11px; margin-top: 20px; padding-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <a href="/en/" class="{{if eq .Lang "en"}}active{{end}}">EN</a>
+      <a href="/de/" class="{{if eq .Lang "de"}}active{{end}}">DE</a>
+      <a href="/es/" class="{{if eq .Lang "es"}}active{{end}}">ES</a>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="hero">
+          <img src="/favicon.png?v={{.V}}" alt="Falcon" />
+          <h1>Falcon</h1>
+          <p class="tagline">{{.T.meta.tagline}}</p>
+        </div>
+
+        <!-- About -->
+        <section id="section-about" class="section active">
+          <h2>{{.T.about.title}}</h2>
+          <p>{{.T.about.intro}}</p>
+          <h3>{{.T.about.howItWorksTitle}}</h3>
+          <p class="muted">{{.T.about.howItWorksBody}}</p>
+          <h3>{{.T.about.stackTitle}}</h3>
+          <p class="muted">{{.T.about.stackBody}}</p>
+          <hr />
+          <p class="muted" style="text-align:center;">{{.T.about.footer}}</p>
+        </section>
+
+        <!-- Screenshots -->
+        <section id="section-screenshots" class="section">
+          <h2>{{.T.screenshots.title}}</h2>
+          <p class="muted">{{.T.screenshots.subtitle}}</p>
+          <div class="shots-grid">
+            {{range .Screens}}
+              <img src="/static/screens/thumbs/{{.}}?v={{$.V}}"
+                   data-full="/static/screens/{{.}}?v={{$.V}}"
+                   alt="Falcon screenshot"
+                   loading="lazy" />
+            {{end}}
+          </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="section-contact" class="section">
+          <h2>{{.T.contact.title}}</h2>
+          <div class="contact-row">
+            <img class="avatar" src="/static/hbarcos.jpeg?v={{.V}}" alt="Helmer Barcos" />
+            <div class="contact-meta">
+              <h3>Helmer Barcos</h3>
+              <p>{{.T.contact.creatorBio}}</p>
+              <div class="contact-links">
+                <a href="https://barcos.co" target="_blank" rel="noopener">🌐 barcos.co</a>
+                <a href="mailto:helmer@barcos.co">✉︎ helmer@barcos.co</a>
+              </div>
+            </div>
+          </div>
+          <div class="contact-row">
+            <img class="avatar" src="/static/hblabs.png?v={{.V}}" alt="HB Labs" />
+            <div class="contact-meta">
+              <h3>HB Labs SAS</h3>
+              <p>{{.T.contact.companyBio}}</p>
+              <div class="contact-links">
+                <a href="https://hblabs.co" target="_blank" rel="noopener">🌐 hblabs.co</a>
+                <a href="mailto:general@hblabs.co">✉︎ general@hblabs.co</a>
+              </div>
+            </div>
+          </div>
+          <h3>{{.T.contact.supportTitle}}</h3>
+          <p class="muted">{{.T.contact.supportBody}}</p>
+        </section>
+
+        <!-- Privacy -->
+        <section id="section-privacy" class="section">
+          <h2>{{.T.privacy.title}}</h2>
+          <p class="muted"><span class="pill">{{.T.privacy.lastUpdated}}</span></p>
+          {{range .T.privacy.sections}}
+            <h3>{{.title}}</h3>
+            <p class="legal-section">{{.body}}</p>
+          {{end}}
+        </section>
+
+        <!-- Terms -->
+        <section id="section-terms" class="section">
+          <h2>{{.T.terms.title}}</h2>
+          <p class="muted"><span class="pill">{{.T.terms.lastUpdated}}</span></p>
+          {{range .T.terms.sections}}
+            <h3>{{.title}}</h3>
+            <p class="legal-section">{{.body}}</p>
+          {{end}}
+        </section>
+
+        <!-- Legal -->
+        <section id="section-legal" class="section">
+          <h2>{{.T.legal.title}}</h2>
+
+          <h3>{{.T.legal.gdprTitle}}</h3>
+          <p>{{.T.legal.gdprBody}}</p>
+          <p><a href="https://legal.mistral.ai/terms/privacy-policy" target="_blank" rel="noopener">{{.T.legal.mistralLink}}</a></p>
+
+          <h3>{{.T.legal.dataRequestsTitle}}</h3>
+          <p class="muted">{{.T.legal.dataRequestsBody}}</p>
+
+          <h3>{{.T.legal.sourceTitle}}</h3>
+          <p class="muted">{{.T.legal.sourceBody}} <a href="https://github.com/hblabs-co/falcon" target="_blank" rel="noopener">github.com/hblabs-co/falcon</a></p>
+
+          <h3>{{.T.legal.imprintTitle}}</h3>
+          <p class="muted">
+            HB Labs SAS<br />
+            Paris, France<br />
+            general@hblabs.co · <a href="https://hblabs.co">hblabs.co</a>
+          </p>
+        </section>
+      </div>
+    </div>
+
+    <div class="foot">© {{.Now}} HB Labs SAS · {{.T.foot}}</div>
+  </div>
+
+  <nav class="nav" role="tablist" aria-label="Sections">
+    <button data-target="about"   class="active">{{.T.nav.about}}</button>
+    <button data-target="screenshots">{{.T.nav.screenshots}}</button>
+    <button data-target="privacy">{{.T.nav.privacy}}</button>
+    <button data-target="terms">{{.T.nav.terms}}</button>
+    <button data-target="legal">{{.T.nav.legal}}</button>
+    <button data-target="contact">{{.T.nav.contact}}</button>
+  </nav>
+
+  <!-- Lightbox — a single shared viewer. Populated with the clicked
+       thumbnail's data-full URL; prev/next walk the gallery's image
+       list in order. Keyboard (←/→/Esc) and swipe gestures wired up
+       in the script below. -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+    <button class="lightbox-close" aria-label="Close" id="lightbox-close">✕</button>
+    <button class="lightbox-btn lightbox-prev" aria-label="Previous" id="lightbox-prev">‹</button>
+    <img id="lightbox-img" alt="" />
+    <button class="lightbox-btn lightbox-next" aria-label="Next" id="lightbox-next">›</button>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
+
+  <script>
+    // Section switcher — client-side only. Language switching is server-side
+    // (see the anchors in .lang-switch which hit /en/, /de/, /es/ and let
+    // the Go handler pick up the path + set the cookie).
+    (function () {
+      const buttons  = document.querySelectorAll('.nav button');
+      const sections = document.querySelectorAll('.section');
+      function activate(target) {
+        buttons.forEach(b => b.classList.toggle('active', b.dataset.target === target));
+        sections.forEach(s => s.classList.toggle('active', s.id === 'section-' + target));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const t = btn.dataset.target;
+          history.replaceState(null, '', location.pathname + '?tab=' + t);
+          activate(t);
+        });
+      });
+      const initial = new URLSearchParams(location.search).get('tab') || 'about';
+      if (document.getElementById('section-' + initial)) activate(initial);
+    })();
+
+    // Lightbox — open on thumbnail click, navigate with arrows/swipe/keys.
+    (function () {
+      const thumbs     = Array.from(document.querySelectorAll('.shots-grid img'));
+      if (thumbs.length === 0) return;
+      const fulls      = thumbs.map(t => t.dataset.full);
+      const box        = document.getElementById('lightbox');
+      const img        = document.getElementById('lightbox-img');
+      const counter    = document.getElementById('lightbox-counter');
+      const prevBtn    = document.getElementById('lightbox-prev');
+      const nextBtn    = document.getElementById('lightbox-next');
+      const closeBtn   = document.getElementById('lightbox-close');
+      let index = 0;
+
+      function show(i) {
+        if (fulls.length === 0) return;
+        index = ((i % fulls.length) + fulls.length) % fulls.length; // wrap
+        img.src = fulls[index];
+        counter.textContent = (index + 1) + ' / ' + fulls.length;
+      }
+      function open(i) { show(i); box.classList.add('open'); document.body.style.overflow = 'hidden'; }
+      function close()  { box.classList.remove('open'); document.body.style.overflow = ''; img.src = ''; }
+
+      thumbs.forEach((t, i) => t.addEventListener('click', () => open(i)));
+      prevBtn.addEventListener('click',  () => show(index - 1));
+      nextBtn.addEventListener('click',  () => show(index + 1));
+      closeBtn.addEventListener('click', close);
+      // Click on backdrop (not on image/buttons) closes too.
+      box.addEventListener('click', (e) => { if (e.target === box) close(); });
+
+      // Keyboard nav while open.
+      document.addEventListener('keydown', (e) => {
+        if (!box.classList.contains('open')) return;
+        if (e.key === 'Escape')      close();
+        if (e.key === 'ArrowLeft')   show(index - 1);
+        if (e.key === 'ArrowRight')  show(index + 1);
+      });
+
+      // Touch swipe — track horizontal delta, fire prev/next on release
+      // if the user moved more than 40px. Tiny threshold so it feels
+      // responsive but doesn't trigger on accidental taps.
+      let touchStartX = null;
+      box.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, {passive: true});
+      box.addEventListener('touchend',   (e) => {
+        if (touchStartX == null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 40) show(index + (dx < 0 ? 1 : -1));
+        touchStartX = null;
+      }, {passive: true});
+    })();
+  </script>
+</body>
+</html>

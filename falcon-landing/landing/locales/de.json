@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "titleSuffix": "Support",
+    "description": "Falcon — KI-gestützte Treffer zwischen Ihrem Lebenslauf und Freelance-Projekten.",
+    "tagline": "Projekt-Intelligenz · KI-gestützte Freelance-Treffer"
+  },
+  "nav": {
+    "about": "Über",
+    "screenshots": "Screens",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "legal": "Rechtliches",
+    "contact": "Kontakt"
+  },
+  "screenshots": {
+    "title": "Screenshots",
+    "subtitle": "Zum Vergrößern auf ein Bild tippen. Mit Pfeilen oder Wischen blättern."
+  },
+  "about": {
+    "title": "Über",
+    "intro": "Falcon überwacht Freelance-Projektbörsen, bewertet jedes neue Projekt anhand Ihres Lebenslaufs mit KI und sendet eine Push-Benachrichtigung, sobald etwas Relevantes erscheint. Kein Stöbern, kein Filtern — nur passende Projekte, die auftauchen.",
+    "howItWorksTitle": "Wie es funktioniert",
+    "howItWorksBody": "Lebenslauf-Embeddings werden lokal über Ollama (bge-m3) erzeugt. Das Matching erfolgt durch Mistral AI in Frankreich (EU). Keine Trainingsnutzung, keine Werbenetzwerke, keine Dritt-Analytics. Der Quellcode ist auf GitHub offen.",
+    "stackTitle": "Technologie",
+    "stackBody": "Go-Microservices · NATS JetStream · MongoDB · Qdrant · Traefik · Kubernetes. iOS-App in SwiftUI. Live Activities + Push-Benachrichtigungen via APNs. Alle Embedding-Prozesse laufen lokal für DSGVO-Konformität.",
+    "footer": "Mit ♥ in Hamburg entwickelt · Von Helmer Barcos · HB Labs SAS"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "creatorBio": "Full-Stack-Entwickler mit 10+ Jahren Erfahrung, spezialisiert auf skalierbare Echtzeit-Architekturen.",
+    "companyBio": "Ein erstklassiges Web-Design- und Entwicklungsteam, das Unternehmen dabei hilft, bedeutungsvolle und interaktive Produkterlebnisse zu gestalten.",
+    "supportTitle": "Support",
+    "supportBody": "Fehlerberichte, Feature-Ideen, Löschungsanfragen — schreiben Sie an general@hblabs.co, wir antworten innerhalb weniger Tage."
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "lastUpdated": "Stand · April 2025",
+    "sections": [
+      {"title": "1. Über uns", "body": "Falcon wird von HB Labs SAS entwickelt und betrieben, einem in Frankreich registrierten Unternehmen. Bei Fragen zu dieser Richtlinie kontaktieren Sie uns unter general@hblabs.co."},
+      {"title": "2. Erhobene Daten", "body": "Falcon erhebt nur die für den Betrieb notwendigen Mindestdaten:\n\n• Anonyme Benutzer-ID — eine zufällig generierte Kennung (nanoid), die lokal auf Ihrem Gerät gespeichert wird. Sie wird niemals mit Ihrem Namen, Ihrer E-Mail-Adresse oder einer persönlichen Identität verknüpft.\n• APNs-Geräte-Token — ein von Apple ausgestelltes Token, das ausschließlich zur Zustellung von Push-Benachrichtigungen an Ihr Gerät verwendet wird.\n• Sprachpräferenz für Benachrichtigungen — Ihre gewählte Sprache für Push-Benachrichtigungen, die auf unserem Server neben Ihrem Geräte-Token gespeichert wird.\n• Lebenslauftext — wenn Sie einen Lebenslauf hochladen, wird der extrahierte Klartext auf unserem Server gespeichert und lokal zur Generierung von Embeddings verarbeitet."},
+      {"title": "3. Verwendung Ihrer Daten", "body": "• Lebenslauf-Embeddings werden lokal mit Ollama (Modell bge-m3) generiert. Ihr Lebenslauftext verlässt unsere Server bei diesem Schritt nicht.\n• Die Projekt-Matching-Analyse wird von Mistral AI durchgeführt, einem Drittanbieter mit Sitz in Frankreich (EU). Ihr Lebenslauftext und Projektbeschreibungen werden an Mistral AI ausschließlich zur Berechnung eines Match-Scores und einer kurzen Zusammenfassung übermittelt. Die Daten werden nicht für das Training verwendet.\n• Push-Benachrichtigungen werden über die APNs-Infrastruktur von Apple mithilfe Ihres Geräte-Tokens zugestellt.\n\nWir verkaufen, teilen oder verwenden Ihre Daten nicht für Werbezwecke."},
+      {"title": "4. Drittanbieter", "body": "• Mistral AI (mistral.ai) — Paris, Frankreich. Wird für LLM-basiertes Projekt-Matching verwendet. Unterliegt der Datenschutzrichtlinie von Mistral AI (https://legal.mistral.ai/terms/privacy-policy).\n• Apple Inc. — Zustellung von APNs-Push-Benachrichtigungen.\n• Recruiter Rodeo (recruiter.rodeo) — In der App angezeigte Recruiter-Bewertungen stammen aus öffentlich verfügbaren Daten von https://recruiter.rodeo/recruiters. Es werden keine personenbezogenen Daten an diesen Dienst übermittelt.\n\nKeine weiteren Drittanbieter erhalten Ihre Daten."},
+      {"title": "5. Datenspeicherung", "body": "Geräte-Token und Sprachpräferenzen werden gespeichert, solange Sie die App nutzen. Lebenslaufdaten werden für laufendes Matching gespeichert. Sie können jederzeit die Löschung Ihrer Daten unter general@hblabs.co beantragen."},
+      {"title": "6. Ihre Rechte (DSGVO)", "body": "Wenn Sie sich im Europäischen Wirtschaftsraum befinden, haben Sie das Recht:\n\n• auf Auskunft über die bei uns gespeicherten personenbezogenen Daten.\n• auf Berichtigung oder Löschung Ihrer Daten.\n• auf Widerspruch oder Einschränkung der Verarbeitung.\n• eine Beschwerde bei Ihrer zuständigen Datenschutzbehörde einzureichen.\n\nZur Ausübung dieser Rechte wenden Sie sich an general@hblabs.co."},
+      {"title": "7. Datensicherheit", "body": "Daten werden auf privaten Servern gespeichert. Lebenslauf-Embeddings und Geräte-Token sind nicht öffentlich zugänglich. Wir treffen angemessene technische und organisatorische Maßnahmen zum Schutz Ihrer Daten."},
+      {"title": "8. Änderungen dieser Richtlinie", "body": "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Aktualisierungen werden in der App angezeigt. Die fortgesetzte Nutzung von Falcon nach Änderungen gilt als Zustimmung zur überarbeiteten Richtlinie."},
+      {"title": "9. Kontakt", "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"}
+    ]
+  },
+  "terms": {
+    "title": "Nutzungsbedingungen",
+    "lastUpdated": "Stand · April 2025",
+    "sections": [
+      {"title": "1. Zustimmung", "body": "Mit der Installation oder Nutzung von Falcon stimmen Sie diesen Nutzungsbedingungen zu. Wenn Sie nicht zustimmen, verwenden Sie die App bitte nicht."},
+      {"title": "2. Leistungsbeschreibung", "body": "Falcon überwacht Freelance-Projektbörsen, analysiert Projektangebote anhand Ihres Lebenslaufs mit KI-basiertem Matching und sendet Push-Benachrichtigungen bei relevanten Treffern. Der Dienst wird ohne Gewährleistung bereitgestellt und ist für die persönliche, nicht-kommerzielle Nutzung bestimmt."},
+      {"title": "3. Nutzungsvoraussetzungen", "body": "Sie müssen mindestens 16 Jahre alt sein, um Falcon nutzen zu können. Mit der Nutzung der App bestätigen Sie, dass Sie diese Voraussetzung erfüllen."},
+      {"title": "4. Ihre Lebenslaufdaten", "body": "Durch das Hochladen eines Lebenslaufs räumen Sie HB Labs SAS eine eingeschränkte Lizenz ein, diesen Inhalt ausschließlich zum Zweck der Erstellung von Projekt-Match-Ergebnissen für Sie zu verarbeiten. Sie behalten das vollständige Eigentum an Ihrem Lebenslauf. Wir geben Ihren Lebenslauf nicht an Arbeitgeber oder Dritte weiter, außer an Mistral AI für die Matching-Analyse (siehe Datenschutzerklärung)."},
+      {"title": "5. Keine Gewährleistung", "body": "Falcon wird ohne jegliche Gewährleistung bereitgestellt. Wir garantieren nicht:\n\n• die Genauigkeit oder Vollständigkeit der Match-Scores.\n• einen unterbrechungsfreien oder fehlerfreien Betrieb des Dienstes.\n• dass Projektangebote aktuell, korrekt oder verfügbar sind.\n\nMatch-Ergebnisse werden von einem KI-Modell generiert und sollten nicht als alleinige Grundlage für berufliche oder finanzielle Entscheidungen dienen."},
+      {"title": "6. Haftungsbeschränkung", "body": "Soweit gesetzlich zulässig haftet HB Labs SAS nicht für mittelbare oder Folgeschäden, die aus der Nutzung von Falcon entstehen, einschließlich Datenverlust, verpasster Projektgelegenheiten oder der Abhängigkeit von KI-generierten Match-Ergebnissen."},
+      {"title": "7. Zulässige Nutzung", "body": "Sie verpflichten sich, Folgendes zu unterlassen:\n\n• Reverse Engineering, Dekompilierung oder Manipulation der App oder ihrer Backend-Dienste.\n• Nutzung des Dienstes zum Scrapen, Harvesten oder Weiterverbreiten von Projektdaten.\n• Versuche, Rate-Limits oder Zugriffskontrollen zu umgehen.\n• Hochladen von Inhalten, die rechtswidrig, schädlich oder rechtsverletzend sind."},
+      {"title": "8. Geistiges Eigentum", "body": "Der Name Falcon, das Logo und das App-Design sind Eigentum von HB Labs SAS. Der Quellcode steht unter der jeweiligen Open-Source-Lizenz zur Verfügung. Diese Bedingungen gewähren Ihnen keine Rechte an Marken von HB Labs SAS."},
+      {"title": "9. Kündigung", "body": "Wir behalten uns das Recht vor, den Zugang zum Dienst jederzeit mit oder ohne Vorankündigung auszusetzen oder zu kündigen, wenn wir der Ansicht sind, dass gegen diese Bedingungen verstoßen wurde."},
+      {"title": "10. Anwendbares Recht", "body": "Diese Bedingungen unterliegen dem französischen Recht. Etwaige Streitigkeiten unterliegen der ausschließlichen Zuständigkeit der Gerichte in Paris, Frankreich."},
+      {"title": "11. Änderungen", "body": "Wir können diese Nutzungsbedingungen jederzeit aktualisieren. Die fortgesetzte Nutzung von Falcon nach Änderungen gilt als Zustimmung zu den aktualisierten Bedingungen."},
+      {"title": "12. Kontakt", "body": "HB Labs SAS\ngeneral@hblabs.co\nhblabs.co"}
+    ]
+  },
+  "legal": {
+    "title": "Rechtliches",
+    "gdprTitle": "DSGVO",
+    "gdprBody": "Lebenslauf-Embeddings werden lokal verarbeitet (Ollama — keine Daten verlassen unsere Server). Die Projekt-Matching-Analyse erfolgt durch Mistral AI, einen externen Dienst mit Sitz in Frankreich (EU). Mit der Nutzung von Falcon stimmen Sie der Verarbeitung Ihrer Lebenslaufdaten durch Mistral AI zu.",
+    "mistralLink": "🔒 Datenschutzerklärung von Mistral AI →",
+    "dataRequestsTitle": "Datenanfragen",
+    "dataRequestsBody": "Für Auskunft, Berichtigung oder Löschung Ihrer Daten schreiben Sie an general@hblabs.co. Wir antworten gemäß Art. 12 DSGVO innerhalb von 30 Tagen.",
+    "sourceTitle": "Quellcode",
+    "sourceBody": "Falcon ist Open-Source. Das komplette Backend + der iOS-Client sind verfügbar unter",
+    "imprintTitle": "Impressum"
+  },
+  "foot": "Falcon ist KI-gestützte Freelance-Projektsuche."
+}
