@@ -8,10 +8,15 @@ private let log = FalconLog.make(category: "companies-sync")
 /// lives in the container (manifest JSON + logo files) so cold launches
 /// always see the last good cache.
 ///
-/// Refresh cadence: 7 days. The cache is only a UX nicety (Live
-/// Activity logos); a stale cache still renders correct fallbacks, so
-/// the cost of being a week behind is "a user with a brand-new
-/// company sees initials for up to 7 days". Acceptable.
+/// Refresh cadence: 2 hours. Chosen over a longer window because
+/// iOS can't run background fetches via WebSocket — the only way a
+/// brand-new company's logo reaches a device without a silent push
+/// path is "on the next foreground resume after TTL expires". 2h
+/// keeps the "user sees initials for a new company" window tight
+/// without turning app launches into chatty sync bursts (most
+/// refreshes inside this window will be no-ops anyway — manifest
+/// unchanged, zero downloads). App version changes still bypass this
+/// and force a fresh pull.
 @MainActor
 final class CompaniesSync {
     static let shared = CompaniesSync()
@@ -19,7 +24,7 @@ final class CompaniesSync {
 
     /// How often to re-pull the manifest. Stored in UserDefaults so a
     /// relaunch within the window skips the network entirely.
-    private let refreshInterval: TimeInterval = 7 * 24 * 60 * 60
+    private let refreshInterval: TimeInterval = 2 * 60 * 60
     private let lastFetchKey   = "CompaniesSync.lastFetchAt"
     private let lastVersionKey = "CompaniesSync.lastFetchAppVersion"
 
