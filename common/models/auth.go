@@ -26,6 +26,13 @@ type Token struct {
 	Used      bool      `json:"used"       bson:"used"`
 	Revoked   bool      `json:"revoked"    bson:"revoked"`
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+	// Test is true for tokens created by falcon-authorizer — long-lived
+	// (30 days), multi-use magic links for App Store reviewers or QA.
+	// falcon-api's /auth/verify skips the "used" marker when this is
+	// set, so the same link survives a reinstall + relogin cycle.
+	// Purge all test tokens at once with DELETE /test-links on the
+	// authorizer.
+	Test bool `json:"test,omitempty" bson:"test,omitempty"`
 }
 
 // SupportedPlatforms lists the platforms that can request auth tokens.

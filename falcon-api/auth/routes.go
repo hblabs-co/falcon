@@ -128,7 +128,11 @@ func handleVerify(c *gin.Context) {
 		return
 	}
 
-	if magic.Used {
+	// Regular magic links are single-use to block replay. Test tokens
+	// issued by falcon-authorizer (`test: true`) stay multi-use for
+	// their full 30-day TTL so an App Store reviewer can uninstall /
+	// reinstall the app and log back in with the same link.
+	if magic.Used && !magic.Test {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "token already used"})
 		return
 	}
@@ -137,16 +141,19 @@ func handleVerify(c *gin.Context) {
 		return
 	}
 
-	// Mark used immediately to prevent replay.
-	if err := system.GetStorage().SetById(
-		ctx,
-		constants.MongoTokensCollection,
-		magic.ID,
-		bson.M{"used": true, "updated_at": time.Now()},
-	); err != nil {
-		logrus.Errorf("mark magic token used: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
-		return
+	// Mark used immediately to prevent replay — skipped for test tokens
+	// (handled above).
+	if !magic.Test {
+		if err := system.GetStorage().SetById(
+			ctx,
+			constants.MongoTokensCollection,
+			magic.ID,
+			bson.M{"used": true, "updated_at": time.Now()},
+		); err != nil {
+			logrus.Errorf("mark magic token used: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+			return
+		}
 	}
 
 	userID, err := findOrCreateUser(ctx, magic.Email)

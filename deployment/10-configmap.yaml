@@ -1,0 +1,55 @@
+## kubectl apply -f deployment/10-configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falcon-config
+  namespace: falcon
+data:
+  # ── Infra endpoints ────────────────────────────────────────────────
+  # In-cluster services. Override via overlay for staging / prod.
+  NATS_URL:          "nats://nats.falcon.svc.cluster.local:4222"
+  MONGODB_URI:       "mongodb://mongo.falcon.svc.cluster.local:27017"
+  MONGODB_DATABASE:  "falcon"
+  QDRANT_HOST:       "qdrant.falcon.svc.cluster.local"
+  QDRANT_PORT:       "6334"
+  MINIO_ENDPOINT:    "minio.falcon.svc.cluster.local:9000"
+  MINIO_SECURE:      "false"
+
+  # ── App config ─────────────────────────────────────────────────────
+  LOG_LEVEL:         "info"
+  NATS_DELIVER_POLICY: "new"
+
+  # Realtime server (WS).
+  REALTIME_PORT:     "8090"
+  REALTIME_ALLOWED_ORIGINS: "https://app.falcon.hblabs.co"
+
+  # Alert throttling in signal.
+  ADMIN_ALERT_WINDOW: "10s"
+
+  # scout
+
+  BATCH_SIZE: "10"
+  BATCH_ITEM_DELAY: "2s"
+  BATCH_BATCH_DELAY: "5s"
+  # POLL_INTERVAL=30s
+  POLL_INTERVAL: "5m"
+
+  MAX_RETRY_ATTEMPTS: "50"
+  RETRY_SERVER_INTERVAL: "30m"
+  RETRY_INSPECT_INTERVAL: "5m"
+  # TEST_RETRY=true
+  # MAX_RETRY_ATTEMPTS=2
+  # RETRY_SERVER_INTERVAL=1m
+  # RETRY_INSPECT_INTERVAL=30m
+
+  # PLATFORMS=freelance.de
+  # PLATFORMS=freelance.de, joyit.de ,waynice.de
+  PLATFORMS: "redglobal.de,contractor.de,solcom.de,computerfutures.com,somi.de,constaff.com"
+
+  # URL externa que verán los clientes (iOS / web) cuando descarguen
+  # archivos vía presigned URL. Debe coincidir con:
+  #   - MINIO_SERVER_URL          (53-minio.yaml)
+  #   - host "minio.falcon..."    (40-ingress.yaml)
+  # Si cambias uno, cambia los tres.
+  MINIO_PUBLIC_URL: "https://minio.falcon.hblabs.co"
