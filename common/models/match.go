@@ -49,6 +49,12 @@ type MatchResultEvent struct {
 	// CompanyName is the authoritative company name from the companies collection
 	// (looked up by company_id+platform), not the LLM extraction. Empty if unknown.
 	CompanyName string `json:"company_name" bson:"company_name"`
+	// CompanyLogoURL is the public MinIO URL for the company's logo,
+	// mirrored from companies.logo_minio_url at match creation time so
+	// iOS surfaces (match cards + Live Activity) can render it without
+	// an extra lookup. Empty when the company has no logo — callers
+	// fall back to initials.
+	CompanyLogoURL string `json:"company_logo_url" bson:"company_logo_url"`
 
 	// Overall score 0–10, average of the six dimension scores.
 	Score  float32     `json:"score"  bson:"score"`

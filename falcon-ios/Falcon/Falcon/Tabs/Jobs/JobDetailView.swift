@@ -11,9 +11,13 @@ struct ProjectDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Fixed zone: header + contact CTAs (call/email)
+            // Fixed zone: header + recruiter stats + contact CTAs (call/email)
             VStack(alignment: .leading, spacing: 16) {
                 header
+                if let stats = project.recruiterRodeoStats {
+                    recruiterStatsRow(stats)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
                 contactCTAs
             }
             .padding(.horizontal, 20)
@@ -144,6 +148,11 @@ struct ProjectDetailView: View {
                     .frame(width: 60, height: 60)
             }
 
+            // Right column (3 sub-rows): title, company, and a bottom
+            // "grid" row splitting location (left) and relative date
+            // (right-edge). `maxWidth: .infinity` makes the VStack fill
+            // the remaining horizontal space so the inner Spacer can
+            // push the date to the far right of the card.
             VStack(alignment: .leading, spacing: 5) {
                 Text(project.displayTitle)
                     .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -151,16 +160,24 @@ struct ProjectDetailView: View {
                 Label(project.displayCompany, systemImage: "building.2")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.secondary)
-                if let loc = project.displayLocation {
-                    Label(loc, systemImage: "mappin.and.ellipse")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                }
-                if let stats = project.recruiterRodeoStats {
-                    recruiterStatsRow(stats)
+                HStack(spacing: 10) {
+                    if let loc = project.displayLocation {
+                        Label(loc, systemImage: "mappin.and.ellipse")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 8)
+                    if let date = project.relativeDate(for: lm.appLanguage) {
+                        Label(date, systemImage: "clock")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.tertiary)
+                            .labelStyle(.titleAndIcon)
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
                 }
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

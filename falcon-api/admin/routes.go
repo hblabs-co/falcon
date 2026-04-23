@@ -18,9 +18,21 @@ type Routes struct{}
 
 func (Routes) Mount(r *gin.Engine) {
 	g := r.Group("/admin")
+
+	// /scout/scan-today stays POST because it's only hit by ops
+	// automation (cron, CI), never by a human pasting the URL.
 	g.POST("/scout/scan-today", handleScanToday)
-	g.POST("/signal/test-alert", handleTestAlert)
-	g.POST("/signal/test-last-match", handleTestLastMatch)
+
+	// GET on the two /signal/test-* endpoints is an intentional REST
+	// bend: Apple's App Review team pastes the URL into Safari on the
+	// test iPhone to trigger a push that exercises the notification
+	// path (otherwise the reviewer sees an empty app with no way to
+	// produce a match in real time). Side effects are contained: each
+	// call inserts one clearly-tagged warning row / fires one push,
+	// both easy to clean up later. Kept as GET-only (no POST mirror)
+	// so the route surface stays minimal.
+	g.GET("/signal/test-alert",      handleTestAlert)
+	g.GET("/signal/test-last-match", handleTestLastMatch)
 }
 
 // handleScanToday publishes a scrape.scan_today event to NATS.

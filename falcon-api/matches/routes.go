@@ -71,6 +71,12 @@ func handleListMatches(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch matches"})
 		return
 	}
+	// Empty result must serialise as `[]`, not `null` — the iOS decoder
+	// treats a null `data` field as "missing" and renders a full-screen
+	// error instead of the empty-state list with filters intact.
+	if docs == nil {
+		docs = []models.MatchResultEvent{}
+	}
 
 	// Count unviewed matches for this user across ALL pages — drives the
 	// tab-icon badge. Missing `viewed` field counts as unread (pre-

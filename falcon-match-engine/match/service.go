@@ -144,8 +144,11 @@ func (s *Service) handleMatchPending(data []byte) error {
 		return nil
 	}
 
-	// Authoritative company name from companies collection (LLM unreliable here).
-	companyName := resolveCompanyName(ctx, &project)
+	// Authoritative company fields from the companies collection (LLM
+	// name extraction is unreliable; logo only exists in Mongo). Goes
+	// through the process-wide cache so a burst of match.pending for
+	// the same company only hits Mongo once per TTL.
+	company, _ := system.GetCachedCompany(ctx, &project)
 
 	result.CVID = event.CVID
 	result.UserID = event.UserID
@@ -163,7 +166,8 @@ func (s *Service) handleMatchPending(data []byte) error {
 		result.ProjectTitle = displayTitle
 	}
 	result.Platform = event.Platform
-	result.CompanyName = companyName
+	result.CompanyName = company.CompanyName
+	result.CompanyLogoURL = company.LogoMinioURL
 	result.PassedThreshold = result.Score >= s.threshold
 	result.ScoredAt = time.Now()
 	// The normalizer can still be working when match-engine already has
@@ -230,19 +234,6 @@ func cleanProjectTitle(ctx context.Context, projectID, rawTitle string) string {
 	return rawTitle
 }
 
-func resolveCompanyName(ctx context.Context, project *models.PersistedProject) string {
-	if project.CompanyID == "" {
-		return ""
-	}
-	var company models.Company
-	err := system.GetStorage().Get(ctx, constants.MongoCompaniesCollection,
-		bson.M{"company_id": project.CompanyID, "source": project.Platform},
-		&company)
-	if err != nil {
-		return ""
-	}
-	return company.CompanyName
-}
 
 func recordScoreError(ctx context.Context, event models.MatchPendingEvent, err error, rawContent string) {
 	system.RecordError(ctx, models.ServiceError{

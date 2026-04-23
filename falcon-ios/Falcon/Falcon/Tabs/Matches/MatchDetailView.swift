@@ -105,7 +105,11 @@ struct MatchDetailView: View {
                 // Activity Lock Screen + minimal card treatment so the
                 // surfaces feel consistent.
                 HStack(spacing: 6) {
-                    companyInitialsAvatar(name: match.companyName.nilIfEmpty ?? match.platform, size: 18)
+                    CompanyChip(
+                        name: match.companyName.nilIfEmpty ?? match.platform,
+                        logoURL: match.resolvedLogoURL,
+                        size: 18
+                    )
                     Text(match.companyName.nilIfEmpty ?? match.platform)
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
@@ -203,20 +207,6 @@ struct MatchDetailView: View {
         }
     }
 
-    /// Same initials-in-a-circle avatar the Live Activity and the
-    /// minimal match card use — copy kept local to this view so the
-    /// file stays drop-in without new shared-folder additions.
-    private func companyInitialsAvatar(name: String, size: CGFloat) -> some View {
-        let words = name.split(separator: " ").prefix(2)
-        let initials = words.compactMap { $0.first }.map(String.init).joined().uppercased()
-        return ZStack {
-            Circle().fill(Color.accentColor.opacity(0.18))
-            Text(initials)
-                .font(.system(size: size * 0.48, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.accentColor)
-        }
-        .frame(width: size, height: size)
-    }
 
     // MARK: - Summary card
 

@@ -479,7 +479,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             label: "top_candidate",
             lang: LanguageManager.shared.appLanguage.rawValue,
             projectTitle: "Senior React Dev Kotlin, Kubernetes, React, Java, Golang, C++ MongoDB — Frankfurt",
-            companyName: "ACME GmbH",
+            companyName: "RED Global",
+            companyLogoUrl: "https://minio.falcon.hblabs.co/company-logos/freelance.de/6070.jpg",
             totalMatches: 12,
             summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS und Docker.",
             projectID: "debug-project-id",
@@ -529,6 +530,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         let projectID = (info["project_id"] as? String) ?? ""
         let cvID = (info["cv_id"] as? String) ?? ""
         let companyName = (info["company_name"] as? String) ?? ""
+        let companyLogoUrl = (info["company_logo_url"] as? String) ?? ""
         let totalMatches = (info["total_matches"] as? NSNumber)?.intValue ?? 0
         let projectTitle = content.title
         let summary = content.body
@@ -540,15 +542,16 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         log.info("starting/updating with score=\(score, privacy: .public) label=\(label, privacy: .public) title=\(projectTitle, privacy: .public)")
 
         let state = FalconMatchAttributes.ContentState(
-            score:        score,
-            label:        label,
-            lang:         LanguageManager.shared.appLanguage.rawValue,
-            projectTitle: projectTitle,
-            companyName:  companyName,
-            totalMatches: totalMatches,
-            summary:      summary,
-            projectID:    projectID,
-            cvID:         cvID,
+            score:          score,
+            label:          label,
+            lang:           LanguageManager.shared.appLanguage.rawValue,
+            projectTitle:   projectTitle,
+            companyName:    companyName,
+            companyLogoUrl: companyLogoUrl,
+            totalMatches:   totalMatches,
+            summary:        summary,
+            projectID:      projectID,
+            cvID:           cvID,
             skillsMatch:          s("skills_match"),
             seniorityFit:         s("seniority_fit"),
             domainExperience:     s("domain_experience"),

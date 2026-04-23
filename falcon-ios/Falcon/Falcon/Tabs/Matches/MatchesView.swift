@@ -248,8 +248,16 @@ struct MatchesView: View {
     //   1. No CV             → upload first (hard blocker)
     //   2. CV failed         → retry (hard blocker)
     //   3. Empty + notifs off → full-screen CTA to enable notifications
-    //   4. Empty             → empty state
-    //   5. Has items / loading / error → list or status with a compact
+    //   4. Empty + (unread filter on OR we've fetched at least once) →
+    //      stay in matchListBody so the filter pills, view-toggle, and
+    //      hero context remain stable. Covers two cases: the unread
+    //      filter returning 0, and the transient gap while switching
+    //      filters (matches briefly = [] before the new fetch lands).
+    //      `currentPage > 0` is the "have we ever successfully loaded"
+    //      signal — without this gate the UI flashes to emptyView for
+    //      ~200ms on every filter toggle.
+    //   5. Empty             → first-time empty state (no matches ever)
+    //   6. Has items / loading / error → list or status with a compact
     //      "notifs off" banner on top when applicable
     @ViewBuilder
     private var contentBody: some View {
@@ -260,6 +268,8 @@ struct MatchesView: View {
         } else if vm.matches.isEmpty, !vm.isLoading, vm.error == nil {
             if nm.authStatus != .authorized {
                 notificationsDisabledView
+            } else if vm.showOnlyUnread || vm.currentPage > 0 {
+                matchListBody(vm)
             } else {
                 emptyView
             }
@@ -328,11 +338,15 @@ struct MatchesView: View {
             infoBadge
             controlRow
             if vm.showOnlyUnread && vm.matches.isEmpty && !vm.isLoading {
-                Text(lm.t(.matchesFilterEmptyUnread))
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 40)
+                // "All caught up" state — rendered inline so the filter
+                // pills and view-toggle above stay visible. A full-screen
+                // ContentUnavailableView would remove that context.
+                ContentUnavailableView(
+                    lm.t(.matchesFilterEmptyUnread),
+                    systemImage: "checkmark.circle.fill",
+                    description: Text(lm.t(.matchesFilterEmptyUnreadBody))
+                )
+                .padding(.vertical, 24)
             }
             if vm.cardMode == .minimal {
                 minimalGrid(vm)
@@ -428,11 +442,21 @@ struct MatchesView: View {
 
     @ViewBuilder
     private func cardForMode(_ match: MatchResult) -> some View {
-        switch vm.cardMode {
-        case .full:    matchCard(match)
-        case .compact: compactCard(match)
-        case .minimal: minimalCard(match)
+        // Each card mode resolves to a *different* concrete View type,
+        // so SwiftUI can't diff between them — switching modes is a
+        // remove+insert. Giving the group a mode-specific id and an
+        // explicit transition turns that remove+insert into a visible
+        // crossfade instead of a 1-frame flash. The outer animation
+        // driving the mode change lives in modeButton's withAnimation.
+        Group {
+            switch vm.cardMode {
+            case .full:    matchCard(match)
+            case .compact: compactCard(match)
+            case .minimal: minimalCard(match)
+            }
         }
+        .id("\(match.id)-\(vm.cardMode.rawValue)")
+        .transition(.opacity.combined(with: .scale(scale: 0.97)))
     }
 
     @ViewBuilder
@@ -606,7 +630,11 @@ struct MatchesView: View {
             // visually of-a-kind.
             if !match.companyName.isEmpty {
                 HStack(spacing: 5) {
-                    companyInitialsAvatar(name: match.companyName, size: 16)
+                    CompanyChip(
+                        name: match.companyName.nilIfEmpty ?? match.platform,
+                        logoURL: match.resolvedLogoURL,
+                        size: 16
+                    )
                     Text(match.companyName)
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(.tertiary)
@@ -626,21 +654,6 @@ struct MatchesView: View {
         .onTapGesture { openedMatch = match }
     }
 
-    /// Circular avatar with the company's two first-letter initials.
-    /// Matches the `CompanyInitialsIcon` used in the Live Activity widget
-    /// so a user who sees "AC" (ACME Corp) on the Lock Screen sees the
-    /// same chip in the minimal match card.
-    private func companyInitialsAvatar(name: String, size: CGFloat) -> some View {
-        let words = name.split(separator: " ").prefix(2)
-        let initials = words.compactMap { $0.first }.map(String.init).joined().uppercased()
-        return ZStack {
-            Circle().fill(Color.accentColor.opacity(0.18))
-            Text(initials)
-                .font(.system(size: size * 0.48, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.accentColor)
-        }
-        .frame(width: size, height: size)
-    }
 
     /// Two-column header:
     ///  - Left  : score badge
@@ -688,7 +701,11 @@ struct MatchesView: View {
                 // same company reads as the same "chip" wherever it
                 // appears in the app.
                 HStack(spacing: 6) {
-                    companyInitialsAvatar(name: match.companyName.nilIfEmpty ?? match.platform, size: 18)
+                    CompanyChip(
+                        name: match.companyName.nilIfEmpty ?? match.platform,
+                        logoURL: match.resolvedLogoURL,
+                        size: 18
+                    )
                     Text(match.companyName.nilIfEmpty ?? match.platform)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)

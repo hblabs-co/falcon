@@ -20,6 +20,9 @@ struct FalconMatchAttributes: ActivityAttributes {
         var projectTitle: String
         /// Authoritative company name (from companies collection). Empty if unknown.
         var companyName: String
+        /// Public MinIO URL for the company logo. Empty when the company
+        /// has no logo — widget falls back to a circular initials chip.
+        var companyLogoUrl: String
         /// Total number of matches the user has right now. Shown in the
         /// activity header so the user sees progress at a glance.
         var totalMatches: Int

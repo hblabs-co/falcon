@@ -146,6 +146,37 @@ private struct CompanyInitialsIcon: View {
     }
 }
 
+// MARK: - Company chip: logo if available, initials otherwise.
+//
+// Uses AsyncImage so the logo downloads inside the widget extension
+// sandbox (Live Activities and Dynamic Island run in the widget process,
+// not the main app). `.empty` renders the fallback instead of a blank
+// placeholder while the request is in flight — on Lock Screen the icon
+// is too small for a spinner to read anyway. `.failure` maps to the
+// same fallback so unreachable logos degrade gracefully.
+private struct CompanyLogoOrInitials: View {
+    var name: String
+    var logoUrl: String
+    var size: CGFloat
+
+    var body: some View {
+        if let url = URL(string: logoUrl), !logoUrl.isEmpty {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let img):
+                    img.resizable().scaledToFill()
+                default:
+                    CompanyInitialsIcon(name: name, size: size)
+                }
+            }
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+        } else {
+            CompanyInitialsIcon(name: name, size: size)
+        }
+    }
+}
+
 // MARK: - Score badge — compact circular indicator
 
 /// Score "gauge" shared by every surface: Lock Screen, Dynamic Island
@@ -244,7 +275,11 @@ struct FalconWidgetLiveActivity: Widget {
                                 HStack(spacing: 6) {
                                     if !context.state.companyName.isEmpty {
                                         HStack(spacing: 5) {
-                                            CompanyInitialsIcon(name: context.state.companyName, size: 14)
+                                            CompanyLogoOrInitials(
+                                                name: context.state.companyName,
+                                                logoUrl: context.state.companyLogoUrl,
+                                                size: 14
+                                            )
                                             Text(context.state.companyName)
                                                 .font(.system(size: 11, weight: .medium))
                                                 .foregroundStyle(.white.opacity(0.7))
@@ -331,7 +366,11 @@ struct FalconWidgetLiveActivity: Widget {
                             .background(Capsule().fill(scoreColor(state.score).opacity(0.15)))
                         if !state.companyName.isEmpty {
                             HStack(spacing: 4) {
-                                CompanyInitialsIcon(name: state.companyName, size: 16)
+                                CompanyLogoOrInitials(
+                                    name: state.companyName,
+                                    logoUrl: state.companyLogoUrl,
+                                    size: 16
+                                )
                                 Text(state.companyName)
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(.secondary)
@@ -461,18 +500,18 @@ struct FalconWidgetLiveActivity: Widget {
 #Preview("Compact", as: .dynamicIsland(.compact), using: FalconMatchAttributes()) {
     FalconWidgetLiveActivity()
 } contentStates: {
-    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "Senior React Dev Kotlin, Kubernetes, React, Java, Golang, C++ MongoDB", companyName: "ACME GmbH", totalMatches: 12, summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS.", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
-    FalconMatchAttributes.ContentState(score: 9.1, label: "apply_immediately", lang: "de", projectTitle: "Cloud Architect AWS", companyName: "Bosch", totalMatches: 23, summary: "Score 9.1 · perfekt passend.", projectID: "p2", cvID: "c1", skillsMatch: 9.5, seniorityFit: 9.0, domainExperience: 8.8, communicationClarity: 9.2, projectRelevance: 9.0, techStackOverlap: 9.5)
+    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "Senior React Dev Kotlin, Kubernetes, React, Java, Golang, C++ MongoDB", companyName: "RED Global", companyLogoUrl: "https://minio.falcon.hblabs.co/company-logos/freelance.de/6070.jpg", totalMatches: 12, summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS.", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
+    FalconMatchAttributes.ContentState(score: 9.1, label: "apply_immediately", lang: "de", projectTitle: "Cloud Architect AWS", companyName: "Bosch", companyLogoUrl: "", totalMatches: 23, summary: "Score 9.1 · perfekt passend.", projectID: "p2", cvID: "c1", skillsMatch: 9.5, seniorityFit: 9.0, domainExperience: 8.8, communicationClarity: 9.2, projectRelevance: 9.0, techStackOverlap: 9.5)
 }
 
 #Preview("Minimal", as: .dynamicIsland(.minimal), using: FalconMatchAttributes()) {
     FalconWidgetLiveActivity()
 } contentStates: {
-    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "", companyName: "", totalMatches: 5, summary: "", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
+    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "", companyName: "", companyLogoUrl: "", totalMatches: 5, summary: "", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
 }
 
 #Preview("Expanded", as: .dynamicIsland(.expanded), using: FalconMatchAttributes()) {
     FalconWidgetLiveActivity()
 } contentStates: {
-    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "Fullstack Java/Kotlin — Frankfurt", companyName: "ACME GmbH", totalMatches: 12, summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS und Docker.", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
+    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "Fullstack Java/Kotlin — Frankfurt", companyName: "RED Global", companyLogoUrl: "https://minio.falcon.hblabs.co/company-logos/freelance.de/6070.jpg", totalMatches: 12, summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS und Docker.", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
 }

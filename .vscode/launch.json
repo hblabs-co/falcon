@@ -8,6 +8,8 @@
       "name": "🚀 Falcon — All Services",
       "configurations": [
         "Debug API",
+        "Debug Landing",
+        "Debug Authorizer",
         "Debug Signal",
         "Debug Scout",
         "Debug Dispatch",

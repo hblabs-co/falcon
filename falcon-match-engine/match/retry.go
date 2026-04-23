@@ -134,7 +134,9 @@ func (s *Service) retryOne(ctx context.Context, svcErr models.ServiceError) {
 		result.ProjectTitle = displayTitle
 	}
 	result.Platform = svcErr.Platform
-	result.CompanyName = resolveCompanyName(ctx, &project)
+	company, _ := system.GetCachedCompany(ctx, &project)
+	result.CompanyName = company.CompanyName
+	result.CompanyLogoURL = company.LogoMinioURL
 	result.PassedThreshold = result.Score >= s.threshold
 	result.Normalized = isProjectNormalized(ctx, svcErr.ProjectID)
 	result.ScoredAt = time.Now()

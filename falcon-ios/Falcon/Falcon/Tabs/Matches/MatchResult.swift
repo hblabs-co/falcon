@@ -18,9 +18,12 @@ struct MatchesResponse: Decodable {
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        data        = try c.decode([MatchResult].self,     forKey: .data)
+        // `data: null` and missing key both map to an empty list —
+        // matches the semantic (no results) without surfacing a
+        // "data could not be read" error on the empty-filter path.
+        data        = (try? c.decodeIfPresent([MatchResult].self, forKey: .data)) ?? []
         pagination  = try c.decode(MatchesPagination.self, forKey: .pagination)
-        unreadCount = (try? c.decodeIfPresent(Int.self,    forKey: .unreadCount)) ?? 0
+        unreadCount = (try? c.decodeIfPresent(Int.self, forKey: .unreadCount)) ?? 0
     }
 }
 
@@ -47,6 +50,10 @@ struct MatchResult: Decodable, Identifiable {
     let projectTitle:     String
     let platform:         String
     let companyName:      String
+    /// Public MinIO URL for the company's logo. Empty when the company
+    /// has no logo — `resolvedLogoURL` returns nil and the UI falls back
+    /// to the initials avatar.
+    let companyLogoUrl:   String
     let score:            Double
     let label:            String
     let scores:           MatchScores
@@ -81,6 +88,7 @@ struct MatchResult: Decodable, Identifiable {
         case projectTitle     = "project_title"
         case platform
         case companyName      = "company_name"
+        case companyLogoUrl   = "company_logo_url"
         case score
         case label
         case scores
@@ -104,6 +112,7 @@ struct MatchResult: Decodable, Identifiable {
         projectTitle       = (try? c.decodeIfPresent(String.self,              forKey: .projectTitle))       ?? ""
         platform           = (try? c.decodeIfPresent(String.self,              forKey: .platform))           ?? ""
         companyName        = (try? c.decodeIfPresent(String.self,              forKey: .companyName))        ?? ""
+        companyLogoUrl     = (try? c.decodeIfPresent(String.self,              forKey: .companyLogoUrl))     ?? ""
         score              = (try? c.decodeIfPresent(Double.self,              forKey: .score))              ?? 0
         label              = (try? c.decodeIfPresent(String.self,              forKey: .label))              ?? ""
         scores             = (try? c.decodeIfPresent(MatchScores.self,         forKey: .scores))             ?? MatchScores.empty
@@ -152,6 +161,21 @@ struct MatchResult: Decodable, Identifiable {
         case "not_suitable":      return lm.t(.matchLabelNotSuitable)
         default:                  return "—"
         }
+    }
+
+    /// In DEBUG builds rewrites the logo URL host to `Config.imageHost`
+    /// so the simulator / device can reach MinIO on the local network.
+    /// In production the URL is used as-is. Mirrors `ProjectItem.resolvedLogoURL`.
+    var resolvedLogoURL: URL? {
+        guard !companyLogoUrl.isEmpty, var components = URLComponents(string: companyLogoUrl) else { return nil }
+#if DEBUG
+        if let base = URLComponents(string: Config.imageHost) {
+            components.scheme = base.scheme
+            components.host   = base.host
+            components.port   = base.port
+        }
+#endif
+        return components.url
     }
 
     func relativeDate(for language: AppLanguage) -> String? {

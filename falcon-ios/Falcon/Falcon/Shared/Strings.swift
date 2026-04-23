@@ -30,7 +30,7 @@ enum StringKey {
     // Alerts view
     case matchesEmpty, matchesEmptyDescription, matchesBannerTagline, matchesBannerTotal
     case matchesInfoBadge, matchesInfoBadgeTitle, matchesNewBadge
-    case matchesFilterAll, matchesFilterUnread, matchesFilterEmptyUnread
+    case matchesFilterAll, matchesFilterUnread, matchesFilterEmptyUnread, matchesFilterEmptyUnreadBody
     case liveNewProjectsSingular, liveNewProjectsPlural
     case liveNewMatchesSingular,  liveNewMatchesPlural
     case liveTapToRefresh
@@ -160,7 +160,8 @@ enum Strings {
             .matchesNewBadge: "NEW",
             .matchesFilterAll:          "All",
             .matchesFilterUnread:       "Unread",
-            .matchesFilterEmptyUnread:  "No unread matches",
+            .matchesFilterEmptyUnread:      "All caught up",
+            .matchesFilterEmptyUnreadBody:  "You've read every match. New ones will land here as they arrive.",
             .serverOfflineTitle:        "Houston, we have a problem",
             .serverOfflineBody:         "Live updates won't be available",
             .serverReconnectedTitle:    "Back online",
@@ -358,7 +359,8 @@ enum Strings {
             .matchesNewBadge: "NEU",
             .matchesFilterAll:          "Alle",
             .matchesFilterUnread:       "Ungelesen",
-            .matchesFilterEmptyUnread:  "Keine ungelesenen Treffer",
+            .matchesFilterEmptyUnread:      "Alles gelesen",
+            .matchesFilterEmptyUnreadBody:  "Du hast jeden Treffer gelesen. Neue erscheinen hier, sobald sie eintreffen.",
             .serverOfflineTitle:        "Hamburg, wir haben ein Problem",
             .serverOfflineBody:         "Echtzeit-Updates nicht möglich",
             .serverReconnectedTitle:    "Wieder online",
@@ -393,7 +395,7 @@ enum Strings {
             .aboutCreatedBy: "Erstellt von",
             .aboutVersion: "Version",
             .aboutBuild: "Build-Version",
-            .aboutGdprNote: "Embedding und Match-Scoring erfolgen beide bei Mistral AI, einem EU-Anbieter mit Hauptsitz in Frankreich, der unter der DSGVO agiert. Mit der Nutzung von Falcon stimmen Sie der Verarbeitung Ihrer Lebenslaufdaten durch Mistral AI zu diesen Zwecken zu. Die Pipeline unterstützt zudem lokale Inferenz über Ollama für vollständig selbst gehostete Deployments.",
+            .aboutGdprNote: "Embedding und Match-Scoring erfolgen beide bei Mistral AI, einem EU-Anbieter mit Hauptsitz in Frankreich, der unter der DSGVO agiert. Mit der Nutzung von Falcon stimmst du der Verarbeitung deiner Lebenslaufdaten durch Mistral AI zu diesen Zwecken zu. Die Pipeline unterstützt zudem lokale Inferenz über Ollama für vollständig selbst gehostete Deployments.",
             .aboutMistralPrivacy: "Datenschutzerklärung von Mistral AI",
             .aboutCreator: "Entwickler",
             .aboutCreatorBio: "Full-Stack-Entwickler mit %d+ Jahren Erfahrung, spezialisiert auf skalierbare Architekturen für Echtzeitsysteme.",
@@ -556,7 +558,8 @@ enum Strings {
             .matchesNewBadge: "NUEVO",
             .matchesFilterAll:          "Todos",
             .matchesFilterUnread:       "No leídos",
-            .matchesFilterEmptyUnread:  "No hay coincidencias sin leer",
+            .matchesFilterEmptyUnread:      "Todo al día",
+            .matchesFilterEmptyUnreadBody:  "Has leído todas las coincidencias. Las nuevas aparecerán aquí en cuanto lleguen.",
             .serverOfflineTitle:        "Houston, tenemos un problema",
             .serverOfflineBody:         "Actualizaciones en tiempo real no disponibles",
             .serverReconnectedTitle:    "De vuelta en línea",

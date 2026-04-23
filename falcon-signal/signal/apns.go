@@ -72,6 +72,7 @@ func (a *apnsClient) Send(ctx context.Context, deviceToken string, result *model
 		Custom("label", string(result.Label)).
 		Custom("summary", summary).
 		Custom("company_name", result.CompanyName).
+		Custom("company_logo_url", result.CompanyLogoURL).
 		Custom("total_matches", totalMatches).
 		Custom("matched_skills", result.MatchedSkills).
 		Custom("missing_skills", result.MissingSkills).
@@ -134,6 +135,7 @@ func (a *apnsClient) SendMatchLiveActivityStart(ctx context.Context, liveActivit
 				"lang":                 lang,
 				"projectTitle":         result.ProjectTitle,
 				"companyName":          result.CompanyName,
+				"companyLogoUrl":       result.CompanyLogoURL,
 				"totalMatches":         totalMatches,
 				"summary":              summary,
 				"projectID":            result.ProjectID,
@@ -205,6 +207,7 @@ func (a *apnsClient) SendMatchLiveActivityUpdate(ctx context.Context, updateToke
 				"lang":                 lang,
 				"projectTitle":         result.ProjectTitle,
 				"companyName":          result.CompanyName,
+				"companyLogoUrl":       result.CompanyLogoURL,
 				"totalMatches":         totalMatches,
 				"summary":              summary,
 				"projectID":            result.ProjectID,

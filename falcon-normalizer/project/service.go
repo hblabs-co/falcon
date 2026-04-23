@@ -307,18 +307,13 @@ func (s *Service) releaseClaim(ctx context.Context, projectID string) {
 	}
 }
 
-// resolveCompanyName returns the authoritative company name: the one stored in
-// the companies collection (matched by platform + company_id), or the platform
-// name as fallback when the company is unknown.
+// resolveCompanyName returns the authoritative company name: the one
+// stored in the companies collection (matched by platform + company_id
+// via the process-wide cache in common/system), or the platform name
+// as fallback when the company is unknown or has no name.
 func resolveCompanyName(ctx context.Context, project *models.PersistedProject) string {
-	if project.CompanyID != "" {
-		var company models.Company
-		err := system.GetStorage().Get(ctx, constants.MongoCompaniesCollection,
-			bson.M{"company_id": project.CompanyID, "source": project.Platform},
-			&company)
-		if err == nil && company.CompanyName != "" {
-			return company.CompanyName
-		}
+	if company, ok := system.GetCachedCompany(ctx, project); ok && company.CompanyName != "" {
+		return company.CompanyName
 	}
 	return project.Platform
 }
