@@ -4,6 +4,10 @@
     "description": "Falcon — KI-gestützte Treffer zwischen Ihrem Lebenslauf und Freelance-Projekten.",
     "tagline": "Projekt-Intelligenz · KI-gestützte Freelance-Treffer"
   },
+  "appStore": {
+    "url": "/ios",
+    "alt": "Laden im App Store"
+  },
   "nav": {
     "about": "Über",
     "screenshots": "Screens",
@@ -20,9 +24,9 @@
     "title": "Über",
     "intro": "Falcon überwacht Freelance-Projektbörsen, bewertet jedes neue Projekt anhand Ihres Lebenslaufs mit KI und sendet eine Push-Benachrichtigung, sobald etwas Relevantes erscheint. Kein Stöbern, kein Filtern — nur passende Projekte, die auftauchen.",
     "howItWorksTitle": "Wie es funktioniert",
-    "howItWorksBody": "Lebenslauf-Embeddings werden lokal über Ollama (bge-m3) erzeugt. Das Matching erfolgt durch Mistral AI in Frankreich (EU). Keine Trainingsnutzung, keine Werbenetzwerke, keine Dritt-Analytics. Der Quellcode ist auf GitHub offen.",
+    "howItWorksBody": "Embedding und Match-Scoring laufen beide auf Mistral AI in Frankreich (EU) — einem DSGVO-nativen Anbieter mit EU-gehosteter Infrastruktur und ohne Nutzung Ihrer Daten zum Training. Die Pipeline ist modellagnostisch und unterstützt einen vollständig selbst gehosteten Stack über Ollama (z. B. bge-m3) für On-Premise-Deployments. Keine Werbenetzwerke, keine Dritt-Analytics. Der Quellcode ist auf GitHub offen.",
     "stackTitle": "Technologie",
-    "stackBody": "Go-Microservices · NATS JetStream · MongoDB · Qdrant · Traefik · Kubernetes. iOS-App in SwiftUI. Live Activities + Push-Benachrichtigungen via APNs. Alle Embedding-Prozesse laufen lokal für DSGVO-Konformität.",
+    "stackBody": "Go-Microservices · NATS JetStream · MongoDB · Qdrant · Traefik · Kubernetes. iOS-App in SwiftUI. Live Activities + Push-Benachrichtigungen via APNs. KI-Inferenz läuft auf der EU-Infrastruktur von Mistral AI (DSGVO-nativ); Ollama wird als Drop-in für vollständig selbst gehostete Deployments unterstützt.",
     "footer": "Mit ♥ in Hamburg entwickelt · Von Helmer Barcos · HB Labs SAS"
   },
   "contact": {
@@ -36,9 +40,9 @@
     "title": "Datenschutzerklärung",
     "lastUpdated": "Stand · April 2025",
     "sections": [
-      {"title": "1. Über uns", "body": "Falcon wird von HB Labs S.A.S. entwickelt und betrieben, einem in Kolumbien registrierten Unternehmen. Bei Fragen zu dieser Richtlinie kontaktieren Sie uns unter general@hblabs.co."},
-      {"title": "2. Erhobene Daten", "body": "Falcon erhebt nur die für den Betrieb notwendigen Mindestdaten:\n\n• Anonyme Benutzer-ID — eine zufällig generierte Kennung (nanoid), die lokal auf Ihrem Gerät gespeichert wird. Sie wird niemals mit Ihrem Namen, Ihrer E-Mail-Adresse oder einer persönlichen Identität verknüpft.\n• APNs-Geräte-Token — ein von Apple ausgestelltes Token, das ausschließlich zur Zustellung von Push-Benachrichtigungen an Ihr Gerät verwendet wird.\n• Sprachpräferenz für Benachrichtigungen — Ihre gewählte Sprache für Push-Benachrichtigungen, die auf unserem Server neben Ihrem Geräte-Token gespeichert wird.\n• Lebenslauftext — wenn Sie einen Lebenslauf hochladen, wird der extrahierte Klartext auf unserem Server gespeichert und lokal zur Generierung von Embeddings verarbeitet."},
-      {"title": "3. Verwendung Ihrer Daten", "body": "• Lebenslauf-Embeddings werden lokal mit Ollama (Modell bge-m3) generiert. Ihr Lebenslauftext verlässt unsere Server bei diesem Schritt nicht.\n• Die Projekt-Matching-Analyse wird von Mistral AI durchgeführt, einem Drittanbieter mit Sitz in Frankreich (EU). Ihr Lebenslauftext und Projektbeschreibungen werden an Mistral AI ausschließlich zur Berechnung eines Match-Scores und einer kurzen Zusammenfassung übermittelt. Die Daten werden nicht für das Training verwendet.\n• Push-Benachrichtigungen werden über die APNs-Infrastruktur von Apple mithilfe Ihres Geräte-Tokens zugestellt.\n\nWir verkaufen, teilen oder verwenden Ihre Daten nicht für Werbezwecke."},
+      {"title": "1. Über uns", "body": "Falcon wird von HB Labs SAS entwickelt und betrieben, einem in Kolumbien registrierten Unternehmen. Bei Fragen zu dieser Richtlinie kontaktieren Sie uns unter general@hblabs.co."},
+      {"title": "2. Erhobene Daten", "body": "Falcon erhebt nur die für den Betrieb notwendigen Mindestdaten:\n\n• Anonyme Benutzer-ID — eine zufällig generierte Kennung (nanoid), die lokal auf Ihrem Gerät gespeichert wird. Sie wird niemals mit Ihrem Namen, Ihrer E-Mail-Adresse oder einer persönlichen Identität verknüpft.\n• APNs-Geräte-Token — ein von Apple ausgestelltes Token, das ausschließlich zur Zustellung von Push-Benachrichtigungen an Ihr Gerät verwendet wird.\n• Sprachpräferenz für Benachrichtigungen — Ihre gewählte Sprache für Push-Benachrichtigungen, die auf unserem Server neben Ihrem Geräte-Token gespeichert wird.\n• Lebenslauftext — wenn Sie einen Lebenslauf hochladen, wird der extrahierte Klartext auf unserem Server gespeichert und an Mistral AI (siehe §3) übermittelt, um das für das Matching verwendete Embedding zu erzeugen."},
+      {"title": "3. Verwendung Ihrer Daten", "body": "Die KI-Pipeline von Falcon besteht aus zwei Schritten — der Umwandlung Ihres Lebenslaufs in einen Vektor (Embedding) und dem Vergleich dieses Vektors mit konkreten Projekten (Match-Scoring). Beide Schritte laufen auf der EU-Infrastruktur von Mistral AI, wodurch Falcon von Grund auf DSGVO-konform ist:\n\n• Embedding (Mistral AI, EU) — Ihr Lebenslauftext wird an Mistral AI übermittelt, um eine für mehrsprachige Inhalte geeignete Vektor-Repräsentation zu erzeugen. Mistral AI hat seinen Hauptsitz in Paris, Frankreich, betreibt EU-gehostete Infrastruktur und unterliegt der DSGVO. Übermittelte Inhalte werden nicht zum Training der Modelle von Mistral verwendet.\n• Match-Scoring (Mistral AI, EU) — zur Bewertung eines Lebenslaufs gegen ein konkretes Projekt werden Ihr Lebenslauftext und die Projektbeschreibung an Mistral AI übermittelt, das einen Match-Score und eine kurze Begründung zurückliefert. Gleiche EU-/DSGVO-Bedingungen wie beim Embedding-Schritt.\n• Self-Hosted-Alternative — die Pipeline ist modellagnostisch und unterstützt lokale Inferenz über Ollama (mit Open-Weights-Modellen wie bge-m3) für Deployments, die vollständig on-premise ohne Datenabfluss verarbeitet werden sollen.\n• Push-Benachrichtigungen — Zustellung über die APNs-Infrastruktur von Apple mithilfe Ihres Geräte-Tokens.\n\nDa jeder KI-Schritt innerhalb der EU und unter DSGVO-konformen Bedingungen erfolgt, ist Falcon durchgängig konform. Wir verkaufen, teilen oder verwenden Ihre Daten nicht für Werbezwecke."},
       {"title": "4. Drittanbieter", "body": "• Mistral AI (mistral.ai) — Paris, Frankreich. Wird für LLM-basiertes Projekt-Matching verwendet. Unterliegt der Datenschutzrichtlinie von Mistral AI (https://legal.mistral.ai/terms/privacy-policy).\n• Apple Inc. — Zustellung von APNs-Push-Benachrichtigungen.\n• Recruiter Rodeo (recruiter.rodeo) — In der App angezeigte Recruiter-Bewertungen stammen aus öffentlich verfügbaren Daten von https://recruiter.rodeo/recruiters. Es werden keine personenbezogenen Daten an diesen Dienst übermittelt.\n\nKeine weiteren Drittanbieter erhalten Ihre Daten."},
       {"title": "5. Datenspeicherung", "body": "Geräte-Token und Sprachpräferenzen werden gespeichert, solange Sie die App nutzen. Lebenslaufdaten werden für laufendes Matching gespeichert. Sie können jederzeit die Löschung Ihrer Daten unter general@hblabs.co beantragen."},
       {"title": "6. Ihre Rechte (DSGVO)", "body": "Wenn Sie sich im Europäischen Wirtschaftsraum befinden, haben Sie das Recht:\n\n• auf Auskunft über die bei uns gespeicherten personenbezogenen Daten.\n• auf Berichtigung oder Löschung Ihrer Daten.\n• auf Widerspruch oder Einschränkung der Verarbeitung.\n• eine Beschwerde bei Ihrer zuständigen Datenschutzbehörde einzureichen.\n\nZur Ausübung dieser Rechte wenden Sie sich an general@hblabs.co."},
@@ -68,7 +72,7 @@
   "legal": {
     "title": "Rechtliches",
     "gdprTitle": "DSGVO",
-    "gdprBody": "Lebenslauf-Embeddings werden lokal verarbeitet (Ollama — keine Daten verlassen unsere Server). Die Projekt-Matching-Analyse erfolgt durch Mistral AI, einen externen Dienst mit Sitz in Frankreich (EU). Mit der Nutzung von Falcon stimmen Sie der Verarbeitung Ihrer Lebenslaufdaten durch Mistral AI zu.",
+    "gdprBody": "Embedding und Match-Scoring erfolgen beide bei Mistral AI, einem EU-Anbieter mit Hauptsitz in Frankreich, der unter der DSGVO agiert. Mit der Nutzung von Falcon stimmen Sie der Verarbeitung Ihrer Lebenslaufdaten durch Mistral AI zu diesen Zwecken zu. Die Pipeline unterstützt zudem lokale Inferenz über Ollama für vollständig selbst gehostete Deployments.",
     "mistralLink": "🔒 Datenschutzerklärung von Mistral AI →",
     "dataRequestsTitle": "Datenanfragen",
     "dataRequestsBody": "Für Auskunft, Berichtigung oder Löschung Ihrer Daten schreiben Sie an general@hblabs.co. Wir antworten gemäß Art. 12 DSGVO innerhalb von 30 Tagen.",

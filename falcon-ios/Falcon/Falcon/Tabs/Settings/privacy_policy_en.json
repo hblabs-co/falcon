@@ -4,19 +4,19 @@
   "sections": [
     {
       "title": "1. Who We Are",
-      "body": "Falcon is developed and operated by HB Labs SAS, a company registered in France. If you have any questions about this policy, contact us at general@hblabs.co."
+      "body": "Falcon is developed and operated by HB Labs SAS, a company registered in Colombia. If you have any questions about this policy, contact us at general@hblabs.co."
     },
     {
       "title": "2. Data We Collect",
-      "body": "Falcon collects only the minimum data necessary to operate:\n\n• Anonymous User ID — a randomly generated identifier (nanoid) stored locally on your device. It is never linked to your name, email, or any personal identity.\n• APNs Device Token — a token issued by Apple used exclusively to deliver push notifications to your device.\n• Notification Language Preference — your chosen language for push notifications, stored on our server alongside your device token.\n• CV Text — if you upload a curriculum vitae, the extracted plain text is stored on our server and processed locally to generate embeddings."
+      "body": "Falcon collects only the minimum data necessary to operate:\n\n• Anonymous User ID — a randomly generated identifier (nanoid) stored locally on your device. It is never linked to your name, email, or any personal identity.\n• APNs Device Token — a token issued by Apple used exclusively to deliver push notifications to your device.\n• Notification Language Preference — your chosen language for push notifications, stored on our server alongside your device token.\n• CV Text — if you upload a curriculum vitae, the extracted plain text is stored on our server and sent to Mistral AI (see §3) to generate the embedding used for matching."
     },
     {
       "title": "3. How We Use Your Data",
-      "body": "• CV Embeddings are generated on-premise using Ollama (bge-m3 model). Your CV text never leaves our servers during this step.\n• Job Matching Analysis is performed by Mistral AI, a third-party service based in France (EU). Your CV text and job descriptions are sent to Mistral AI solely for the purpose of computing a match score and a short summary. No data is used for training.\n• Push Notifications are sent via Apple's APNs infrastructure using your device token to deliver job match alerts.\n\nWe do not sell, share, or use your data for advertising."
+      "body": "Falcon's AI pipeline has two steps — turning your CV into a vector (embedding) and comparing that vector against specific projects (match scoring). Both steps run on Mistral AI's EU infrastructure, which is what makes Falcon GDPR-compliant by design:\n\n• Embedding (Mistral AI, EU) — your CV text is sent to Mistral AI to produce a vector representation suited for multilingual content. Mistral AI is headquartered in Paris, France, operates EU-hosted infrastructure, and is subject to the GDPR. Submitted content is not used to train Mistral's models.\n• Match scoring (Mistral AI, EU) — to score a CV against a specific project, your CV text and the project description are sent to Mistral AI, which returns a match score and a short rationale. Same EU/GDPR terms as the embedding step.\n• Self-hosted alternative — the pipeline is model-agnostic and supports local inference via Ollama (with open-weights models such as bge-m3) for deployments that require fully on-premise processing with zero egress beyond our infrastructure.\n• Push Notifications — delivered via Apple's APNs infrastructure using your device token.\n\nBecause every AI step runs within the EU and under GDPR-compliant terms, Falcon is compliant end-to-end. We do not sell, share, or use your data for advertising."
     },
     {
       "title": "4. Third Parties",
-      "body": "• Mistral AI (mistral.ai) — Paris, France. Used for LLM-based job matching. Subject to the Mistral AI Privacy Policy (https://legal.mistral.ai/terms/privacy-policy).\n• Apple Inc. — APNs push notification delivery.\n• Recruiter Rodeo (recruiter.rodeo) — Publicly available recruiter ratings displayed in the app are sourced from https://recruiter.rodeo/recruiters. No personal data is shared with this service.\n\nNo other third-party services receive your data."
+      "body": "• Mistral AI (mistral.ai) — Paris, France. Used for LLM-based project matching. Subject to the Mistral AI Privacy Policy (https://legal.mistral.ai/terms/privacy-policy).\n• Apple Inc. — APNs push notification delivery.\n• Recruiter Rodeo (recruiter.rodeo) — Publicly available recruiter ratings displayed in the app are sourced from https://recruiter.rodeo/recruiters. No personal data is shared with this service.\n\nNo other third-party services receive your data."
     },
     {
       "title": "5. Data Retention",

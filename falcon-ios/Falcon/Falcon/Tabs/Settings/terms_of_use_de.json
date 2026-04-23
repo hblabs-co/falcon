@@ -8,7 +8,7 @@
     },
     {
       "title": "2. Leistungsbeschreibung",
-      "body": "Falcon überwacht Freelance-Jobbörsen, analysiert Stellenangebote anhand Ihres Lebenslaufs mit KI-basiertem Matching und sendet Push-Benachrichtigungen bei relevanten Treffern. Der Dienst wird ohne Gewährleistung bereitgestellt und ist für die persönliche, nicht-kommerzielle Nutzung bestimmt."
+      "body": "Falcon überwacht Freelance-Projektbörsen, analysiert Projektangebote anhand Ihres Lebenslaufs mit KI-basiertem Matching und sendet Push-Benachrichtigungen bei relevanten Treffern. Der Dienst wird ohne Gewährleistung bereitgestellt und ist für die persönliche, nicht-kommerzielle Nutzung bestimmt."
     },
     {
       "title": "3. Nutzungsvoraussetzungen",
@@ -16,19 +16,19 @@
     },
     {
       "title": "4. Ihre Lebenslaufdaten",
-      "body": "Durch das Hochladen eines Lebenslaufs räumen Sie HB Labs SAS eine eingeschränkte Lizenz ein, diesen Inhalt ausschließlich zum Zweck der Erstellung von Job-Match-Ergebnissen für Sie zu verarbeiten. Sie behalten das vollständige Eigentum an Ihrem Lebenslauf. Wir geben Ihren Lebenslauf nicht an Arbeitgeber oder Dritte weiter, außer an Mistral AI für die Matching-Analyse (siehe Datenschutzerklärung)."
+      "body": "Durch das Hochladen eines Lebenslaufs räumen Sie HB Labs SAS eine eingeschränkte Lizenz ein, diesen Inhalt ausschließlich zum Zweck der Erstellung von Projekt-Match-Ergebnissen für Sie zu verarbeiten. Sie behalten das vollständige Eigentum an Ihrem Lebenslauf. Wir geben Ihren Lebenslauf nicht an Arbeitgeber oder Dritte weiter, außer an Mistral AI für die Matching-Analyse (siehe Datenschutzerklärung)."
     },
     {
       "title": "5. Keine Gewährleistung",
-      "body": "Falcon wird ohne jegliche Gewährleistung bereitgestellt. Wir garantieren nicht:\n\n• die Genauigkeit oder Vollständigkeit der Match-Scores.\n• einen unterbrechungsfreien oder fehlerfreien Betrieb des Dienstes.\n• dass Stellenangebote aktuell, korrekt oder verfügbar sind.\n\nMatch-Ergebnisse werden von einem KI-Modell generiert und sollten nicht als alleinige Grundlage für berufliche oder finanzielle Entscheidungen dienen."
+      "body": "Falcon wird ohne jegliche Gewährleistung bereitgestellt. Wir garantieren nicht:\n\n• die Genauigkeit oder Vollständigkeit der Match-Scores.\n• einen unterbrechungsfreien oder fehlerfreien Betrieb des Dienstes.\n• dass Projektangebote aktuell, korrekt oder verfügbar sind.\n\nMatch-Ergebnisse werden von einem KI-Modell generiert und sollten nicht als alleinige Grundlage für berufliche oder finanzielle Entscheidungen dienen."
     },
     {
       "title": "6. Haftungsbeschränkung",
-      "body": "Soweit gesetzlich zulässig haftet HB Labs SAS nicht für mittelbare oder Folgeschäden, die aus der Nutzung von Falcon entstehen, einschließlich Datenverlust, verpasster Jobgelegenheiten oder der Abhängigkeit von KI-generierten Match-Ergebnissen."
+      "body": "Soweit gesetzlich zulässig haftet HB Labs SAS nicht für mittelbare oder Folgeschäden, die aus der Nutzung von Falcon entstehen, einschließlich Datenverlust, verpasster Projektgelegenheiten oder der Abhängigkeit von KI-generierten Match-Ergebnissen."
     },
     {
       "title": "7. Zulässige Nutzung",
-      "body": "Sie verpflichten sich, Folgendes zu unterlassen:\n\n• Reverse Engineering, Dekompilierung oder Manipulation der App oder ihrer Backend-Dienste.\n• Nutzung des Dienstes zum Scrapen, Harvesten oder Weiterverbreiten von Jobdaten.\n• Versuche, Rate-Limits oder Zugriffskontrollen zu umgehen.\n• Hochladen von Inhalten, die rechtswidrig, schädlich oder rechtsverletzend sind."
+      "body": "Sie verpflichten sich, Folgendes zu unterlassen:\n\n• Reverse Engineering, Dekompilierung oder Manipulation der App oder ihrer Backend-Dienste.\n• Nutzung des Dienstes zum Scrapen, Harvesten oder Weiterverbreiten von Projektdaten.\n• Versuche, Rate-Limits oder Zugriffskontrollen zu umgehen.\n• Hochladen von Inhalten, die rechtswidrig, schädlich oder rechtsverletzend sind."
     },
     {
       "title": "8. Geistiges Eigentum",
@@ -40,7 +40,7 @@
     },
     {
       "title": "10. Anwendbares Recht",
-      "body": "Diese Bedingungen unterliegen dem französischen Recht. Etwaige Streitigkeiten unterliegen der ausschließlichen Zuständigkeit der Gerichte in Paris, Frankreich."
+      "body": "Diese Bedingungen unterliegen dem Recht Kolumbiens. Etwaige Streitigkeiten unterliegen der ausschließlichen Zuständigkeit der Gerichte in Cartagena, Kolumbien."
     },
     {
       "title": "11. Änderungen",

@@ -27,6 +27,14 @@ data:
   # Alert throttling in signal.
   ADMIN_ALERT_WINDOW: "10s"
 
+  # ── falcon-dispatch cv.indexed backfill ────────────────────────────
+  # When a new CV is indexed, dispatch scans the last N hours of
+  # projects and pre-computes matches so the user doesn't land on an
+  # empty feed. Cap guards against a pathological scraper burst
+  # (e.g. after a long outage) flooding the queue.
+  DISPATCH_CV_BACKFILL_HOURS:        "48"
+  DISPATCH_CV_BACKFILL_MAX_PROJECTS: "500"
+
   # scout
 
   BATCH_SIZE: "10"

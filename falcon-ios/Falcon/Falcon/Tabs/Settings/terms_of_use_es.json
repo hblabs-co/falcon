@@ -8,7 +8,7 @@
     },
     {
       "title": "2. Descripción del servicio",
-      "body": "Falcon monitorea plataformas de empleo freelance, analiza ofertas de trabajo frente a su CV mediante coincidencia basada en IA, y envía notificaciones push cuando se encuentran coincidencias relevantes. El servicio se proporciona tal cual y está destinado a uso personal y no comercial."
+      "body": "Falcon monitorea plataformas de proyectos freelance, analiza proyectos frente a su CV mediante coincidencia basada en IA, y envía notificaciones push cuando se encuentran coincidencias relevantes. El servicio se proporciona tal cual y está destinado a uso personal y no comercial."
     },
     {
       "title": "3. Requisitos de uso",
@@ -16,19 +16,19 @@
     },
     {
       "title": "4. Sus datos del CV",
-      "body": "Al subir un CV, otorga a HB Labs SAS una licencia limitada para procesar ese contenido con el único propósito de generar resultados de coincidencia de empleo para usted. Usted conserva la propiedad total de su CV. No compartimos su CV con empleadores ni con terceros, excepto con Mistral AI para el análisis de coincidencia (consulte la Política de privacidad)."
+      "body": "Al subir un CV, otorga a HB Labs SAS una licencia limitada para procesar ese contenido con el único propósito de generar resultados de coincidencia de proyectos para usted. Usted conserva la propiedad total de su CV. No compartimos su CV con empleadores ni con terceros, excepto con Mistral AI para el análisis de coincidencia (consulte la Política de privacidad)."
     },
     {
       "title": "5. Sin garantía",
-      "body": "Falcon se proporciona \"tal cual\" sin garantías de ningún tipo. No garantizamos:\n\n• La precisión o integridad de las puntuaciones de coincidencia.\n• El funcionamiento ininterrumpido o sin errores del servicio.\n• Que las ofertas de trabajo sean actuales, precisas o estén disponibles.\n\nLos resultados de coincidencia son generados por un modelo de IA y no deben ser la única base para ninguna decisión profesional o financiera."
+      "body": "Falcon se proporciona \"tal cual\" sin garantías de ningún tipo. No garantizamos:\n\n• La precisión o integridad de las puntuaciones de coincidencia.\n• El funcionamiento ininterrumpido o sin errores del servicio.\n• Que los proyectos listados sean actuales, precisos o estén disponibles.\n\nLos resultados de coincidencia son generados por un modelo de IA y no deben ser la única base para ninguna decisión profesional o financiera."
     },
     {
       "title": "6. Limitación de responsabilidad",
-      "body": "En la máxima medida permitida por la ley, HB Labs SAS no será responsable de daños indirectos o consecuentes derivados del uso de Falcon, incluyendo pérdida de datos, oportunidades de empleo perdidas o dependencia de resultados generados por IA."
+      "body": "En la máxima medida permitida por la ley, HB Labs SAS no será responsable de daños indirectos o consecuentes derivados del uso de Falcon, incluyendo pérdida de datos, oportunidades de proyecto perdidas o dependencia de resultados generados por IA."
     },
     {
       "title": "7. Uso aceptable",
-      "body": "Usted se compromete a no:\n\n• Realizar ingeniería inversa, descompilar o manipular la app o sus servicios backend.\n• Usar el servicio para extraer, recopilar o redistribuir datos de empleo.\n• Intentar eludir límites de velocidad o controles de acceso.\n• Cargar contenido ilegal, dañino o que infrinja derechos de terceros."
+      "body": "Usted se compromete a no:\n\n• Realizar ingeniería inversa, descompilar o manipular la app o sus servicios backend.\n• Usar el servicio para extraer, recopilar o redistribuir datos de proyectos.\n• Intentar eludir límites de velocidad o controles de acceso.\n• Cargar contenido ilegal, dañino o que infrinja derechos de terceros."
     },
     {
       "title": "8. Propiedad intelectual",
@@ -40,7 +40,7 @@
     },
     {
       "title": "10. Ley aplicable",
-      "body": "Estos términos se rigen por las leyes de Francia. Cualquier disputa estará sujeta a la jurisdicción exclusiva de los tribunales de París, Francia."
+      "body": "Estos términos se rigen por las leyes de Colombia. Cualquier disputa estará sujeta a la jurisdicción exclusiva de los tribunales de Cartagena, Colombia."
     },
     {
       "title": "11. Cambios",

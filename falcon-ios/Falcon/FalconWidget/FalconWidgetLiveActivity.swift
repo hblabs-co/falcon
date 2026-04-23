@@ -461,7 +461,7 @@ struct FalconWidgetLiveActivity: Widget {
 #Preview("Compact", as: .dynamicIsland(.compact), using: FalconMatchAttributes()) {
     FalconWidgetLiveActivity()
 } contentStates: {
-    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "Senior React Dev Kotlin, Kuberntes, React, Java, Golang, C++ MongoDB", companyName: "ACME GmbH", totalMatches: 12, summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS.", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
+    FalconMatchAttributes.ContentState(score: 7.8, label: "top_candidate", lang: "de", projectTitle: "Senior React Dev Kotlin, Kubernetes, React, Java, Golang, C++ MongoDB", companyName: "ACME GmbH", totalMatches: 12, summary: "Score 7.8 · React/TypeScript stark, fehlendes AWS.", projectID: "p1", cvID: "c1", skillsMatch: 8.5, seniorityFit: 7.2, domainExperience: 6.0, communicationClarity: 9.0, projectRelevance: 7.5, techStackOverlap: 8.0)
     FalconMatchAttributes.ContentState(score: 9.1, label: "apply_immediately", lang: "de", projectTitle: "Cloud Architect AWS", companyName: "Bosch", totalMatches: 23, summary: "Score 9.1 · perfekt passend.", projectID: "p2", cvID: "c1", skillsMatch: 9.5, seniorityFit: 9.0, domainExperience: 8.8, communicationClarity: 9.2, projectRelevance: 9.0, techStackOverlap: 9.5)
 }
 

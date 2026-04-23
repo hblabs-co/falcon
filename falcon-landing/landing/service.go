@@ -48,6 +48,12 @@ const (
 	// absolute URLs — relying on r.Host would let an attacker with a
 	// DNS rebind trick our sitemap into pointing at their domain.
 	canonicalHost = "https://falcon.hblabs.co"
+	// appStoreURL is the single source of truth for the App Store
+	// listing. Served via the branded /ios redirect so assets (badges,
+	// locale strings, socials) link through one hop we control — if
+	// the listing ever moves, we flip this constant instead of chasing
+	// down every asset.
+	appStoreURL = "https://apps.apple.com/app/falcon-f%C3%BCr-freelancer/id6763169883"
 )
 
 var (
@@ -175,6 +181,12 @@ func Handler() http.Handler {
 	mux.HandleFunc("/robots.txt",  serveRobots)
 	mux.HandleFunc("/sitemap.xml", serveSitemap)
 
+	// Branded shortlink to the App Store listing — used by the
+	// download badge, social posts, etc. 302 (not 301) so we can
+	// retarget later without cached redirects locking visitors in.
+	mux.HandleFunc("/ios", serveAppStoreRedirect)
+	mux.HandleFunc("/ios/", serveAppStoreRedirect)
+
 	// /static/* — photos, logos, anything else embedded. strip the
 	// "static/" prefix since the embed FS keeps the whole tree
 	// (so an asset at embed path `static/hbarcos.jpeg` should be
@@ -291,6 +303,13 @@ func serveLogo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Cache-Control", "public, max-age=604800, immutable")
 	_, _ = w.Write(logoPNG)
+}
+
+// serveAppStoreRedirect forwards /ios to the App Store listing. Apple
+// auto-routes to the visitor's regional storefront based on their
+// device locale, so a single target URL is enough for all languages.
+func serveAppStoreRedirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, appStoreURL, http.StatusFound)
 }
 
 // serveRobots answers crawler probes. Everything on this landing is

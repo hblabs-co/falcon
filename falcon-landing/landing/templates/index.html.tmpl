@@ -89,9 +89,16 @@
       border-bottom: 1px solid var(--border);
       margin-bottom: 28px;
     }
-    .hero img { width: 68px; height: 68px; border-radius: 16px; }
+    .hero img.logo { width: 68px; height: 68px; border-radius: 16px; }
     .hero h1 { margin: 12px 0 4px; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
     .hero .tagline { margin: 0 0 18px; color: var(--muted); font-size: 13px; font-weight: 500; }
+    .hero .app-store-badge {
+      display: inline-block;
+      margin: 0 0 18px;
+      transition: opacity .15s ease;
+    }
+    .hero .app-store-badge:hover { opacity: .82; text-decoration: none; }
+    .hero .app-store-badge img { height: 44px; width: auto; border-radius: 0; }
 
     h2 { margin: 0 0 18px; font-size: 18px; font-weight: 700; letter-spacing: -0.015em; }
     h3 { margin: 24px 0 8px; font-size: 14px; font-weight: 600; }
@@ -282,9 +289,12 @@
     <div class="card">
       <div class="card-body">
         <div class="hero">
-          <img src="/favicon.png?v={{.V}}" alt="Falcon" />
+          <img class="logo" src="/favicon.png?v={{.V}}" alt="Falcon" />
           <h1>Falcon</h1>
           <p class="tagline">{{.T.meta.tagline}}</p>
+          <a class="app-store-badge" href="{{.T.appStore.url}}" target="_blank" rel="noopener">
+            <img src="/static/badges/app-store-{{.Lang}}.svg?v={{.V}}" alt="{{.T.appStore.alt}}" />
+          </a>
         </div>
 
         <!-- About -->
@@ -378,7 +388,7 @@
 
           <h3>{{.T.legal.imprintTitle}}</h3>
           <p class="muted">
-            HB Labs S.A.S.<br />
+            HB Labs SAS<br />
             Cartagena, Colombia<br />
             general@hblabs.co · <a href="https://hblabs.co">hblabs.co</a>
           </p>

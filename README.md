@@ -9,6 +9,12 @@ Created in Hamburg with ❤️, April 2026 - Visit https://falcon.hblabs.co
   <img src="assets/ios-preview/en/p08.png" width="22%" alt="Falcon iOS screenshot 4" />
 </p>
 
+<p align="center">
+  <a href="https://apps.apple.com/app/falcon-f%C3%BCr-freelancer/id6763169883">
+    <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" height="56" alt="Download on the App Store" />
+  </a>
+</p>
+
 ![Architecture](docs/falcon-architecture.png)
 
 ## Microservices
