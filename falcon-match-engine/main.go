@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/match-engine/match"
 )
@@ -17,6 +18,8 @@ func main() {
 	if err := system.InitStorage(ctx); err != nil {
 		logrus.Fatalf("storage init: %v", err)
 	}
+
+	system.RegisterServiceFromBuildTime(ctx, constants.ServiceMatchEngine)
 
 	svc, err := match.NewService(ctx)
 	if err != nil {

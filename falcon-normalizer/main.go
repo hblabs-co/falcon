@@ -4,6 +4,7 @@ import (
 	_ "embed"
 
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/modules/llm"
 	"hblabs.co/falcon/normalizer/cv"
@@ -30,6 +31,8 @@ func main() {
 	if err := system.InitStorage(ctx); err != nil {
 		logrus.Fatalf("storage init: %v", err)
 	}
+
+	system.RegisterServiceFromBuildTime(ctx, constants.ServiceNormalizer)
 
 	// Shared LLM client — translate prompt is the same for all modules.
 	llmClient, err := llm.NewFromEnv(translatePrompt)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/realtime/realtime"
 )
@@ -10,6 +11,8 @@ func main() {
 	system.LoadEnvs()
 	system.ConfigLogger()
 	system.Init()
+
+	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceRealtime)
 
 	system.InitBus(system.MergeBusConfigs(
 		system.StreamRealtime(),

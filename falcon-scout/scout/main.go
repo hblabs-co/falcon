@@ -1,6 +1,7 @@
 package main
 
 import (
+	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/scout/platforms/computerfuturescom"
 	"hblabs.co/falcon/scout/platforms/constaffcom"
@@ -15,6 +16,9 @@ func main() {
 	system.LoadEnvs()
 	system.ConfigLogger()
 	system.Init()
+
+	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceScout)
+
 	system.InitBus(system.MergeBusConfigs(
 		system.StreamProjects(),
 		system.StreamScrape(),

@@ -7,6 +7,7 @@ const (
 	ServiceAuth       = "falcon-auth"
 	ServiceDispatch   = "falcon-dispatch"
 	ServiceMatchEngine = "falcon-match-engine"
-	ServiceSignal     = "falcon-signal"
-	ServiceStorage    = "falcon-storage"
+	ServiceSignal      = "falcon-signal"
+	ServiceStorage     = "falcon-storage"
+	ServiceRealtime    = "falcon-realtime"
 )
