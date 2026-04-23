@@ -145,13 +145,22 @@ func (s *Service) retryOne(ctx context.Context, svcErr models.ServiceError) {
 		return
 	}
 
-	if result.PassedThreshold {
-		if err := system.Publish(ctx, constants.SubjectMatchResult, result); err != nil {
-			log.Warnf("[match-retry] publish: %v", err)
-		}
+	resolveAllForPair(ctx, svcErr.CVID, svcErr.ProjectID)
+
+	// Mirror the primary path's logging (service.go) so retry successes
+	// are diffable against normal-flow lines — only the attempt= field
+	// marks them apart.
+	if !result.PassedThreshold {
+		log.Infof("[match-retry] score %.1f below threshold %.1f — saved, not forwarded", result.Score, s.threshold)
+		return
 	}
 
-	resolveAllForPair(ctx, svcErr.CVID, svcErr.ProjectID)
+	if err := system.Publish(ctx, constants.SubjectMatchResult, result); err != nil {
+		log.Warnf("[match-retry] publish: %v", err)
+		return
+	}
+
+	log.Infof("[match-retry] published match.result — score %.1f label=%s", result.Score, result.Label)
 	log.Infof("[match-retry] succeeded on attempt %d (score=%.1f)", svcErr.RetryCount+1, result.Score)
 }
 

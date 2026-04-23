@@ -158,3 +158,36 @@ func (c *Client) Search(ctx context.Context, vector []float32, limit int, scoreT
 
 	return resp.Result, nil
 }
+
+// SearchByPayload runs Search but restricts the candidate pool to points
+// whose payload field `key` exactly equals `value`. Primarily used by
+// falcon-dispatch's cv.indexed backfill, where we want "does project X
+// match THIS specific CV?" rather than "which CVs match project X?".
+//
+// Under the hood this is Qdrant's `filter.must[{key,match.value}]`
+// clause — server-side, so the candidate set is narrowed before the
+// vector similarity step, not post-filtered in Go.
+func (c *Client) SearchByPayload(ctx context.Context, vector []float32, limit int, scoreThreshold float32, key, value string) ([]SearchResult, error) {
+	var resp struct {
+		Result []SearchResult `json:"result"`
+	}
+
+	if err := c.http.Post(ctx, "/collections/"+c.collection+"/points/search", ownhttp.Request{
+		Body: map[string]any{
+			"vector":          vector,
+			"limit":           limit,
+			"score_threshold": scoreThreshold,
+			"with_payload":    true,
+			"filter": map[string]any{
+				"must": []map[string]any{
+					{"key": key, "match": map[string]any{"value": value}},
+				},
+			},
+		},
+		Result: &resp,
+	}); err != nil {
+		return nil, fmt.Errorf("qdrant search by payload %s=%s: %w", key, value, err)
+	}
+
+	return resp.Result, nil
+}

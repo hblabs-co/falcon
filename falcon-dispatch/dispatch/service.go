@@ -7,8 +7,10 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
 	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
@@ -21,15 +23,24 @@ import (
 const (
 	defaultTopN           = 20
 	defaultScoreThreshold = float32(0.75)
+	// cv.indexed backfill defaults. A newly-indexed CV needs matches
+	// computed against recent projects so the user doesn't open the app
+	// to an empty list. 48h covers a weekend's worth of scrapes; the
+	// cap guards against a pathological case (scraper just ran a huge
+	// catchup) embedding hundreds of projects in one blocking handler.
+	defaultBackfillHours       = 48
+	defaultBackfillMaxProjects = 500
 )
 
 // Service consumes project events, searches for matching CVs in Qdrant,
 // and publishes a match.pending message for each candidate above the threshold.
 type Service struct {
-	embeddings *embeddings.Client
-	qdrant     *qdrant.Client
-	topN       int
-	threshold  float32
+	embeddings         *embeddings.Client
+	qdrant             *qdrant.Client
+	topN               int
+	threshold          float32
+	backfillHours      int
+	backfillMaxProject int
 }
 
 func NewService() (*Service, error) {
@@ -44,14 +55,17 @@ func NewService() (*Service, error) {
 	}
 
 	return &Service{
-		embeddings: emb,
-		qdrant:     qdr,
-		topN:       helpers.ParseInt("DISPATCH_TOP_N", defaultTopN),
-		threshold:  helpers.ParseFloat32("DISPATCH_SCORE_THRESHOLD", defaultScoreThreshold),
+		embeddings:         emb,
+		qdrant:             qdr,
+		topN:               helpers.ParseInt("DISPATCH_TOP_N", defaultTopN),
+		threshold:          helpers.ParseFloat32("DISPATCH_SCORE_THRESHOLD", defaultScoreThreshold),
+		backfillHours:      helpers.ParseInt("DISPATCH_CV_BACKFILL_HOURS", defaultBackfillHours),
+		backfillMaxProject: helpers.ParseInt("DISPATCH_CV_BACKFILL_MAX_PROJECTS", defaultBackfillMaxProjects),
 	}, nil
 }
 
-// Run subscribes to project.created and project.updated and blocks until ctx is cancelled.
+// Run subscribes to project events (forward dispatch) and cv.indexed
+// (reverse dispatch / backfill) and blocks until ctx is cancelled.
 func (s *Service) Run() error {
 	ctx := system.Ctx()
 
@@ -62,6 +76,16 @@ func (s *Service) Run() error {
 		}
 		logrus.Infof("subscribed to %s", subject)
 	}
+
+	// Reverse dispatch: cv.indexed fires when a new CV (or an update)
+	// is ready in Qdrant. We backfill matches against the last N hours
+	// of projects so the user doesn't open the app to an empty list.
+	if err := system.Subscribe(ctx, constants.StreamStorage, "dispatch-cv-indexed",
+		constants.SubjectCVIndexed, s.handleCVIndexed); err != nil {
+		return fmt.Errorf("subscribe %s: %w", constants.SubjectCVIndexed, err)
+	}
+	logrus.Infof("subscribed to %s (backfill window: %dh, cap: %d projects)",
+		constants.SubjectCVIndexed, s.backfillHours, s.backfillMaxProject)
 
 	system.Wait()
 	return nil
@@ -87,7 +111,11 @@ func (s *Service) handleProjectEvent(data []byte) error {
 	}
 
 	text := project.Title + "\n" + project.Description
-	vector, err := s.embeddings.Embed(ctx, text)
+	vector, err := s.embeddings.Embed(ctx, text, map[string]any{
+		"project_id": event.ProjectID,
+		"platform":   event.Platform,
+		"path":       "forward",
+	})
 	if err != nil {
 		return fmt.Errorf("embed project: %w", err)
 	}
@@ -176,5 +204,121 @@ func (s *Service) handleProjectEvent(data []byte) error {
 		}
 	}
 
+	return nil
+}
+
+// handleCVIndexed is the reverse-dispatch path: a freshly indexed CV
+// gets scored against every recent project so the user lands on the
+// app with pre-computed matches instead of an empty list.
+//
+// Shape of the work:
+//   1. Pull the latest N projects whose DisplayUpdatedAt falls inside
+//      the backfill window (default 48h).
+//   2. Embed each project text, then query Qdrant filtered by
+//      this CV's payload. We search *this CV's chunks only* — cheap
+//      per-project since the filter narrows the candidate set before
+//      the cosine step.
+//   3. For every chunk that clears the threshold, publish a
+//      match.pending with the best chunk score. match-engine picks it
+//      up and runs the real LLM scoring; upsert-by-(cv_id, project_id)
+//      means this can safely race against the forward dispatch for
+//      the same pair without duplicating rows.
+//
+// Runs serially — a CV indexed once doesn't need parallelism, and
+// embedding 500 projects sequentially on a local Ollama takes ~40s,
+// well within a consumer ack window.
+func (s *Service) handleCVIndexed(data []byte) error {
+	var evt models.CVIndexedEvent
+	if err := json.Unmarshal(data, &evt); err != nil {
+		logrus.Errorf("unmarshal cv.indexed: %v (dropping)", err)
+		return nil
+	}
+
+	log := logrus.WithFields(logrus.Fields{
+		"cv_id":   evt.CVID,
+		"user_id": evt.UserID,
+	})
+	log.Infof("cv.indexed — backfilling matches from last %dh of projects", s.backfillHours)
+
+	ctx := context.Background()
+
+	since := time.Now().Add(-time.Duration(s.backfillHours) * time.Hour)
+	filter := bson.M{
+		"display_updated_at": bson.M{"$gte": since},
+		"platform":           bson.M{"$ne": "freelance.de"}, // same exclusion the API applies
+	}
+
+	var projects []models.PersistedProject
+	// FindPage with page=1 + pageSize=cap gives us "top cap docs,
+	// most-recent first" — equivalent to a sorted-limit query.
+	if _, err := system.GetStorage().FindPage(ctx,
+		constants.MongoProjectsCollection,
+		filter,
+		"display_updated_at", true, // desc — most recent first
+		1, s.backfillMaxProject,
+		&projects,
+	); err != nil {
+		return fmt.Errorf("list recent projects: %w", err)
+	}
+
+	if len(projects) == 0 {
+		log.Info("no recent projects in window — nothing to backfill")
+		return nil
+	}
+
+	log.Infof("scanning %d recent projects for matches", len(projects))
+
+	matched := 0
+	for i, p := range projects {
+		text := p.Title + "\n" + p.Description
+		vec, err := s.embeddings.Embed(ctx, text, map[string]any{
+			"cv_id":      evt.CVID,
+			"project_id": p.ID,
+			"platform":   p.Platform,
+			"path":       "backfill",
+			"i":          fmt.Sprintf("%d/%d", i+1, len(projects)),
+		})
+		if err != nil {
+			log.Warnf("embed project %s: %v — skipping", p.ID, err)
+			continue
+		}
+
+		// Filter-by-cv_id so we only see chunks belonging to *this* CV.
+		// Limit is the number of chunks a single CV might have — 20 is
+		// generous (typical CV has 6–12).
+		results, err := s.qdrant.SearchByPayload(ctx, vec, 20, s.threshold, "cv_id", evt.CVID)
+		if err != nil {
+			log.Warnf("qdrant search for project %s: %v — skipping", p.ID, err)
+			continue
+		}
+		if len(results) == 0 {
+			continue
+		}
+
+		// Best chunk across the filtered results → that's what the
+		// MatchPending event carries forward.
+		best := results[0]
+		for _, r := range results {
+			if r.Score > best.Score {
+				best = r
+			}
+		}
+
+		msg := best.GetEvent(p.ID, p.Platform)
+		// The search was already filtered to this CV, but GetEvent pulls
+		// user_id from the payload too — belt-and-suspenders, make sure
+		// the message carries the right user we were told about.
+		if msg.UserID == "" {
+			msg.UserID = evt.UserID
+		}
+		if err := system.Publish(ctx, constants.SubjectMatchPending, msg); err != nil {
+			log.Errorf("publish match.pending for project %s: %v", p.ID, err)
+			continue
+		}
+		matched++
+	}
+
+	log.Infof("cv.indexed backfill done — %d/%d projects matched (threshold %.2f)",
+		matched, len(projects), s.threshold)
 	return nil
 }

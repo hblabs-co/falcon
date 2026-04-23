@@ -57,7 +57,11 @@ var paragraphSplit = regexp.MustCompile(`\n\s*\n+`)
 // return the element-wise mean of the chunks' vectors. Not ideal for
 // retrieval-per-section use cases (switch to multi-vector storage for
 // that), but good enough for whole-document similarity.
-func (c *Client) Embed(ctx context.Context, text string) ([]float32, error) {
+//
+// Optional fields are merged into the structured log line so callers
+// fired in a loop (e.g. dispatch's backfill) can attach project_id /
+// cv_id for traceability.
+func (c *Client) Embed(ctx context.Context, text string, fields ...map[string]any) ([]float32, error) {
 	start := time.Now()
 
 	chunks := splitRunes(text, maxChunkChars)
@@ -71,7 +75,7 @@ func (c *Client) Embed(ctx context.Context, text string) ([]float32, error) {
 		if err != nil {
 			return nil, err
 		}
-		logrus.WithField("took", time.Since(start).String()).Info("Embed")
+		logEmbed("Embed", start, len(text), 1, fields)
 		return v, nil
 	}
 
@@ -96,12 +100,23 @@ func (c *Client) Embed(ctx context.Context, text string) ([]float32, error) {
 		sum[i] *= inv
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"took":   time.Since(start).String(),
-		"chunks": len(chunks),
-		"chars":  len(text),
-	}).Info("Embed (chunked mean-pool)")
+	logEmbed("Embed (chunked mean-pool)", start, len(text), len(chunks), fields)
 	return sum, nil
+}
+
+// logEmbed emits the standard Embed log line with caller-supplied context.
+func logEmbed(msg string, start time.Time, chars, chunks int, extra []map[string]any) {
+	f := logrus.Fields{
+		"took":   time.Since(start).String(),
+		"chars":  chars,
+		"chunks": chunks,
+	}
+	for _, m := range extra {
+		for k, v := range m {
+			f[k] = v
+		}
+	}
+	logrus.WithFields(f).Info(msg)
 }
 
 // Chunk is a piece of a longer document with its own embedding. Index
