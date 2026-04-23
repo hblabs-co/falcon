@@ -123,9 +123,16 @@ func handleListProjects(c *gin.Context) {
 	ctx := c.Request.Context()
 	store := system.GetStorage()
 
+	// Filter out the "in_progress" claim placeholders the normalizer
+	// writes on tryClaim before the LLM runs — those docs carry only
+	// project_id + status + acquired_at and no en/de/es content, so
+	// returning them would surface as empty cards in the iOS feed
+	// (issue: "a card with just a random id and no content").
+	listFilter := bson.M{"status": bson.M{"$ne": "in_progress"}}
+
 	var docs []normalizedDoc
 	total, err := store.FindPage(ctx, constants.MongoNormalizedProjectsCollection,
-		bson.M{}, "display_updated_at", true, page, pageSize, &docs)
+		listFilter, "display_updated_at", true, page, pageSize, &docs)
 	if err != nil {
 		logrus.Errorf("list projects page=%d: %v", page, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch projects"})
