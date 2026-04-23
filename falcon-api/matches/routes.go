@@ -15,17 +15,6 @@ import (
 
 const pageSize = 20
 
-// Default mirrors match-engine's defaultScoreThreshold. Read at request
-// time (not init) so a kubectl rollout-free env change takes effect
-// immediately. `passed_threshold` on old records is ignored — we filter
-// by live score instead, so raising or lowering the threshold on
-// match-engine is reflected in the API without needing to re-score.
-const defaultScoreThreshold = float32(6.0)
-
-func currentScoreThreshold() float32 {
-	return helpers.ParseFloat32("MATCH_ENGINE_SCORE_THRESHOLD", defaultScoreThreshold)
-}
-
 // Routes implements server.RouteGroup for match feed endpoints.
 type Routes struct{}
 
@@ -59,24 +48,15 @@ func handleListMatches(c *gin.Context) {
 	ctx := c.Request.Context()
 	store := system.GetStorage()
 
-	// Filter by live threshold (env var, re-read per request) instead
-	// of the persisted `passed_threshold` field — that flag is baked
-	// at score time and would lag behind a threshold change until every
-	// record is re-scored. Using `score >= threshold` means raising or
-	// lowering MATCH_ENGINE_SCORE_THRESHOLD takes effect immediately
-	// for everyone, and matches the set that match-engine currently
-	// publishes to NATS (so the realtime counter can't diverge from
-	// the paginated list).
-	threshold := currentScoreThreshold()
+	// Canonical "what the user can see" predicate — shared with
+	// falcon-signal so Live Activity counters always agree with the
+	// list. Anything more subtle than the defaults goes through
+	// `helpers.VisibleMatchFilter` so both sides stay in sync.
+	listFilter := helpers.VisibleMatchFilter(uid)
 
 	// Optional "unread only" client filter. `viewed: {$ne: true}`
 	// matches false, null, and missing — covers pre-feature docs that
 	// never got the field written, not just explicit `viewed: false`.
-	listFilter := bson.M{
-		"user_id":  uid,
-		"platform": bson.M{"$ne": "freelance.de"},
-		"score":    bson.M{"$gte": threshold},
-	}
 	if c.Query("only_unread") == "true" {
 		listFilter["viewed"] = bson.M{"$ne": true}
 	}
@@ -95,16 +75,13 @@ func handleListMatches(c *gin.Context) {
 	// Count unviewed matches for this user across ALL pages — drives the
 	// tab-icon badge. Missing `viewed` field counts as unread (pre-
 	// feature docs). Cheap on an indexed collection and avoids a second
-	// round-trip from the client. Uses the same live-threshold filter
-	// as the list so the badge never counts matches the user can't see.
-	unreadFilter := bson.M{
-		"user_id":  uid,
-		"platform": bson.M{"$ne": "freelance.de"},
-		"score":    bson.M{"$gte": threshold},
-		"$or": []bson.M{
-			{"viewed": bson.M{"$exists": false}},
-			{"viewed": false},
-		},
+	// round-trip from the client. Starts from the same canonical
+	// visible-match filter so the badge never counts matches the user
+	// can't see.
+	unreadFilter := helpers.VisibleMatchFilter(uid)
+	unreadFilter["$or"] = []bson.M{
+		{"viewed": bson.M{"$exists": false}},
+		{"viewed": false},
 	}
 	unread, err := store.Count(ctx, constants.MongoMatchResultsCollection, unreadFilter)
 	if err != nil {

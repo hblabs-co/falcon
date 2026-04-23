@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
+	"hblabs.co/falcon/common/helpers"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/signal/email"
@@ -62,7 +63,14 @@ func (s *Service) handleMatchResult(data []byte) error {
 	}
 
 	// Total matches for this user — shown in the Live Activity header.
-	totalMatches64, _ := system.GetStorage().Count(ctx, constants.MongoMatchResultsCollection, bson.M{"user_id": event.UserID})
+	// Uses the canonical visible-match filter (helpers.VisibleMatchFilter)
+	// so the Lock Screen counter never drifts above what the app lists.
+	// Mismatch here was the cause of "13 Treffer on Lock Screen but only
+	// 8 in the app" reports: we used to Count() raw user_id, which
+	// included sub-threshold scores and freelance.de listings that the
+	// /matches endpoint filters out.
+	totalMatches64, _ := system.GetStorage().Count(ctx, constants.MongoMatchResultsCollection,
+		helpers.VisibleMatchFilter(event.UserID))
 	totalMatches := int(totalMatches64)
 
 	var staleTokens []string
@@ -297,7 +305,10 @@ func (s *Service) handleAdminTestMatch(data []byte) error {
 		}
 
 		// Total matches for this admin (for the Live Activity header).
-		totalMatches64, _ := system.GetStorage().Count(ctx, constants.MongoMatchResultsCollection, bson.M{"user_id": user.ID})
+		// Same canonical filter as the production path so test pushes
+		// agree with the app UI too.
+		totalMatches64, _ := system.GetStorage().Count(ctx, constants.MongoMatchResultsCollection,
+			helpers.VisibleMatchFilter(user.ID))
 		totalMatches := int(totalMatches64)
 
 		for _, dt := range tokens {
