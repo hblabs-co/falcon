@@ -50,9 +50,10 @@ struct MatchResult: Decodable, Identifiable {
     let projectTitle:     String
     let platform:         String
     let companyName:      String
-    /// Public MinIO URL for the company's logo. Empty when the company
-    /// has no logo — `resolvedLogoURL` returns nil and the UI falls back
-    /// to the initials avatar.
+    /// Public MinIO URL for the company's logo. Empty when the
+    /// company has no logo. The UI treats this as a cache key into
+    /// the App Group container populated by `CompaniesSync`; empty
+    /// or cache-miss both fall back to initials.
     let companyLogoUrl:   String
     let score:            Double
     let label:            String
@@ -161,21 +162,6 @@ struct MatchResult: Decodable, Identifiable {
         case "not_suitable":      return lm.t(.matchLabelNotSuitable)
         default:                  return "—"
         }
-    }
-
-    /// In DEBUG builds rewrites the logo URL host to `Config.imageHost`
-    /// so the simulator / device can reach MinIO on the local network.
-    /// In production the URL is used as-is. Mirrors `ProjectItem.resolvedLogoURL`.
-    var resolvedLogoURL: URL? {
-        guard !companyLogoUrl.isEmpty, var components = URLComponents(string: companyLogoUrl) else { return nil }
-#if DEBUG
-        if let base = URLComponents(string: Config.imageHost) {
-            components.scheme = base.scheme
-            components.host   = base.host
-            components.port   = base.port
-        }
-#endif
-        return components.url
     }
 
     func relativeDate(for language: AppLanguage) -> String? {

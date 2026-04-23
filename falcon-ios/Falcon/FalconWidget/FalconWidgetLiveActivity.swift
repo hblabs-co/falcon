@@ -146,34 +146,40 @@ private struct CompanyInitialsIcon: View {
     }
 }
 
-// MARK: - Company chip: logo if available, initials otherwise.
+// MARK: - Company chip: logo if cached on disk, initials otherwise.
 //
-// Uses AsyncImage so the logo downloads inside the widget extension
-// sandbox (Live Activities and Dynamic Island run in the widget process,
-// not the main app). `.empty` renders the fallback instead of a blank
-// placeholder while the request is in flight — on Lock Screen the icon
-// is too small for a spinner to read anyway. `.failure` maps to the
-// same fallback so unreachable logos degrade gracefully.
+// Reads the logo synchronously from the App Group container
+// (populated by the main app's CompaniesSync). `AsyncImage` is NOT
+// used here on purpose — WidgetKit snapshots the view tree for Lock
+// Screen / Dynamic Island render before any network request resolves,
+// so a remote URL would always fall back to the placeholder. On-disk
+// reads are sub-millisecond and complete well within the snapshot.
 private struct CompanyLogoOrInitials: View {
     var name: String
+    /// Canonical MinIO URL the main app used as the cache key.
+    /// Hashed via `CompanyLogoFilename` (from the shared target) to
+    /// resolve the local file. Empty → initials.
     var logoUrl: String
     var size: CGFloat
 
     var body: some View {
-        if let url = URL(string: logoUrl), !logoUrl.isEmpty {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let img):
-                    img.resizable().scaledToFill()
-                default:
-                    CompanyInitialsIcon(name: name, size: size)
-                }
-            }
-            .frame(width: size, height: size)
-            .clipShape(Circle())
+        if let uiImage = cachedImage() {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
         } else {
             CompanyInitialsIcon(name: name, size: size)
         }
+    }
+
+    private func cachedImage() -> UIImage? {
+        guard !logoUrl.isEmpty,
+              let local = CompanyLogoFilename.localURL(for: logoUrl),
+              FileManager.default.fileExists(atPath: local.path)
+        else { return nil }
+        return UIImage(contentsOfFile: local.path)
     }
 }
 

@@ -52,6 +52,7 @@
 		CF615B192F81FFCA008434B9 /* FalconNotification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FalconNotification.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF615B1B2F81FFCA008434B9 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		CF615B1D2F81FFCA008434B9 /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
+		CFB47A1B2F9AD17F00537918 /* FalconWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FalconWidgetExtension.entitlements; sourceTree = "<group>"; };
 		CFE766C72F83508000FBE9E7 /* FalconWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FalconWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CFE766C82F83508000FBE9E7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CFE766CA2F83508000FBE9E7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -82,6 +83,7 @@
 		CFE766E22F8352BF00FBE9E7 /* Exceptions for "Falcon" folder in "FalconWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Shared/CompanyLogoCache.swift,
 				Shared/FalconJobsActivity.swift,
 			);
 			target = CFE766C62F83508000FBE9E7 /* FalconWidgetExtension */;
@@ -148,6 +150,7 @@
 		CF615AEA2F81F1A4008434B9 = {
 			isa = PBXGroup;
 			children = (
+				CFB47A1B2F9AD17F00537918 /* FalconWidgetExtension.entitlements */,
 				CF615AF52F81F1A4008434B9 /* Falcon */,
 				CF615B1F2F81FFCA008434B9 /* FalconNotification */,
 				CFE766CC2F83508000FBE9E7 /* FalconWidget */,
@@ -629,6 +632,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = FalconWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KC5LD84VKS;
@@ -661,6 +665,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = FalconWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KC5LD84VKS;

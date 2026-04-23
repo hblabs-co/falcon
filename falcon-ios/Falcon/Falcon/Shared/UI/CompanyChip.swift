@@ -1,34 +1,47 @@
 import SwiftUI
+import UIKit
 
-/// Circular company avatar — renders the company logo when a URL is
-/// available and falls back to a two-letter initials chip otherwise
-/// (including while the image is in flight or on load failure).
+/// Circular company avatar — renders the company logo when a local
+/// cached file exists in the App Group container, falls back to a
+/// two-letter initials chip otherwise.
 ///
-/// Used across every surface that shows a company: match cards, match
-/// detail, project detail, and — with its widget-target twin
-/// (CompanyLogoOrInitials in FalconWidgetLiveActivity) — Live Activities.
-/// Keeping one source of truth here means an ACME chip in the list
-/// looks identical to the ACME chip in the detail sheet.
+/// Why disk-only and not `AsyncImage`:
+///   - Live Activities / widgets render via snapshot; any network
+///     request is racy with the snapshot deadline and usually loses.
+///   - The companies cache (`CompaniesSync`) pre-downloads every
+///     logo once a week to the App Group, so the main app never
+///     needs to hit the network here either — one code path, same
+///     behaviour across surfaces.
+///   - A cache miss (user installed today, sync hasn't run yet) just
+///     shows initials, which is the correct first-launch experience.
 struct CompanyChip: View {
     let name: String
-    let logoURL: URL?
+    /// Canonical MinIO URL used as the cache key. Same URL the server
+    /// persists on `match_results.company_logo_url` and ships in
+    /// Live Activity `companyLogoUrl`. Empty string means "no logo
+    /// known" — initials fallback. Non-empty but file missing locally
+    /// also falls back gracefully.
+    let logoURL: String
     let size: CGFloat
 
     var body: some View {
-        if let url = logoURL {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let img):
-                    img.resizable().scaledToFill()
-                default:
-                    CompanyInitialsChip(name: name, size: size)
-                }
-            }
-            .frame(width: size, height: size)
-            .clipShape(Circle())
+        if let uiImage = cachedImage() {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
         } else {
             CompanyInitialsChip(name: name, size: size)
         }
+    }
+
+    private func cachedImage() -> UIImage? {
+        guard !logoURL.isEmpty,
+              let local = CompanyLogoFilename.localURL(for: logoURL),
+              FileManager.default.fileExists(atPath: local.path)
+        else { return nil }
+        return UIImage(contentsOfFile: local.path)
     }
 }
 

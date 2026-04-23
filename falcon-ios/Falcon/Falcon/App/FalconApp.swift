@@ -35,6 +35,12 @@ struct FalconApp: App {
                         // to call noteAppOpenSource("magic_link") first.
                         RealtimeClient.shared.scheduleAppOpened(defaultSource: "foreground")
                         RealtimeClient.shared.emitSessionStartedOnce()
+                        // Refresh the company logo cache in the App Group
+                        // container. Cheap no-op when the last pull is
+                        // still within the 7-day window; otherwise fires
+                        // a background Task so the Live Activity widget
+                        // eventually sees fresh logos on disk.
+                        CompaniesSync.shared.refreshIfNeeded()
                     case .background:
                         Task { await RealtimeClient.shared.emitAppBackgroundedAndClose() }
                     default:

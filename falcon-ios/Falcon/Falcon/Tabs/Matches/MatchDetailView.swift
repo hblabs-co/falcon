@@ -107,7 +107,7 @@ struct MatchDetailView: View {
                 HStack(spacing: 6) {
                     CompanyChip(
                         name: match.companyName.nilIfEmpty ?? match.platform,
-                        logoURL: match.resolvedLogoURL,
+                        logoURL: match.companyLogoUrl,
                         size: 18
                     )
                     Text(match.companyName.nilIfEmpty ?? match.platform)
