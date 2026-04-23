@@ -79,8 +79,13 @@ func parseMinioEndpoint(rawURL string) (endpoint string, secure bool) {
 	return u.Host, u.Scheme == "https"
 }
 
-// EnsureBucket creates bucket if it does not exist. Pass publicRead=true to set
-// a public read-only bucket policy (suitable for logos, avatars, etc.).
+// EnsureBucket creates the bucket if missing, and — when publicRead=true —
+// always reconciles the anonymous-GET policy on every call. The second
+// half matters: a bucket created in an older deploy (before the policy
+// argument existed) or provisioned manually via `mc mb` would otherwise
+// stay private forever, and logos served from it would 403 for iOS.
+// SetBucketPolicy is idempotent, so calling it on every startup is safe
+// and cheap — no-op if the policy already matches.
 func EnsureBucket(ctx context.Context, bucket string, publicRead bool) error {
 	mc := GetMinio()
 
@@ -88,24 +93,37 @@ func EnsureBucket(ctx context.Context, bucket string, publicRead bool) error {
 	if err != nil {
 		return fmt.Errorf("check bucket %q: %w", bucket, err)
 	}
-	if exists {
-		return nil
+	if !exists {
+		if err := mc.MakeBucket(ctx, bucket, minio.MakeBucketOptions{}); err != nil {
+			return fmt.Errorf("make bucket %q: %w", bucket, err)
+		}
+		logrus.Infof("minio: created bucket %q", bucket)
 	}
-
-	if err := mc.MakeBucket(ctx, bucket, minio.MakeBucketOptions{}); err != nil {
-		return fmt.Errorf("make bucket %q: %w", bucket, err)
-	}
-	logrus.Infof("minio: created bucket %q", bucket)
 
 	if publicRead {
-		policy := fmt.Sprintf(
-			`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}`,
-			bucket,
-		)
-		if err := mc.SetBucketPolicy(ctx, bucket, policy); err != nil {
-			logrus.Warnf("minio: set public read policy on %q: %v", bucket, err)
-		}
+		return reconcilePublicReadPolicy(ctx, mc, bucket)
 	}
+	return nil
+}
 
+// reconcilePublicReadPolicy forces `bucket` into the canonical anonymous-
+// GET shape on every startup. SetBucketPolicy is idempotent on MinIO's
+// side (same JSON → same state, no error) so we don't bother reading
+// first — the diff/compare added complexity (MinIO normalises policy
+// JSON, making naive string-compare a false-negative trap) without
+// saving any real work. Logged at Debug so the line is available for
+// troubleshooting without spamming Info on every pod restart.
+func reconcilePublicReadPolicy(ctx context.Context, mc *minio.Client, bucket string) error {
+	policy := fmt.Sprintf(
+		`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}`,
+		bucket,
+	)
+	if err := mc.SetBucketPolicy(ctx, bucket, policy); err != nil {
+		// Downgrade to warn — the bucket still serves, we just can't
+		// open it up. Alerting is out of scope here.
+		logrus.Warnf("minio: set public read policy on %q: %v", bucket, err)
+		return nil
+	}
+	logrus.Debugf("minio: applied public-read policy on bucket %q", bucket)
 	return nil
 }
