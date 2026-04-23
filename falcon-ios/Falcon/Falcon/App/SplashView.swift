@@ -26,7 +26,12 @@ struct SplashView: View {
                     .foregroundStyle(.secondary)
                     .opacity(subtitleOpacity)
 
-                Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                // "v1.0.5" style: marketing version (CFBundleShortVersionString)
+                // + build number (CFBundleVersion) joined by a dot. Lets us
+                // bump the build every TestFlight iteration and have the
+                // splash reflect it without editing MARKETING_VERSION each
+                // time. Reads "1.0.1" to a user instead of "1.0 (1)".
+                Text("v\(appVersionLabel)")
                     .font(.system(size: 11, weight: .regular, design: .monospaced))
                     .foregroundStyle(.tertiary)
                     .opacity(subtitleOpacity)
@@ -47,5 +52,14 @@ struct SplashView: View {
                 onComplete()
             }
         }
+    }
+
+    /// "1.0.1" — marketing version + build joined by a dot. Empty
+    /// fallbacks ("—") surface the problem instead of silently showing
+    /// "1.0" when the Info.plist keys are missing.
+    private var appVersionLabel: String {
+        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+        return "\(short).\(build)"
     }
 }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  PrivacyInfo.xcprivacy — required by Apple for App Store submission.
+  Declares which "required reason" APIs Falcon uses (UserDefaults),
+  whether the app collects data that's linked to a user identity, and
+  whether any domain performs cross-site tracking.
+
+  Falcon policy:
+    • No third-party SDKs. No ad networks. No analytics trackers.
+    • UserDefaults used only for app-local settings (language, filter).
+    • DiskSpace accessed only by system-level CV file picker flows.
+    • No data collection on-device beyond CV text the user explicitly uploads
+      (declared separately in App Store Connect → Privacy Labels).
+-->
+<plist version="1.0">
+<dict>
+    <!-- 1. Tracking: we don't track users across apps/sites. -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+
+    <!-- 2. Collected data types — declared IN-APP for SDK privacy
+         manifests only; for apps this section is enforced via the
+         App Store Connect "Data Collection" questionnaire, not here.
+         Kept empty intentionally. -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+
+    <!-- 3. Required-reason APIs. Each entry declares an Apple-approved
+         code explaining *why* we call a given API. Apple rejects builds
+         that call these APIs without a declaration. -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <!-- UserDefaults: storing app-local preferences (language,
+             filter state, card density). CA92.1 = "access info
+             written to or read from UserDefaults that is within
+             the app itself". -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+
+        <!-- File timestamp: UIImage/SwiftUI AsyncImage caching touches
+             these under the hood. C617.1 = "Inspect file timestamps to
+             display to the person using the device". -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>C617.1</string>
+            </array>
+        </dict>
+
+        <!-- Disk space: CV upload checks free space before reading a
+             potentially-large document. E174.1 = "Display free disk
+             space to the user". -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryDiskSpace</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>E174.1</string>
+            </array>
+        </dict>
+
+        <!-- System boot time: Foundation/CFNetwork reads this for
+             general OS bookkeeping, not explicitly by Falcon code.
+             35F9.1 = "Access system boot time to measure app or
+             user action latency". -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategorySystemBootTime</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>35F9.1</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

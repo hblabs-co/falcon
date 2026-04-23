@@ -29,5 +29,28 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+
+	<!-- Production metadata — required / strongly recommended before
+	     App Store submission. -->
+
+	<!-- Display name shown on the Home Screen + Settings. -->
+	<key>CFBundleDisplayName</key>
+	<string>Falcon</string>
+
+	<!-- Copyright. Apple reads this for the Credits section in the
+	     app's auto-generated "About" view and for legal notices. -->
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 HB Labs SAS</string>
+
+	<!-- App Store category — picks where Falcon lives in the browse
+	     tree. "productivity" fits AI-driven workflow tools. -->
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+
+	<!-- Export compliance — tells App Store Connect the app uses only
+	     Apple-provided encryption (HTTPS / WebSocket TLS). Without this
+	     every TestFlight build prompts a manual compliance form. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

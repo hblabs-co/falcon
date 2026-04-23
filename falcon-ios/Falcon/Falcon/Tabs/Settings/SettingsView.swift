@@ -25,8 +25,12 @@ struct SettingsView: View {
                 startSection
                 statusSection
                 languageSection
-                tokenSection
+                // Device-token + config sections are diagnostic-only —
+                // the end user has no reason to see their APNs token
+                // or tweak the API URL on a production build. Compiled
+                // out of Release so the UI stays clean.
                 #if DEBUG
+                tokenSection
                 configSection
                 #endif
                 aboutSection
@@ -78,6 +82,11 @@ struct SettingsView: View {
         }
     }
 
+    // Whole property compiled out of Release builds — references
+    // devSetAPIURL() and debugStartFakeMatchActivity() which are also
+    // `#if DEBUG`-only. Without this wrapper the property body
+    // compiles in Release but its callees don't, breaking the build.
+    #if DEBUG
     private var configSection: some View {
         Section(lm.t(.sectionConfiguration)) {
             LabeledContent(lm.t(.configAPIURL)) {
@@ -110,6 +119,7 @@ struct SettingsView: View {
             }
         }
     }
+    #endif
 
     private var languageSection: some View {
         Section(lm.t(.sectionLanguage)) {
@@ -149,6 +159,10 @@ struct SettingsView: View {
         URLSession.shared.dataTask(with: req).resume()
     }
 
+    // Diagnostic-only — only rendered in DEBUG builds (see body).
+    // Wrapped here too so Release doesn't compile a dead property
+    // the developer accidentally wires into a new code path.
+    #if DEBUG
     private var tokenSection: some View {
         Section(lm.t(.sectionDeviceToken)) {
             if let token = nm.deviceToken {
@@ -165,6 +179,7 @@ struct SettingsView: View {
             }
         }
     }
+    #endif
 
     // private var lastNotificationSection: some View {
     //     Section(lm.t(.sectionLastNotification)) {
