@@ -1,0 +1,76 @@
+## kubectl apply -f deployment/53-minio.yaml
+
+# kubectl apply -f deployment/53-minio.yaml                                                          
+# kubectl rollout restart statefulset/minio -n falcon
+
+# MinIO — S3-compatible object storage. Single-node "standalone" mode;
+# for HA switch to "distributed" with 4+ replicas. Root creds come from
+# the falcon-secrets Secret (MINIO_ACCESS_KEY / MINIO_SECRET_KEY) so
+# you can rotate without editing this file.
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: falcon
+  labels: {app: minio}
+spec:
+  ports:
+    - {name: s3,      port: 9000, targetPort: 9000}
+    - {name: console, port: 9001, targetPort: 9001}
+  selector: {app: minio}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: falcon
+spec:
+  serviceName: minio
+  replicas: 1
+  selector: {matchLabels: {app: minio}}
+  template:
+    metadata:
+      labels: {app: minio}
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio:latest
+          args: ["server", "/data", "--console-address", ":9001"]
+          ports:
+            - {name: s3,      containerPort: 9000}
+            - {name: console, containerPort: 9001}
+          env:
+            # MinIO uses MINIO_ROOT_USER/MINIO_ROOT_PASSWORD for bootstrap,
+            # but our clients connect via MINIO_ACCESS_KEY/SECRET. Mirror
+            # the secret values into both name sets.
+            - name: MINIO_ROOT_USER
+              valueFrom: {secretKeyRef: {name: falcon-secrets, key: MINIO_ACCESS_KEY}}
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom: {secretKeyRef: {name: falcon-secrets, key: MINIO_SECRET_KEY}}
+            # Public hostnames MinIO uses when signing URLs or
+            # redirecting from the console. Without these, presigned
+            # URLs embed the internal DNS (minio.falcon.svc…) which
+            # the iOS/web client cannot reach. Must match the Ingress
+            # hosts in 40-ingress.yaml and MINIO_PUBLIC_URL in the
+            # ConfigMap.
+            - {name: MINIO_SERVER_URL,           value: "https://minio.falcon.hblabs.co"}
+            - {name: MINIO_BROWSER_REDIRECT_URL, value: "https://minio-console.falcon.hblabs.co"}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+          readinessProbe:
+            httpGet: {path: /minio/health/ready, port: s3}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /minio/health/live, port: s3}
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests: {cpu: "100m", memory: "256Mi"}
+            limits:   {cpu: "1000m", memory: "1Gi"}
+  volumeClaimTemplates:
+    - metadata: {name: data}
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests: {storage: 5Gi}

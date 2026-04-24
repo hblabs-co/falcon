@@ -25,7 +25,7 @@ spec:
           image: registry.4the.company/falcon-realtime:1.0.0
           imagePullPolicy: Always
           ports:
-            - {name: ws, containerPort: 8090}
+            - {name: ws, containerPort: 8080}
           envFrom:
             - configMapRef: {name: falcon-config}
             - secretRef:    {name: falcon-secrets}
@@ -60,4 +60,4 @@ metadata:
 spec:
   selector: {app: falcon-realtime}
   ports:
-    - {name: ws, port: 80, targetPort: 8090}
+    - {name: ws, port: 80, targetPort: 8080}

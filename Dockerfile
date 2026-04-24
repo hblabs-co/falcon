@@ -152,6 +152,7 @@ RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificat
 FROM runtime-base AS falcon-api
 COPY --from=main-builder /out/falcon-api /app
 USER app
+ENV PORT=8080
 EXPOSE 8080
 ENTRYPOINT ["/app"]
 
@@ -163,6 +164,7 @@ ENTRYPOINT ["/app"]
 FROM runtime-base AS falcon-landing
 COPY --from=main-builder /out/falcon-landing /app
 USER app
+ENV PORT=8080
 EXPOSE 8080
 ENTRYPOINT ["/app"]
 
@@ -179,7 +181,11 @@ ENTRYPOINT ["/app"]
 FROM runtime-base AS falcon-realtime
 COPY --from=main-builder /out/falcon-realtime /app
 USER app
-EXPOSE 8090
+# Cluster default: uniform 8080 like every other HTTP service. The
+# local .env overrides PORT=8090 so dev doesn't collide with api/landing
+# which also use 8080 locally.
+ENV PORT=8080
+EXPOSE 8080
 ENTRYPOINT ["/app"]
 
 FROM runtime-base AS falcon-signal

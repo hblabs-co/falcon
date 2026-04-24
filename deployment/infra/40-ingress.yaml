@@ -1,0 +1,111 @@
+# kubectl apply -f deployment/40-ingress.yaml
+#
+# Traefik-based ingresses for the externally-reachable Falcon endpoints.
+# Traefik defaults that Falcon relies on:
+#   - WebSocket upgrade → native (no annotation needed, unlike nginx).
+#   - Large request bodies → streamed, no 1 MB default cap like nginx.
+#   - Idle-connection timeout → inherited from the entrypoint config in
+#     the Traefik Helm values; override per-route with a Middleware CRD
+#     if a specific host needs longer. Kept off here because Falcon's
+#     keep-alive pings (every 30s from the iOS client) stay well under
+#     any reasonable default.
+#
+# Cert-manager issues the TLS certs via the existing "letsencrypt-production"
+# ClusterIssuer.
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: falcon-api
+  namespace: falcon
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["api.falcon.hblabs.co"]
+      secretName: falcon-api-cert
+  rules:
+    - host: api.falcon.hblabs.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: falcon-api
+                port: {number: 80}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: falcon-realtime
+  namespace: falcon
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["realtime.falcon.hblabs.co"]
+      secretName: falcon-realtime-cert
+  rules:
+    - host: realtime.falcon.hblabs.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: falcon-realtime
+                port: {number: 80}
+---
+# MinIO S3 API — the public URL presigned upload/download links point at.
+# No body-size override: Traefik streams bodies, so uploads aren't capped
+# by the reverse proxy.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio
+  namespace: falcon
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["minio.falcon.hblabs.co"]
+      secretName: minio-cert
+  rules:
+    - host: minio.falcon.hblabs.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio
+                port: {number: 9000}
+---
+# MinIO web console — admin UI. Same host pattern as the API so certs
+# are easy to manage.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-console
+  namespace: falcon
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["minio-console.falcon.hblabs.co"]
+      secretName: minio-console-cert
+  rules:
+    - host: minio-console.falcon.hblabs.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio
+                port: {number: 9001}

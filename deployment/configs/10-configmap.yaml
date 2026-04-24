@@ -17,11 +17,11 @@ data:
   MINIO_SECURE:      "false"
 
   # ── App config ─────────────────────────────────────────────────────
-  LOG_LEVEL:         "info"
-  NATS_DELIVER_POLICY: "new"
+  PORT:                 "8080"
+  LOG_LEVEL:            "info"
+  NATS_DELIVER_POLICY:  "new"
 
-  # Realtime server (WS).
-  REALTIME_PORT:     "8090"
+  # Realtime server (WS). Port comes from the Dockerfile default
   REALTIME_ALLOWED_ORIGINS: "https://app.falcon.hblabs.co"
 
   # Alert throttling in signal.

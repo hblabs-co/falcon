@@ -23,7 +23,7 @@ spec:
       imagePullSecrets:
         - name: regcred
       containers:
-        - name: landing
+        - name: falcon-landing
           image: registry.4the.company/falcon-landing:1.0.0
           imagePullPolicy: Always
           ports:

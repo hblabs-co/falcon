@@ -11,5 +11,12 @@ falcon-import/recruiter_rodeo/recruiters.html
 falcon-scout/scout/scout
 see_later
 
+# Secrets — match both the old flat layout and the post-reorg path
+# under deployment/configs/. Keep both so a stashed/old branch can't
+# accidentally stage creds.
 deployment/11-secret.yaml
 deployment/12-registry-access.yaml
+deployment/configs/11-secret.yaml
+deployment/configs/12-registry-access.yaml
+
+falcon-appstore-preview-maker/falcon-appstore-preview-maker

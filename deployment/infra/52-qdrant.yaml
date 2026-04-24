@@ -1,0 +1,62 @@
+## kubectl apply -f deployment/52-qdrant.yaml
+
+# Qdrant — vector database. Uses our curl-enabled custom image
+# (Dockerfile target: qdrant) so the readiness probe can hit
+# /readyz via HTTP without relying on the built-in grpc health check.
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant
+  namespace: falcon
+  labels: {app: qdrant}
+spec:
+  ports:
+    - {name: http, port: 6333, targetPort: 6333}
+    - {name: grpc, port: 6334, targetPort: 6334}
+  selector: {app: qdrant}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qdrant
+  namespace: falcon
+spec:
+  serviceName: qdrant
+  replicas: 1
+  selector: {matchLabels: {app: qdrant}}
+  template:
+    metadata:
+      labels: {app: qdrant}
+    spec:
+      containers:
+        - name: qdrant
+          # Stock Qdrant — no custom image needed. The httpGet probes
+          # below run from the kubelet (out-of-band HTTP requests), so
+          # the container doesn't need curl or any shell binary. This
+          # differs from docker-compose where `test: ["CMD-SHELL", ...]`
+          # shells out *inside* the container.
+          image: qdrant/qdrant:latest
+          ports:
+            - {name: http, containerPort: 6333}
+            - {name: grpc, containerPort: 6334}
+          volumeMounts:
+            - {name: storage, mountPath: /qdrant/storage}
+          readinessProbe:
+            httpGet: {path: /readyz, port: http}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            # Qdrant is memory-bound on the HNSW index — scale up as
+            # the embedding corpus grows.
+            requests: {cpu: "200m", memory: "512Mi"}
+            limits:   {cpu: "2000m", memory: "2Gi"}
+  volumeClaimTemplates:
+    - metadata: {name: storage}
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests: {storage: 10Gi}

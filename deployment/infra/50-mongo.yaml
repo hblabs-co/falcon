@@ -1,0 +1,76 @@
+## kubectl apply -f deployment/50-mongo.yaml
+
+# MongoDB 7 — standalone StatefulSet. Single replica, good enough for
+# dev / small prod. If you need replica set or sharding, swap to the
+# Bitnami chart or operator-based setup.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: falcon
+  labels: {app: mongo}
+spec:
+  ports:
+    - {name: mongo, port: 27017, targetPort: 27017}
+  selector: {app: mongo}
+  # ClusterIP only — not exposed outside the cluster.
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  namespace: falcon
+spec:
+  serviceName: mongo
+  replicas: 1
+  selector: {matchLabels: {app: mongo}}
+  template:
+    metadata:
+      labels: {app: mongo}
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - {name: mongo, containerPort: 27017}
+          env:
+            # Database bootstrap — matches MONGODB_DATABASE in the
+            # ConfigMap and the value common.system uses.
+            - {name: MONGO_INITDB_DATABASE, value: "falcon"}
+          volumeMounts:
+            - {name: data, mountPath: /data/db}
+          # Startup probe gives Mongo up to 5 min to come up (replay journal,
+          # rebuild indexes on a large dataset, etc.) without counting
+          # against liveness. Uses tcpSocket — cheap, just checks the port.
+          startupProbe:
+            tcpSocket: {port: 27017}
+            periodSeconds: 5
+            failureThreshold: 60
+          # Readiness keeps the real ping so the service only routes
+          # traffic when Mongo is actually answering. `timeoutSeconds: 10`
+          # is generous because mongosh is a fat Node.js client — default
+          # 1s is not enough under any load.
+          readinessProbe:
+            exec:
+              command: ["mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+            periodSeconds: 60
+            timeoutSeconds: 20
+            failureThreshold: 3
+          # Liveness uses tcpSocket — we only care "is the process alive
+          # and accepting connections", not "can it serve queries". A slow
+          # query should NOT get the pod killed. This replaces the mongosh
+          # exec that was timing out at 1s and causing CrashLoopBackOff.
+          livenessProbe:
+            tcpSocket: {port: 27017}
+            periodSeconds: 60
+            timeoutSeconds: 20
+            failureThreshold: 5
+          resources:
+            requests: {cpu: "200m", memory: "512Mi"}
+            limits:   {cpu: "1000m", memory: "2Gi"}
+  volumeClaimTemplates:
+    - metadata: {name: data}
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests: {storage: 10Gi}
