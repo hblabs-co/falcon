@@ -3,6 +3,7 @@ package cv
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/modules/embeddings"
+	"hblabs.co/falcon/modules/ocr"
 	"hblabs.co/falcon/modules/qdrant"
 	"hblabs.co/falcon/storage/infra"
 )
@@ -22,11 +24,17 @@ import (
 const (
 	cvsBucket          = "cvs"
 	presignedURLExpiry = 15 * time.Minute
+	// presignedOCRExpiry is how long the GET URL handed to Mistral
+	// OCR stays valid. Kept short — OCR requests that take longer
+	// than 10 min are usually stuck and should fail clean instead
+	// of succeeding against a still-open URL.
+	presignedOCRExpiry = 10 * time.Minute
 )
 
 type service struct {
 	embeddings *embeddings.Client
 	qdrant     *qdrant.Client
+	ocr        *ocr.Client
 }
 
 func newService(ctx context.Context) (*service, error) {
@@ -52,7 +60,12 @@ func newService(ctx context.Context) (*service, error) {
 		return nil, fmt.Errorf("qdrant ensure collection: %w", err)
 	}
 
-	return &service{embeddings: emb, qdrant: qdr}, nil
+	ocrClient, err := ocr.NewFromEnv()
+	if err != nil {
+		return nil, fmt.Errorf("ocr client: %w", err)
+	}
+
+	return &service{embeddings: emb, qdrant: qdr, ocr: ocrClient}, nil
 }
 
 // prepare creates a pending CV record and returns the presigned MinIO PUT URL
@@ -142,19 +155,45 @@ func (s *service) index(ctx context.Context, evt models.CVIndexRequestedEvent) e
 		"user_id": userID, "status": models.CVStatusIndexing, "error": "", "updated_at": time.Now(),
 	})
 
-	// 2. Download from MinIO.
-	obj, err := infra.GetMinio().GetObject(ctx, cv.MinioBucket, cv.MinioKey, minio.GetObjectOptions{})
-	if err != nil {
-		return fmt.Errorf("download from minio: %w", err) // transient — retry
-	}
-	defer obj.Close()
-
-	// 3. Extract text — use size from StatObject.
-	text, err := extractText(obj, info.Size)
-	if err != nil {
-		return fail(fmt.Sprintf("extract text: %v", err)) // bad file — permanent
+	// 2+3. Extract text — dispatch by file type.
+	//   .pdf  → presign a GET URL against the public MinIO endpoint
+	//           and hand it to Mistral OCR. The bucket stays private;
+	//           the URL is short-lived (10 min) and signed. Mistral
+	//           downloads from outside the cluster via the public
+	//           ingress, same way users' browsers would.
+	//   .docx → stream the object locally and parse the Word XML.
+	//           Faster + cheaper (no external API round-trip) and
+	//           works offline.
+	var text string
+	if isPDF(cv.Filename) {
+		presigned, err := infra.GetMinioPublic().PresignedGetObject(
+			ctx, cv.MinioBucket, cv.MinioKey, presignedOCRExpiry, url.Values{},
+		)
+		if err != nil {
+			return fmt.Errorf("presign GET: %w", err) // transient — retry
+		}
+		text, err = s.ocr.ExtractFromURL(ctx, presigned.String(), map[string]any{
+			"cv_id":    cv.ID,
+			"filename": cv.Filename,
+		})
+		if err != nil {
+			return fmt.Errorf("ocr extract: %w", err) // transient — retry (Mistral may be 5xx)
+		}
+	} else {
+		obj, err := infra.GetMinio().GetObject(ctx, cv.MinioBucket, cv.MinioKey, minio.GetObjectOptions{})
+		if err != nil {
+			return fmt.Errorf("download from minio: %w", err) // transient — retry
+		}
+		defer obj.Close()
+		text, err = extractDOCXText(obj, info.Size)
+		if err != nil {
+			return fail(fmt.Sprintf("extract text: %v", err)) // bad file — permanent
+		}
 	}
 	if text == "" {
+		if isPDF(cv.Filename) {
+			return fail("PDF has no selectable text — export from Word or use a text-layer PDF")
+		}
 		return fail("document appears to be empty")
 	}
 	log.Infof("extracted %d chars from %s", len(text), cv.Filename)

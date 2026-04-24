@@ -41,7 +41,10 @@ struct ProfileView: View {
             .withLoginToolbar(showEmail: true)
             .fileImporter(
                 isPresented: $showFilePicker,
-                allowedContentTypes: [UTType("org.openxmlformats.wordprocessingml.document")!],
+                allowedContentTypes: [
+                    UTType("org.openxmlformats.wordprocessingml.document")!, // .docx
+                    .pdf,
+                ],
                 allowsMultipleSelection: false
             ) { result in
                 guard case .success(let urls) = result, let url = urls.first else { return }

@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-// extractText reads a .docx file from r (of size sz bytes) and returns the
+// extractDOCXText reads a .docx file from r (of size sz bytes) and returns the
 // plain text from the document body, with whitespace normalised.
-func extractText(r io.Reader, sz int64) (string, error) {
+func extractDOCXText(r io.Reader, sz int64) (string, error) {
 	buf, err := io.ReadAll(r)
 	if err != nil {
 		return "", fmt.Errorf("read docx: %w", err)
