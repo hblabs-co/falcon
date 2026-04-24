@@ -1,6 +1,6 @@
 # Falcon 🦅
 
-Created in Hamburg with ❤️, April 2026 — Visit https://falcon.hblabs.co
+Hecho en Hamburgo con ❤️, 2026. Visit https://falcon.hblabs.co
 
 <p align="center">
   <img src="assets/ios-preview/en/p05.png" width="22%" alt="Falcon iOS screenshot 1" />
@@ -21,69 +21,64 @@ Created in Hamburg with ❤️, April 2026 — Visit https://falcon.hblabs.co
 
 ## Services
 
-Every Go binary in the repo lives under `falcon-*`. Service-name
-constants are centralised in `common/constants/services.go` so the
-ops portal, Mongo `system` collection, and startup banners all agree
-on names.
+Every Go binary in the repo lives under `falcon-*`.
 
-### HTTP services (cluster-deployed)
+Each row is tagged with a **type** flag so it's clear at a glance
+where the thing runs:
 
-| Name | Port | What it does |
-|------|------|--------------|
-| **falcon-api** | 8080 | Public REST API consumed by the iOS client. JWT-gated. Routes for matches, projects, CVs, companies, system status, admin. |
-| **falcon-landing** | 8080 | Static marketing site at falcon.hblabs.co. Serves localized HTML (EN/DE/ES), privacy/terms, App Store badges, `/ios` redirect. |
-| **falcon-realtime** | 8080 | WebSocket fan-out. Pushes `match.result`, `project.normalized`, `match.flipped` to connected iOS clients. Sticky-session sharded. |
+- <code>HTTP</code> : cluster-deployed, listens on HTTP.
+- <code>NATS</code> : cluster-deployed, NATS consumer (no HTTP).
+- <code>LOCAL</code> : local-only tool, not in the cluster.
+- <code>INFRA</code> : backing service (datastore / broker / LLM runtime).
 
-### NATS consumers (cluster-deployed, no HTTP)
 
-| Name | What it does |
-|------|--------------|
-| **falcon-storage** | CV upload pipeline (MinIO presign → text extract → embedding → Qdrant). Includes Mistral OCR for PDFs. Also caches company logos. |
-| **falcon-normalizer** | LLM-backed normalization of project + CV text into structured JSON (title, requirements, contact, etc.) per language. |
-| **falcon-dispatch** | Vector-search dispatcher — forward (project → CVs) and reverse (new CV → recent projects). Publishes `match.pending`. |
-| **falcon-match-engine** | Scores each `match.pending` via LLM across six dimensions. Publishes `match.result` if above threshold. The only horizontally-scaled service. |
-| **falcon-signal** | Delivers push notifications via APNs (iOS), Live Activities, and magic-link emails via Mailjet. |
-| **falcon-scout** | Polls freelance project boards (redglobal.de, contractor.de, solcom.de, computerfutures.com, somi.de, constaff.com) and emits `project.created` / `project.updated`. |
+| Type    | Name                    | Port        | What it does                                                                                                                                                                                                 |
+| ------- | ----------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `HTTP`  | **falcon-api**          | 8081        | Public REST API consumed by the iOS client. JWT-gated. Routes for matches, projects, CVs, companies, system status, admin.                                                                                   |
+| `HTTP`  | **falcon-landing**      | 8082        | Static marketing site at falcon.hblabs.co. Serves localized HTML (EN/DE/ES), privacy/terms, App Store badges, `/ios` redirect.                                                                               |
+| `HTTP`  | **falcon-realtime**     | 8090        | WebSocket fan-out. Pushes `match.result`, `project.normalized`, `match.flipped` to connected iOS clients. Sticky-session sharded.                                                                            |
+|         |                         |             |                                                                                                                                                                                                              |
+|         |                         |             |                                                                                                                                                                                                              |
+| `NATS`  | **falcon-storage**      | —           | CV upload pipeline (MinIO presign → text extract → embedding → Qdrant). Includes Mistral OCR for PDFs. Also caches company logos.                                                                            |
+| `NATS`  | **falcon-normalizer**   | —           | LLM-backed normalization of project + CV text into structured JSON (title, requirements, contact, etc.) per language.                                                                                        |
+| `NATS`  | **falcon-dispatch**     | —           | Vector-search dispatcher — forward (project → CVs) and reverse (new CV → recent projects). Publishes `match.pending`.                                                                                        |
+| `NATS`  | **falcon-match-engine** | —           | Scores each `match.pending` via LLM across six dimensions. Publishes `match.result` if above threshold. The only horizontally-scaled service.                                                                |
+| `NATS`  | **falcon-signal**       | —           | Delivers push notifications via APNs (iOS), Live Activities, and magic-link emails via Mailjet.                                                                                                              |
+| `NATS`  | **falcon-scout**        | —           | Polls freelance project boards (redglobal.de, contractor.de, solcom.de, computerfutures.com, somi.de, constaff.com) and emits `project.created` / `project.updated`.                                         |
+|         |                         |             |                                                                                                                                                                                                              |
+|         |                         |             |                                                                                                                                                                                                              |
+| `LOCAL` | **falcon-authorizer**   | 8082        | Local helper that issues 30-day magic-link tokens for App Store reviewers and manual QA. Bearer-auth gated.                                                                                                  |
+| `LOCAL` | **falcon-designer**     | 8083        | Static design canvas + dashboard for Claude-generated mockups. Hot-reloads any HTML/JSX/CSS edit.                                                                                                            |
+| `LOCAL` | **falcon-nest**         | 8080        | Local dev portal that lists every service, every infra component, and `kubectl port-forward` cheat sheets.                                                                                                   |
+| `LOCAL` | **falcon-import**       | —           | One-shot CLIs (e.g. recruiter ratings ingestion from Recruiter Rodeo).                                                                                                                                       |
+|         |                         |             |                                                                                                                                                                                                              |
+|         |                         |             |                                                                                                                                                                                                              |
+| `INFRA` | **MongoDB**             | 27017       | Primary data store — users, CVs, projects, match results, normalized projects, errors/warnings, system metadata. Flexible schema, no migrations.                                                             |
+| `INFRA` | **NATS JetStream**      | 4222 / 8222 | At-least-once durable event bus between every service. Subjects: `cv.indexed`, `project.created`, `project.normalized`, `match.pending`, `match.result`, `match.flipped`. Replay survives consumer downtime. |
+| `INFRA` | **Qdrant**              | 6333 / 6334 | Vector database. Multi-vector storage — one Qdrant point per CV chunk, payload `cv_id` lets dispatch group chunks per CV at query time.                                                                      |
+| `INFRA` | **MinIO**               | 9000 / 9001 | S3-compatible object storage for CV originals (Word + PDF) and company logos. Public-read policy on the logos bucket so iOS Live Activities can load them via the App Group cache.                           |
+| `INFRA` | **Ollama**              | 11434       | Local inference runtime. Optional — the production stack runs Mistral; Ollama is the on-premise alternative for fully self-hosted deployments. See section below.                                            |
 
 > ⚠️ **`falcon-match-engine` is the only service that needs horizontal
-> scaling.** Each LLM call takes several seconds; a single project
-> can fan out to N candidate matches. Add replicas to process them
-> in parallel — every pod shares the same NATS durable consumer so
-> each message lands on exactly one pod.
-
-### Local-only tooling (not in the cluster)
-
-| Name | Port | What it does |
-|------|------|--------------|
-| **falcon-authorizer** | 8082 | Local helper that issues 30-day magic-link tokens for App Store reviewers and manual QA. Bearer-auth gated. |
-| **falcon-designer** | 8083 | Static design canvas + dashboard for Claude-generated mockups. Hot-reloads any HTML/JSX/CSS edit. |
-| **falcon-nest** | 8080 | Local dev portal that lists every service, every infra component, and `kubectl port-forward` cheat sheets. |
-| **falcon-import** | — | One-shot CLIs (e.g. recruiter ratings ingestion from Recruiter Rodeo). |
-
-### Backing services (infrastructure)
-
-| Name | Local port | What it does |
-|------|-----------|--------------|
-| **MongoDB** | 27017 | Primary data store — users, CVs, projects, match results, normalized projects, errors/warnings, system metadata. Flexible schema, no migrations. |
-| **NATS JetStream** | 4222 (client) / 8222 (monitor) | At-least-once durable event bus between every service. Subjects: `cv.indexed`, `project.created`, `project.normalized`, `match.pending`, `match.result`, `match.flipped`. Replay survives consumer downtime. |
-| **Qdrant** | 6333 (HTTP) / 6334 (gRPC) | Vector database. Multi-vector storage — one Qdrant point per CV chunk, payload `cv_id` lets dispatch group chunks per CV at query time. |
-| **MinIO** | 9000 (S3 API) / 9001 (console) | S3-compatible object storage for CV originals (Word + PDF) and company logos. Public-read policy on the logos bucket so iOS Live Activities can load them via the App Group cache. |
-| **Ollama** | 11434 | Local inference runtime. Optional — the production stack runs Mistral; Ollama is the on-premise alternative for fully self-hosted deployments. See section below. |
+> scaling.** Each LLM call takes several seconds; a single project can
+> fan out to N candidate matches. Add replicas to process them in
+> parallel — every pod shares the same NATS durable consumer so each
+> message lands on exactly one pod.
 
 ---
 
 ## LLM strategy and GDPR
 
-Falcon's AI pipeline has two stages — **embedding** (CV text → vector)
+Falcon's AI pipeline has two stages. **embedding** (CV text → vector)
 and **scoring** (CV × project → match score). Both stages currently
 run on **Mistral AI** in France (EU), which is what makes Falcon
 GDPR-compliant by design.
 
-| Stage | Model | Provider | Notes |
-|-------|-------|----------|-------|
-| Embedding | `codestral-embed` | Mistral AI (EU) | Used by `falcon-storage` (CVs) and `falcon-dispatch` (projects). |
-| Match scoring | `mistral-small-latest` | Mistral AI (EU) | Used by `falcon-match-engine`. |
-| OCR (PDF CVs) | `mistral-ocr-latest` | Mistral AI (EU) | Used by `falcon-storage` for PDF uploads. |
+| Stage         | Model                  | Provider        | Notes                                                                |
+| ------------- | ---------------------- | --------------- | -------------------------------------------------------------------- |
+| Embedding     | `codestral-embed`      | Mistral AI (EU) | Used by `falcon-storage` (CVs) and `falcon-dispatch` (projects).     |
+| Match scoring | `mistral-small-latest` | Mistral AI (EU) | Used by `falcon-match-engine`.                                       |
+| OCR (PDF CVs) | `mistral-ocr-latest`   | Mistral AI (EU) | Used by `falcon-storage` for PDF uploads.                            |
 | Normalization | `mistral-small-latest` | Mistral AI (EU) | Used by `falcon-normalizer` for project + CV text → structured JSON. |
 
 CV and project text are **personal data** under GDPR. Mistral is
@@ -175,16 +170,6 @@ deployment/
     └── logs.sh       # multiplexed log tail across every pod
 ```
 
-Daily iteration: `deployment/scripts/rollout.sh` (or filter:
-`rollout.sh api signal`). Tail: `deployment/scripts/logs.sh`.
-
-## Local UIs
-
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| **falcon-nest** (dev portal) | http://localhost:8080 | — |
-| **falcon-designer** | http://localhost:8083 | — |
-| MinIO console | http://localhost:9001 | `minioadmin` / `minioadmin` |
-| Qdrant dashboard | http://localhost:6333/dashboard | — |
-| NATS monitoring | http://localhost:8222 | — |
-| Ollama (if running) | http://localhost:11434 | — |
+Daily iteration: `deployment/scripts/rollout.sh` </br>
+Daily iteration with filter: `deployment/scripts/rollout.sh api signal` </br>
+Tail: `deployment/scripts/logs.sh`
