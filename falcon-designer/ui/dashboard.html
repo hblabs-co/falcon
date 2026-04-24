@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Falcon · Designer</title>
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --card: #ffffff;
+    --text: #1a1a1d;
+    --muted: #6b6b75;
+    --accent: #2563eb;
+    --accent-bg: rgba(37,99,235,0.10);
+    --border: rgba(0,0,0,0.08);
+    --shadow: 0 10px 30px rgba(0,0,0,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e0e10;
+      --card: #18181b;
+      --text: #f3f3f5;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --accent-bg: rgba(96,165,250,0.14);
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+    font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+  header {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 6px;
+  }
+  header h1 {
+    margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+  }
+  header .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 11px; font-weight: 600;
+    border-radius: 999px;
+    background: var(--accent-bg); color: var(--accent);
+  }
+  .subtitle {
+    margin: 0 0 36px;
+    color: var(--muted); font-size: 14px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    display: flex; flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--accent);
+  }
+  .card h3 {
+    margin: 0 0 6px;
+    font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
+  }
+  .card p {
+    margin: 0 0 14px;
+    color: var(--muted); font-size: 13px;
+    flex-grow: 1;
+  }
+  .card .slug {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 8px;
+    border-radius: 6px;
+    align-self: flex-start;
+    margin-bottom: 10px;
+  }
+  .tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: auto;
+  }
+  .tag {
+    font-size: 10px; font-weight: 600;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+  }
+  .empty code {
+    background: var(--card);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <h1>Falcon · Designer</h1>
+    <span class="pill">{{len .Designs}} design{{if ne (len .Designs) 1}}s{{end}}</span>
+  </header>
+  <p class="subtitle">Local design canvas — pick a project to open it.</p>
+
+  <div class="grid">
+    {{range .Designs}}
+      <a class="card" href="/{{.Slug}}/">
+        <span class="slug">{{.Slug}}</span>
+        <h3>{{.Title}}</h3>
+        <p>{{.Description}}</p>
+        {{if .Tags}}
+          <div class="tags">
+            {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+          </div>
+        {{end}}
+      </a>
+    {{else}}
+      <div class="empty">
+        No designs yet — drop an <code>index.html</code> under
+        <code>designs/&lt;slug&gt;/</code> and refresh.
+      </div>
+    {{end}}
+  </div>
+</div>
+</body>
+</html>

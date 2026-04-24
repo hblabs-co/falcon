@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Falcon · App Store Previews</title>
+<meta name="viewport" content="width=1400" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Inter', -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "variant": "Light",
+  "lang": "es"
+}/*EDITMODE-END*/;
+
+const BRAND = {
+  blue: '#0A84FF', blueDeep: '#0051D5', red: '#EB5757',
+  green: '#2E9D4E', orange: '#E8873C',
+  bgLight: '#F5F1E8', bgCream: '#EDE7DA', bgDark: '#0B0B0D',
+  ink: '#0B0B0D', muted: '#6E6E73',
+};
+
+const PREVIEW_W = 430, PREVIEW_H = 932;
+const SHOT_W = 290;
+
+const SHOT_IDS = ['2','3','4','5','6','7','8','9','10'];
+
+const COPY = {
+  '2': {
+    de: { eye: 'Push · Lockscreen',  t1: 'Score 7.8.',         t2: 'Direkt aufs Lock.',  sub: 'Falcon meldet sich, sobald ein Projekt wirklich zu dir passt — mit Score, Skills und Kontext.' },
+    en: { eye: 'Push · Lock Screen', t1: 'Score 7.8.',         t2: 'Straight to Lock.',  sub: 'Falcon pings you the moment a project truly fits — with score, skills and context.' },
+    es: { eye: 'Push · Pant. bloqueo', t1: 'Score 7.8.',       t2: 'Directo al Lock.',   sub: 'Falcon te avisa en el instante en que un proyecto encaja — con score, skills y contexto.' },
+  },
+  '3': {
+    de: { eye: 'KI-Matching',  t1: 'Jedes Projekt.',     t2: 'Bewertet.',  sub: 'Skill-für-Skill Vergleich mit deinem CV. Matching, Lücken, Seniorität — alles sichtbar.' },
+    en: { eye: 'AI Matching',  t1: 'Every project.',    t2: 'Scored.',     sub: 'Skill-by-skill comparison with your CV. Matches, gaps, seniority — all visible.' },
+    es: { eye: 'Matching IA',  t1: 'Cada proyecto.',    t2: 'Evaluado.',   sub: 'Comparación skill a skill con tu CV. Coincidencias, brechas, seniority — todo visible.' },
+  },
+  '4': {
+    de: { eye: 'Live Activity',  t1: 'Immer im',  t2: 'Blick.',  sub: 'Falcon zeigt Treffer in Echtzeit — auf Home Screen, Dynamic Island und Sperrbildschirm.' },
+    en: { eye: 'Live Activity',  t1: 'Always in', t2: 'sight.',  sub: 'Falcon surfaces matches in real time — on Home Screen, Dynamic Island and Lock Screen.' },
+    es: { eye: 'Live Activity',  t1: 'Siempre a', t2: 'la vista.',sub: 'Falcon muestra coincidencias en tiempo real — en Home Screen, Dynamic Island y Lock Screen.' },
+  },
+  '5': {
+    de: { eye: 'Live-Feed',  t1: 'Alle Projekte.',  t2: 'Ein Feed.',  sub: 'freelance.de, freelancermap und mehr — zusammengeführt, sortiert, automatisch bewertet.' },
+    en: { eye: 'Live Feed',  t1: 'Every project.',  t2: 'One feed.',  sub: 'freelance.de, freelancermap and more — unified, sorted and scored automatically.' },
+    es: { eye: 'Feed en vivo', t1: 'Todos los proyectos.', t2: 'Un feed.', sub: 'freelance.de, freelancermap y más — unificado, ordenado y evaluado automáticamente.' },
+  },
+  '6': {
+    de: { eye: 'Setup in 60 Sek.',  t1: 'CV rein.',        t2: 'KI übernimmt.',  sub: 'Word oder PDF hochladen — Mistral extrahiert Skills, Seniorität und Erfahrung automatisch.' },
+    en: { eye: 'Setup in 60 sec.',  t1: 'Drop your CV.',   t2: 'AI takes over.', sub: 'Upload Word or PDF — Mistral extracts your skills, seniority and experience automatically.' },
+    es: { eye: 'Setup en 60 seg.',  t1: 'Sube tu CV.',     t2: 'La IA se encarga.', sub: 'Sube Word o PDF — Mistral extrae tus habilidades, seniority y experiencia automáticamente.' },
+  },
+  '7': {
+    de: { eye: 'Volle Transparenz',  t1: 'Direkt auf den', t2: 'Ansprechpartner.', sub: 'Aufgaben, Ansprechpartner und Original-Ausschreibung — in einer sauberen Ansicht.' },
+    en: { eye: 'Full transparency',  t1: 'Straight to the', t2: 'hiring contact.', sub: 'Tasks, contact details and the original posting — in one clean view.' },
+    es: { eye: 'Total transparencia', t1: 'Directo al',    t2: 'contacto.',        sub: 'Tareas, datos de contacto y publicación original — en una vista limpia.' },
+  },
+  '8': {
+    de: { eye: 'Deine Ansicht',  t1: 'Liste, Raster,',  t2: 'kompakt.',  sub: 'Wechsle zwischen Ansichten — Falcon passt sich deinem Workflow an, nicht umgekehrt.' },
+    en: { eye: 'Your view',      t1: 'List, grid,',     t2: 'compact.',  sub: 'Switch between views — Falcon adapts to your workflow, not the other way around.' },
+    es: { eye: 'Tu vista',       t1: 'Lista, rejilla,', t2: 'compacta.', sub: 'Cambia entre vistas — Falcon se adapta a tu flujo, no al revés.' },
+  },
+  '9': {
+    de: { eye: 'Dein Profil',  t1: 'Berufserfahrung,', t2: 'sauber erfasst.', sub: 'Falcon baut dein Profil aus dem CV auf. Du editierst, die KI matcht.' },
+    en: { eye: 'Your profile', t1: 'Experience,',      t2: 'cleanly captured.', sub: 'Falcon builds your profile from your CV. You edit, the AI matches.' },
+    es: { eye: 'Tu perfil',    t1: 'Experiencia,',     t2: 'bien capturada.', sub: 'Falcon construye tu perfil desde el CV. Tú editas, la IA empareja.' },
+  },
+  '10': {
+    de: { eye: 'EU · Open Source · DSGVO',  t1: 'Lokal.',  t2: 'Offen. Privat.',   sub: 'CV-Embeddings laufen lokal via Ollama. Keine US-Cloud, keine Tracker, Code auf GitHub.' },
+    en: { eye: 'EU · Open Source · GDPR',   t1: 'Local.',  t2: 'Open. Private.',   sub: 'CV embeddings run locally via Ollama. No US cloud, no trackers, code on GitHub.' },
+    es: { eye: 'UE · Open Source · RGPD',   t1: 'Local.',  t2: 'Abierto. Privado.',sub: 'Los embeddings del CV corren localmente con Ollama. Sin nube US, sin trackers, código en GitHub.' },
+  },
+};
+
+const STYLE_BY_SHOT = {
+  '2':  { bg: 'dark',  accent: BRAND.green, blob: { pos: 'tr', color: 'rgba(46,157,78,0.35)' } },
+  '3':  { bg: 'light', accent: BRAND.blue,  blob: { pos: 'bl', color: 'rgba(10,132,255,0.18)' } },
+  '4':  { bg: 'dark',  accent: BRAND.blue,  blob: { pos: 'tl', color: 'rgba(10,132,255,0.35)' } },
+  '5':  { bg: 'cream', accent: BRAND.blue,  blob: null },
+  '6':  { bg: 'light', accent: BRAND.blue,  blob: { pos: 'tr', color: 'rgba(10,132,255,0.2)'  } },
+  '7':  { bg: 'cream', accent: BRAND.orange,blob: null },
+  '8':  { bg: 'light', accent: BRAND.blue,  blob: { pos: 'br', color: 'rgba(10,132,255,0.18)' } },
+  '9':  { bg: 'dark',  accent: BRAND.green, blob: { pos: 'bl', color: 'rgba(46,157,78,0.3)'   } },
+  '10': { bg: 'dark',  accent: BRAND.blue,  blob: { pos: 'tr', color: 'rgba(10,132,255,0.3)'  } },
+};
+
+const LABELS = {
+  de: { '2': '02 · Push', '3': '03 · KI-Matching', '4': '04 · Live Activity', '5': '05 · Projekte', '6': '06 · CV-Upload', '7': '07 · Detail', '8': '08 · Grid', '9': '09 · Profil', '10': '10 · Privacy' },
+  en: { '2': '02 · Push', '3': '03 · AI Matching', '4': '04 · Live Activity', '5': '05 · Projects', '6': '06 · CV Upload', '7': '07 · Detail', '8': '08 · Grid', '9': '09 · Profile', '10': '10 · Privacy' },
+  es: { '2': '02 · Push', '3': '03 · Matching IA', '4': '04 · Live Activity', '5': '05 · Proyectos', '6': '06 · Subida CV', '7': '07 · Detalle', '8': '08 · Rejilla', '9': '09 · Perfil', '10': '10 · Privacidad' },
+};
+
+// Cache-buster bumped whenever assets change. Date.now() forces reload every page load.
+const ASSET_V = Date.now();
+
+const SECTION_TITLES = { de: 'Falcon · App Store Previews', en: 'Falcon · App Store Previews', es: 'Falcon · App Store Previews' };
+const SECTION_SUBS = {
+  de: 'iPhone 6.9″ (1290×2796) · 9 Slides · Ziehen zum Umsortieren',
+  en: 'iPhone 6.9″ (1290×2796) · 9 slides · Drag to reorder',
+  es: 'iPhone 6.9″ (1290×2796) · 9 slides · Arrastra para reordenar',
+};
+
+function Logo({ size = 28 }) {
+  return <img src="assets/brand/falcon-logo.png" width={size} height={size}
+    style={{ borderRadius: size * 0.22, display: 'block' }} crossOrigin="anonymous" />;
+}
+
+// iPhone screenshot aspect ratio (1290x2796 ≈ 0.4614)
+const SHOT_H = Math.round(SHOT_W * 2796 / 1290); // ~629
+const BEZEL = 7; // px — thickness of the phone frame
+
+function PhoneShot({ src, top = 340 }) {
+  // Outer wrapper = bezel (black frame). Inner = rounded clipped screenshot.
+  const outerW = SHOT_W + BEZEL * 2;
+  const outerH = SHOT_H + BEZEL * 2;
+  return (
+    <div style={{
+      position: 'absolute', top,
+      left: '50%', marginLeft: -outerW / 2,
+      width: outerW, height: outerH,
+      borderRadius: 36 + BEZEL,
+      background: '#0E0E10',
+      padding: BEZEL,
+      boxShadow: '0 24px 50px rgba(0,0,0,0.22), 0 6px 16px rgba(0,0,0,0.1)',
+      zIndex: 2,
+    }}>
+      <div style={{
+        width: SHOT_W, height: SHOT_H,
+        borderRadius: 36, overflow: 'hidden',
+        background: '#000',
+      }}>
+        <img src={src}
+          width={SHOT_W} height={SHOT_H}
+          style={{ width: SHOT_W, height: SHOT_H, display: 'block', objectFit: 'cover' }}
+          crossOrigin="anonymous" />
+      </div>
+    </div>
+  );
+}
+
+function GradientBlob({ pos, color }) {
+  const base = { position: 'absolute', width: 440, height: 440, borderRadius: '50%',
+    background: `radial-gradient(circle, ${color} 0%, transparent 65%)`,
+    filter: 'blur(22px)', zIndex: 1, pointerEvents: 'none' };
+  if (pos === 'tr') return <div style={{ ...base, top: -140, right: -120 }} />;
+  if (pos === 'tl') return <div style={{ ...base, top: -140, left: -120 }} />;
+  if (pos === 'bl') return <div style={{ ...base, bottom: -150, left: -140 }} />;
+  if (pos === 'br') return <div style={{ ...base, bottom: -150, right: -140 }} />;
+  return null;
+}
+
+function Preview({ shotId, lang, variant }) {
+  const isDark = variant === 'Dark';
+  const style = STYLE_BY_SHOT[shotId];
+  const copy = COPY[shotId][lang];
+  const bg = isDark ? BRAND.bgDark :
+             style.bg === 'dark'  ? BRAND.bgDark :
+             style.bg === 'cream' ? BRAND.bgCream : BRAND.bgLight;
+  const ink = (bg === BRAND.bgDark) ? '#fff' : BRAND.ink;
+  const accent = style.accent;
+
+  return (
+    <div style={{
+      width: PREVIEW_W, height: PREVIEW_H, background: bg, color: ink,
+      position: 'relative', overflow: 'hidden',
+      fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+    }}>
+      {style.blob && <GradientBlob {...style.blob} />}
+
+      <div style={{ padding: '52px 40px 0', position: 'relative', zIndex: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
+          <Logo size={26} />
+          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: -0.1, opacity: 0.8 }}>Falcon</div>
+          <div style={{ width: 3, height: 3, borderRadius: 2, background: ink, opacity: 0.3 }} />
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, color: accent, textTransform: 'uppercase' }}>
+            {copy.eye}
+          </div>
+        </div>
+
+        <div style={{
+          fontFamily: '"Instrument Serif", Georgia, serif',
+          fontSize: 48, lineHeight: 0.98, letterSpacing: -1.2, fontWeight: 400,
+        }}>
+          {copy.t1}<br/>
+          <i style={{ color: accent, fontWeight: 400 }}>{copy.t2}</i>
+        </div>
+
+        <div style={{
+          fontSize: 14.5, marginTop: 12, opacity: 0.66,
+          letterSpacing: -0.1, lineHeight: 1.4, maxWidth: 340,
+        }}>{copy.sub}</div>
+      </div>
+
+      <PhoneShot src={`assets/${lang}/${shotId}.jpg?v=${ASSET_V}`} top={320} />
+
+      <div style={{
+        position: 'absolute', bottom: 24, left: 40, right: 40,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        fontSize: 10, opacity: 0.4, zIndex: 3, letterSpacing: 0.3,
+      }}>
+        <span>FALCON · AI MATCHING</span>
+        <span>{SHOT_IDS.indexOf(shotId) + 1} / {SHOT_IDS.length}</span>
+      </div>
+    </div>
+  );
+}
+
+function Tweaks({ value, onChange, visible, onClose }) {
+  if (!visible) return null;
+  const btn = (active, label, onClick) => (
+    <button key={label} onClick={onClick}
+      style={{ flex: 1, padding: '8px 0', border: 'none',
+        background: active ? BRAND.blue : 'rgba(255,255,255,0.1)',
+        color: '#fff', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 500 }}>{label}</button>
+  );
+  return (
+    <div style={{
+      position: 'fixed', bottom: 20, right: 20, zIndex: 1000,
+      width: 260, padding: 16, borderRadius: 14,
+      background: 'rgba(20,20,22,0.95)', color: '#fff',
+      backdropFilter: 'blur(20px)', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+      fontFamily: 'Inter, system-ui, sans-serif', fontSize: 13,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ fontWeight: 600, fontSize: 14 }}>Tweaks</div>
+        {onClose && (
+          <button onClick={onClose} aria-label="Close"
+            style={{ background: 'transparent', border: 'none', color: '#fff',
+              opacity: 0.5, cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: 2 }}>×</button>
+        )}
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ opacity: 0.6, fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>Idioma</div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[['de','DE'], ['en','EN'], ['es','ES']].map(([k, label]) =>
+            btn(value.lang === k, label, () => onChange({ lang: k })))}
+        </div>
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ opacity: 0.6, fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>Variante</div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {['Light', 'Dark'].map(v => btn(value.variant === v, v, () => onChange({ variant: v })))}
+        </div>
+      </div>
+      <div style={{ fontSize: 11, opacity: 0.5, lineHeight: 1.4 }}>
+        iPhone 6.9" · 1290×2796
+      </div>
+    </div>
+  );
+}
+
+function ReopenTweaksButton({ onClick }) {
+  return (
+    <button onClick={onClick}
+      style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000,
+        padding: '10px 14px', border: 'none', borderRadius: 10,
+        background: 'rgba(20,20,22,0.95)', color: '#fff',
+        fontFamily: 'Inter, system-ui, sans-serif', fontSize: 12, fontWeight: 500,
+        cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+      ⚙ Tweaks
+    </button>
+  );
+}
+
+function Root() {
+  const [tweaks, setTweaks] = React.useState(TWEAK_DEFAULTS);
+  // Standalone (opened directly): show panel by default.
+  // Inside the editor iframe: only show when the editor explicitly asks.
+  const isStandalone = typeof window !== 'undefined' && window.parent === window;
+  const [editMode, setEditMode] = React.useState(isStandalone);
+
+  React.useEffect(() => {
+    const handler = (e) => {
+      const d = e.data;
+      if (!d || typeof d !== 'object') return;
+      if (d.type === '__activate_edit_mode') setEditMode(true);
+      if (d.type === '__deactivate_edit_mode') setEditMode(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const update = (patch) => {
+    setTweaks(prev => {
+      const next = { ...prev, ...patch };
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: patch }, '*');
+      return next;
+    });
+  };
+
+  React.useEffect(() => {
+    window.__setTweaks = (patch) => update(patch);
+    window.__getTweaks = () => ({ lang: tweaks.lang || 'en', variant: tweaks.variant || 'Light' });
+  }, [tweaks.lang, tweaks.variant]);
+
+  const lang = tweaks.lang || 'en';
+  const variant = tweaks.variant || 'Light';
+  const L = LABELS[lang];
+
+  return (
+    <>
+      <DesignCanvas>
+        <DCSection id="app-store" title={SECTION_TITLES[lang]} subtitle={`${SECTION_SUBS[lang]} · ${variant}`}>
+          {SHOT_IDS.map(id => (
+            <DCArtboard key={`${lang}-${variant}-${id}`} id={`p${id.padStart(2,'0')}`}
+              label={L[id]} width={PREVIEW_W} height={PREVIEW_H}>
+              <Preview shotId={id} lang={lang} variant={variant} />
+            </DCArtboard>
+          ))}
+        </DCSection>
+      </DesignCanvas>
+      <Tweaks value={tweaks} onChange={update} visible={editMode}
+              onClose={isStandalone ? () => setEditMode(false) : undefined} />
+      {isStandalone && !editMode && <ReopenTweaksButton onClick={() => setEditMode(true)} />}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+
+// ========== EXPORT (html2canvas) ==========
+// IMPORTANT: use globalThis.Blob etc to avoid scope collisions in this Babel block.
+const _Blob = globalThis.Blob;
+
+function downloadBlob(blob, filename) {
+  if (!blob || !(blob instanceof _Blob) || blob.size < 1) {
+    throw new Error('empty blob for ' + filename);
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { try { a.remove(); URL.revokeObjectURL(url); } catch(e){} }, 2000);
+}
+
+async function waitReady() {
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(e){}
+  const imgs = Array.from(document.querySelectorAll('[data-dc-slot] .dc-card img'));
+  await Promise.all(imgs.map(async (img) => {
+    if (!img.complete || img.naturalWidth === 0) {
+      await new Promise(r => { img.onload = r; img.onerror = r; });
+    }
+  }));
+  await new Promise(r => setTimeout(r, 250));
+}
+
+async function renderCard(card) {
+  const W = PREVIEW_W, H = PREVIEW_H;
+  const scale = 1290 / W;
+  const prevT = card.style.transform;
+  card.style.transform = 'none';
+  try {
+    const canvas = await window.html2canvas(card, {
+      width: W,
+      height: H,
+      windowWidth: W,
+      windowHeight: H,
+      scale: scale,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      logging: false,
+      imageTimeout: 15000,
+      ignoreElements: (el) => el.classList && (el.classList.contains('per-export-btn') || el.classList.contains('dc-label')),
+    });
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob((b) => b ? resolve(b) : reject(new Error('toBlob returned null')), 'image/png');
+    });
+    if (!blob || blob.size < 1000) throw new Error('empty render');
+    return blob;
+  } finally {
+    card.style.transform = prevT;
+  }
+}
+
+async function exportCombo(lang, variant, folder, btn) {
+  window.__setTweaks && window.__setTweaks({ lang, variant });
+  await new Promise(r => setTimeout(r, 700));
+  await waitReady();
+  const cards = Array.from(document.querySelectorAll('[data-dc-slot] .dc-card'));
+  for (let i = 0; i < cards.length; i++) {
+    btn.textContent = `${lang.toUpperCase()} · ${variant} · ${i+1}/${cards.length}…`;
+    const slot = cards[i].closest('[data-dc-slot]');
+    const label = slot.dataset.dcSlot || `p${i+1}`;
+    const blob = await renderCard(cards[i]);
+    folder.file(`${label}.png`, blob);
+  }
+}
+
+async function exportAll() {
+  const btn = document.getElementById('export-all-btn');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  const prev = { ...((window.__getTweaks && window.__getTweaks()) || { lang: 'en', variant: 'Light' }) };
+  try {
+    const zip = new JSZip();
+    for (const lang of ['de','en','es']) {
+      for (const variant of ['Light','Dark']) {
+        const folder = zip.folder(`${lang}-${variant.toLowerCase()}`);
+        await exportCombo(lang, variant, folder, btn);
+      }
+    }
+    btn.textContent = 'Zipping…';
+    const blob = await zip.generateAsync({ type: 'blob' }, (meta) => {
+      btn.textContent = `Zipping ${Math.round(meta.percent)}%…`;
+    });
+    downloadBlob(blob, 'falcon-app-store-previews-all.zip');
+  } catch (e) {
+    console.error(e);
+    alert('Error: ' + (e && e.message ? e.message : e));
+  } finally {
+    window.__setTweaks && window.__setTweaks(prev);
+    btn.textContent = orig; btn.disabled = false;
+  }
+}
+
+async function exportCurrent() {
+  const btn = document.getElementById('export-current-btn');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  try {
+    await waitReady();
+    const zip = new JSZip();
+    const cards = Array.from(document.querySelectorAll('[data-dc-slot] .dc-card'));
+    for (let i = 0; i < cards.length; i++) {
+      btn.textContent = `${i+1}/${cards.length}…`;
+      const slot = cards[i].closest('[data-dc-slot]');
+      const label = slot.dataset.dcSlot || `p${i+1}`;
+      const blob = await renderCard(cards[i]);
+      zip.file(`${label}.png`, blob);
+    }
+    const t = (window.__getTweaks && window.__getTweaks()) || {};
+    const blob = await zip.generateAsync({ type: 'blob' });
+    downloadBlob(blob, `falcon-${t.lang || 'en'}-${(t.variant || 'light').toLowerCase()}.zip`);
+  } catch (e) { console.error(e); alert('Error: ' + (e && e.message ? e.message : e)); }
+  finally { btn.textContent = orig; btn.disabled = false; }
+}
+
+async function exportSingle(index) {
+  try {
+    await waitReady();
+    const cards = Array.from(document.querySelectorAll('[data-dc-slot] .dc-card'));
+    const card = cards[index];
+    if (!card) throw new Error('no card at ' + index);
+    const slot = card.closest('[data-dc-slot]');
+    const label = slot.dataset.dcSlot || `p${index+1}`;
+    const t = (window.__getTweaks && window.__getTweaks()) || {};
+    const blob = await renderCard(card);
+    downloadBlob(blob, `falcon-${t.lang || 'en'}-${(t.variant || 'light').toLowerCase()}-${label}.png`);
+  } catch (e) { console.error(e); alert('Error: ' + (e && e.message ? e.message : e)); }
+}
+
+window.exportSingle = exportSingle;
+window.renderCard = renderCard;
+
+// ========== UI ==========
+const exportUI = document.createElement('div');
+exportUI.innerHTML = `
+  <div style="position:fixed; top:18px; right:18px; z-index:200; display:flex; gap:8px;">
+    <button id="export-current-btn" style="
+      padding:11px 16px; border:none; border-radius:10px;
+      background:#fff; color:#0B0B0D; font:600 13px/1 Inter, system-ui;
+      cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.08);
+    ">↓ Current (9 PNGs)</button>
+    <button id="export-all-btn" style="
+      padding:11px 18px; border:none; border-radius:10px;
+      background:#0B0B0D; color:#fff; font:600 13px/1 Inter, system-ui;
+      cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.15);
+    ">↓ All 3 langs × 2 variants (54 PNGs)</button>
+  </div>
+`;
+document.body.appendChild(exportUI);
+document.getElementById('export-all-btn').onclick = exportAll;
+document.getElementById('export-current-btn').onclick = exportCurrent;
+
+function injectPerArtboardButtons() {
+  const slots = document.querySelectorAll('[data-dc-slot]');
+  slots.forEach((slot) => {
+    if (slot.querySelector('.per-export-btn')) return;
+    const b = document.createElement('button');
+    b.className = 'per-export-btn';
+    b.textContent = '↓ PNG';
+    Object.assign(b.style, {
+      position: 'absolute', top: '-34px', right: '0',
+      padding: '5px 10px', border: 'none', borderRadius: '7px',
+      background: '#0B0B0D', color: '#fff',
+      font: '600 11px/1 Inter, system-ui',
+      cursor: 'pointer', zIndex: '50',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    });
+    b.onclick = (e) => {
+      e.stopPropagation();
+      const idx = Array.from(document.querySelectorAll('[data-dc-slot]')).indexOf(slot);
+      window.exportSingle(idx);
+    };
+    slot.style.position = slot.style.position || 'relative';
+    slot.appendChild(b);
+  });
+}
+setInterval(injectPerArtboardButtons, 500);
+setTimeout(injectPerArtboardButtons, 800);
+</script>
+</body>
+</html>
