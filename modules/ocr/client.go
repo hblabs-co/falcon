@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/ownhttp"
 )
 
@@ -18,9 +18,9 @@ import (
 //
 // Payload shape matches Mistral's spec:
 //
-//   POST /v1/ocr
-//   { "model": "mistral-ocr-latest",
-//     "document": { "type": "document_url", "document_url": "<url>" } }
+//	POST /v1/ocr
+//	{ "model": "mistral-ocr-latest",
+//	  "document": { "type": "document_url", "document_url": "<url>" } }
 type Client struct {
 	http  *ownhttp.Client
 	model string
@@ -31,7 +31,7 @@ type Client struct {
 // this client can be pointed at self-hosted equivalents in the future
 // without a code change.
 func NewFromEnv() (*Client, error) {
-	values, err := helpers.ReadEnvs("OCR_URL", "OCR_API_KEY", "OCR_MODEL")
+	values, err := environment.ReadMany("OCR_URL", "OCR_API_KEY", "OCR_MODEL")
 	if err != nil {
 		return nil, err
 	}

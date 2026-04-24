@@ -23,10 +23,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-	"os"
 
+	"hblabs.co/falcon/common/constants"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/falcon-authorizer/authorizer"
 )
@@ -37,13 +39,10 @@ func main() {
 	// handler can dereference `system.GetStorage()`.
 	system.Init()
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8082"
-	}
+	port := environment.ParseInt("PORT", 8082)
+	system.PrintStartupBannerAndPort(constants.ServiceAuthorizer, port)
 
-	log.Printf("falcon-authorizer listening on :%s", port)
-	if err := http.ListenAndServe(":"+port, authorizer.Handler()); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), authorizer.Handler()); err != nil {
 		log.Fatalf("http: %v", err)
 	}
 }

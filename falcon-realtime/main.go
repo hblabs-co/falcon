@@ -12,6 +12,7 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
+	system.PrintStartupBannerAndPort(constants.ServiceRealtime, realtime.GetParsedPort())
 	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceRealtime)
 
 	system.InitBus(system.MergeBusConfigs(

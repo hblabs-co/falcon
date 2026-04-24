@@ -11,7 +11,7 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 )
 
 var (
@@ -117,7 +117,7 @@ func InitBus(streams []jetstream.StreamConfig) {
 //
 // Supported values: "all", "last", "new" (default).
 func deliverPolicy() jetstream.DeliverPolicy {
-	switch helpers.ReadEnvOptional("NATS_DELIVER_POLICY", "new") {
+	switch environment.ReadOptional("NATS_DELIVER_POLICY", "new") {
 	case "all":
 		return jetstream.DeliverAllPolicy
 	case "last":

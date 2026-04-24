@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/modules/llm"
@@ -54,7 +54,7 @@ func NewService(ctx context.Context) (*Service, error) {
 
 	return &Service{
 		scorer:    newScorer(llmClient),
-		threshold: helpers.ParseFloat32("MATCH_ENGINE_SCORE_THRESHOLD", defaultScoreThreshold),
+		threshold: environment.ParseFloat32("MATCH_ENGINE_SCORE_THRESHOLD", defaultScoreThreshold),
 	}, nil
 }
 
@@ -233,7 +233,6 @@ func cleanProjectTitle(ctx context.Context, projectID, rawTitle string) string {
 	}
 	return rawTitle
 }
-
 
 func recordScoreError(ctx context.Context, event models.MatchPendingEvent, err error, rawContent string) {
 	system.RecordError(ctx, models.ServiceError{

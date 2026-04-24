@@ -10,7 +10,7 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 )
@@ -27,7 +27,7 @@ type Service struct {
 func newService() *Service {
 	return &Service{
 		hub:    NewHub(),
-		secret: helpers.ReadEnvOptional("REALTIME_SHARED_SECRET", ""),
+		secret: environment.ReadOptional("REALTIME_SHARED_SECRET", ""),
 	}
 }
 
@@ -46,7 +46,7 @@ func (s *Service) startHTTP(ctx context.Context) error {
 		})
 	})
 
-	port := helpers.ReadEnvOptional("REALTIME_PORT", "8090")
+	port := GetRawPort()
 	s.server = &http.Server{
 		Addr:              ":" + port,
 		Handler:           mux,

@@ -13,6 +13,7 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
+	system.PrintStartupBanner(constants.ServiceStorage)
 	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceStorage)
 
 	// cv.prepare.requested / cv.prepared are NATS core request/reply — not in any stream.

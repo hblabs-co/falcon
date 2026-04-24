@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/ownhttp"
 )
 
@@ -32,7 +32,7 @@ type Client struct {
 
 // NewFromEnv creates a Client from LLM_URL, LLM_API_KEY, LLM_MODEL, LLM_PROVIDER env vars.
 func NewFromEnv(translatePrompt string) (*Client, error) {
-	values, err := helpers.ReadEnvs("LLM_URL", "LLM_API_KEY", "LLM_MODEL", "LLM_PROVIDER")
+	values, err := environment.ReadMany("LLM_URL", "LLM_API_KEY", "LLM_MODEL", "LLM_PROVIDER")
 	if err != nil {
 		return nil, err
 	}

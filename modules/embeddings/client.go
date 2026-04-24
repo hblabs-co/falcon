@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/ownhttp"
 )
 
@@ -21,7 +21,7 @@ type Client struct {
 // NewFromEnv creates a Client from environment variables.
 // EMBEDDINGS_URL, EMBEDDINGS_API_KEY, and EMBEDDINGS_MODEL are required.
 func NewFromEnv() (*Client, error) {
-	values, err := helpers.ReadEnvs("EMBEDDINGS_URL", "EMBEDDINGS_API_KEY", "EMBEDDINGS_MODEL")
+	values, err := environment.ReadMany("EMBEDDINGS_URL", "EMBEDDINGS_API_KEY", "EMBEDDINGS_MODEL")
 	if err != nil {
 		return nil, err
 	}

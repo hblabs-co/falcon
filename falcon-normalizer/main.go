@@ -25,6 +25,8 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
+	system.PrintStartupBanner(constants.ServiceNormalizer)
+
 	system.InitBus(system.MergeBusConfigs(system.StreamProjects(), system.StreamMatches(), system.StreamStorage()))
 
 	ctx := system.Ctx()

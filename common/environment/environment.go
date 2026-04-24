@@ -1,4 +1,4 @@
-package helpers
+package environment
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// ReadEnv returns the value of the environment variable key with whitespace trimmed.
+// Read returns the value of the environment variable key with whitespace trimmed.
 // Panics if the variable is unset or empty.
-func ReadEnv(key string) (string, error) {
+func Read(key string) (string, error) {
 	val := strings.TrimSpace(os.Getenv(key))
 	if val == "" {
 		return "", fmt.Errorf("required environment variable not set: %s", key)
@@ -19,12 +19,12 @@ func ReadEnv(key string) (string, error) {
 	return val, nil
 }
 
-func ReadEnvs(keys ...string) ([]string, error) {
+func ReadMany(keys ...string) ([]string, error) {
 	values := make([]string, len(keys))
 	var missing []string
 
 	for i, key := range keys {
-		val, err := ReadEnv(key)
+		val, err := Read(key)
 		if err != nil {
 			missing = append(missing, key)
 			continue
@@ -39,9 +39,9 @@ func ReadEnvs(keys ...string) ([]string, error) {
 	return values, nil
 }
 
-// ReadEnvOptional returns the value of the environment variable key with whitespace
+// ReadOptional returns the value of the environment variable key with whitespace
 // trimmed, or defaultVal if it is unset or empty.
-func ReadEnvOptional(key string, defaultVal string) string {
+func ReadOptional(key string, defaultVal string) string {
 	val := strings.TrimSpace(os.Getenv(key))
 	if val == "" {
 		return defaultVal
@@ -50,7 +50,7 @@ func ReadEnvOptional(key string, defaultVal string) string {
 }
 
 func ParseInt(key string, def int) int {
-	v := ReadEnvOptional(key, "")
+	v := ReadOptional(key, "")
 	if v == "" {
 		return def
 	}
@@ -63,7 +63,7 @@ func ParseInt(key string, def int) int {
 }
 
 func ParseFloat32(key string, def float32) float32 {
-	v := ReadEnvOptional(key, "")
+	v := ReadOptional(key, "")
 	if v == "" {
 		return def
 	}
@@ -76,7 +76,7 @@ func ParseFloat32(key string, def float32) float32 {
 }
 
 func ParseDuration(key, def string) time.Duration {
-	v := ReadEnvOptional(key, def)
+	v := ReadOptional(key, def)
 	d, err := time.ParseDuration(v)
 	if err != nil {
 		logrus.Printf("invalid %s %q, using %s default", key, v, def)

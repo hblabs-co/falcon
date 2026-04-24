@@ -3,7 +3,7 @@ package signal
 import (
 	"strings"
 
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 )
 
 // AdminConfig holds the set of email addresses that should receive operational
@@ -23,7 +23,7 @@ type AdminConfig struct {
 
 // LoadAdminConfig parses ADMIN_EMAILS from the environment.
 func LoadAdminConfig() AdminConfig {
-	raw := helpers.ReadEnvOptional("ADMIN_EMAILS", "")
+	raw := environment.ReadOptional("ADMIN_EMAILS", "")
 	cfg := AdminConfig{set: make(map[string]struct{})}
 	if raw == "" {
 		return cfg

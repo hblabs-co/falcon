@@ -1,6 +1,9 @@
 package helpers
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"go.mongodb.org/mongo-driver/v2/bson"
+	environment "hblabs.co/falcon/common/environment"
+)
 
 // defaultScoreThreshold mirrors falcon-match-engine's default. Kept in
 // sync by convention — if you bump one, bump the other. Both read the
@@ -13,7 +16,7 @@ const defaultScoreThreshold = float32(6.0)
 // rollout-free configmap change takes effect on the next HTTP request
 // or NATS event.
 func CurrentScoreThreshold() float32 {
-	return ParseFloat32("MATCH_ENGINE_SCORE_THRESHOLD", defaultScoreThreshold)
+	return environment.ParseFloat32("MATCH_ENGINE_SCORE_THRESHOLD", defaultScoreThreshold)
 }
 
 // VisibleMatchFilter is the canonical "what counts as a user-visible

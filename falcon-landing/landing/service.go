@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"hblabs.co/falcon/common/ownhttp"
 )
 
 // Embedded assets: template, per-language locale JSON, and the raw
@@ -196,8 +198,11 @@ func Handler() http.Handler {
 
 	mux.HandleFunc("/", root)
 
-	// Basic access log so k8s stdout gives a useful trail.
-	return logRequests(mux)
+	// Basic access log so k8s stdout gives a useful trail. Shared
+	// middleware keeps the log shape identical to falcon-api's gin
+	// logger, so ops can `grep path=/healthz` across every service
+	// and get the same field layout.
+	return ownhttp.LoggingMiddleware(mux)
 }
 
 // root is the catch-all that either (a) renders the page in the path's
@@ -393,17 +398,6 @@ func cacheStatic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "public, max-age=604800, immutable")
 		next.ServeHTTP(w, r)
-	})
-}
-
-func logRequests(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next.ServeHTTP(w, r)
-		fmt.Printf("%s %s %s %s\n",
-			time.Now().UTC().Format(time.RFC3339),
-			r.Method, r.URL.Path, time.Since(start),
-		)
 	})
 }
 

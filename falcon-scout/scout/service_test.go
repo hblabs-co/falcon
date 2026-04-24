@@ -18,15 +18,15 @@ type mockPlatform struct {
 	pollCalled      bool
 }
 
-func (m *mockPlatform) Name() string                             { return m.name }
-func (m *mockPlatform) BaseURL() string                          { return "" }
-func (m *mockPlatform) CompanyID() string                        { return "" }
-func (m *mockPlatform) SetLogger(_ any)                          {}
-func (m *mockPlatform) SetSaveHandler(_ platformkit.SaveFn)      {}
-func (m *mockPlatform) SetFilterHandler(_ platformkit.FilterFn)  {}
-func (m *mockPlatform) SetWarnHandler(_ platformkit.WarnFn)      {}
-func (m *mockPlatform) SetErrHandler(_ platformkit.ErrFn)        {}
-func (m *mockPlatform) SetBatchConfig(_ platformkit.BatchConfig) {}
+func (m *mockPlatform) Name() string                                { return m.name }
+func (m *mockPlatform) BaseURL() string                             { return "" }
+func (m *mockPlatform) CompanyID() string                           { return "" }
+func (m *mockPlatform) SetLogger(_ any)                             {}
+func (m *mockPlatform) SetSaveHandler(_ platformkit.SaveFn)         {}
+func (m *mockPlatform) SetFilterHandler(_ platformkit.FilterFn)     {}
+func (m *mockPlatform) SetWarnHandler(_ platformkit.WarnFn)         {}
+func (m *mockPlatform) SetErrHandler(_ platformkit.ErrFn)           {}
+func (m *mockPlatform) SetBatchConfig(_ platformkit.BatchConfig)    {}
 func (m *mockPlatform) Retry(_ context.Context, _ any, _ any) error { return nil }
 func (m *mockPlatform) Init(_ context.Context) error {
 	m.initCalled = true
@@ -134,7 +134,7 @@ func TestReadAllowedPlatforms(t *testing.T) {
 }
 
 func TestReadAllowedPlatformsDefault(t *testing.T) {
-	// When PLATFORMS is empty, ReadEnvOptional falls back to "hblabs.co".
+	// When PLATFORMS is empty, ReadOptional falls back to "hblabs.co".
 	t.Setenv("PLATFORMS", "")
 
 	svc := NewService()

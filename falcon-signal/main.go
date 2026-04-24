@@ -12,6 +12,7 @@ func main() {
 	system.ConfigLogger()
 	system.Init()
 
+	system.PrintStartupBanner(constants.ServiceSignal)
 	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceSignal)
 
 	system.InitBus(system.MergeBusConfigs(

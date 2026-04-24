@@ -12,13 +12,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/modules/embeddings"
 	"hblabs.co/falcon/modules/qdrant"
 )
-
 
 const (
 	defaultTopN           = 20
@@ -57,10 +56,10 @@ func NewService() (*Service, error) {
 	return &Service{
 		embeddings:         emb,
 		qdrant:             qdr,
-		topN:               helpers.ParseInt("DISPATCH_TOP_N", defaultTopN),
-		threshold:          helpers.ParseFloat32("DISPATCH_SCORE_THRESHOLD", defaultScoreThreshold),
-		backfillHours:      helpers.ParseInt("DISPATCH_CV_BACKFILL_HOURS", defaultBackfillHours),
-		backfillMaxProject: helpers.ParseInt("DISPATCH_CV_BACKFILL_MAX_PROJECTS", defaultBackfillMaxProjects),
+		topN:               environment.ParseInt("DISPATCH_TOP_N", defaultTopN),
+		threshold:          environment.ParseFloat32("DISPATCH_SCORE_THRESHOLD", defaultScoreThreshold),
+		backfillHours:      environment.ParseInt("DISPATCH_CV_BACKFILL_HOURS", defaultBackfillHours),
+		backfillMaxProject: environment.ParseInt("DISPATCH_CV_BACKFILL_MAX_PROJECTS", defaultBackfillMaxProjects),
 	}, nil
 }
 
@@ -212,17 +211,17 @@ func (s *Service) handleProjectEvent(data []byte) error {
 // app with pre-computed matches instead of an empty list.
 //
 // Shape of the work:
-//   1. Pull the latest N projects whose DisplayUpdatedAt falls inside
-//      the backfill window (default 48h).
-//   2. Embed each project text, then query Qdrant filtered by
-//      this CV's payload. We search *this CV's chunks only* — cheap
-//      per-project since the filter narrows the candidate set before
-//      the cosine step.
-//   3. For every chunk that clears the threshold, publish a
-//      match.pending with the best chunk score. match-engine picks it
-//      up and runs the real LLM scoring; upsert-by-(cv_id, project_id)
-//      means this can safely race against the forward dispatch for
-//      the same pair without duplicating rows.
+//  1. Pull the latest N projects whose DisplayUpdatedAt falls inside
+//     the backfill window (default 48h).
+//  2. Embed each project text, then query Qdrant filtered by
+//     this CV's payload. We search *this CV's chunks only* — cheap
+//     per-project since the filter narrows the candidate set before
+//     the cosine step.
+//  3. For every chunk that clears the threshold, publish a
+//     match.pending with the best chunk score. match-engine picks it
+//     up and runs the real LLM scoring; upsert-by-(cv_id, project_id)
+//     means this can safely race against the forward dispatch for
+//     the same pair without duplicating rows.
 //
 // Runs serially — a CV indexed once doesn't need parallelism, and
 // embedding 500 projects sequentially on a local Ollama takes ~40s,

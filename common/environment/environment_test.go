@@ -1,8 +1,8 @@
-package helpers
+package environment
 
 import "testing"
 
-func TestReadEnv(t *testing.T) {
+func TestRead(t *testing.T) {
 	tests := []struct {
 		name    string
 		key     string
@@ -23,18 +23,18 @@ func TestReadEnv(t *testing.T) {
 			if tc.value != "" {
 				t.Setenv(tc.key, tc.value)
 			}
-			got, err := ReadEnv(tc.key)
+			got, err := Read(tc.key)
 			if (err != nil) != tc.wantErr {
-				t.Errorf("ReadEnv(%q) error = %v, wantErr %v", tc.key, err, tc.wantErr)
+				t.Errorf("Read(%q) error = %v, wantErr %v", tc.key, err, tc.wantErr)
 			}
 			if got != tc.want {
-				t.Errorf("ReadEnv(%q) = %q, want %q", tc.key, got, tc.want)
+				t.Errorf("Read(%q) = %q, want %q", tc.key, got, tc.want)
 			}
 		})
 	}
 }
 
-func TestReadEnvs(t *testing.T) {
+func TestReadMany(t *testing.T) {
 	tests := []struct {
 		name    string
 		envs    map[string]string
@@ -91,19 +91,19 @@ func TestReadEnvs(t *testing.T) {
 			for k, v := range tc.envs {
 				t.Setenv(k, v)
 			}
-			got, err := ReadEnvs(tc.keys...)
+			got, err := ReadMany(tc.keys...)
 			if (err != nil) != tc.wantErr {
-				t.Errorf("ReadEnvs(%v) error = %v, wantErr %v", tc.keys, err, tc.wantErr)
+				t.Errorf("ReadMany(%v) error = %v, wantErr %v", tc.keys, err, tc.wantErr)
 				return
 			}
 			if !tc.wantErr {
 				if len(got) != len(tc.want) {
-					t.Errorf("ReadEnvs(%v) len = %d, want %d", tc.keys, len(got), len(tc.want))
+					t.Errorf("ReadMany(%v) len = %d, want %d", tc.keys, len(got), len(tc.want))
 					return
 				}
 				for i := range tc.want {
 					if got[i] != tc.want[i] {
-						t.Errorf("ReadEnvs(%v)[%d] = %q, want %q", tc.keys, i, got[i], tc.want[i])
+						t.Errorf("ReadMany(%v)[%d] = %q, want %q", tc.keys, i, got[i], tc.want[i])
 					}
 				}
 			}
@@ -140,7 +140,7 @@ func TestParseFloat32(t *testing.T) {
 	}
 }
 
-func TestReadEnvOptional(t *testing.T) {
+func TestReadOptional(t *testing.T) {
 	tests := []struct {
 		name       string
 		key        string
@@ -161,9 +161,9 @@ func TestReadEnvOptional(t *testing.T) {
 			if tc.value != "" {
 				t.Setenv(tc.key, tc.value)
 			}
-			got := ReadEnvOptional(tc.key, tc.defaultVal)
+			got := ReadOptional(tc.key, tc.defaultVal)
 			if got != tc.want {
-				t.Errorf("ReadEnvOptional(%q, %q) = %q, want %q", tc.key, tc.defaultVal, got, tc.want)
+				t.Errorf("ReadOptional(%q, %q) = %q, want %q", tc.key, tc.defaultVal, got, tc.want)
 			}
 		})
 	}

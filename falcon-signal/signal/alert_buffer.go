@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 )
 
 // defaultAlertWindow is used when ADMIN_ALERT_WINDOW is unset or invalid.
@@ -132,7 +132,7 @@ func runAlertFlushLoop(ctx context.Context, buf *alertBuffer, notifier *AdminNot
 // readAlertWindow parses ADMIN_ALERT_WINDOW from the environment. Expects a
 // Go duration string (e.g. "2m", "90s", "5m"). Falls back to 2 minutes.
 func readAlertWindow() time.Duration {
-	v := helpers.ReadEnvOptional("ADMIN_ALERT_WINDOW", "2m")
+	v := environment.ReadOptional("ADMIN_ALERT_WINDOW", "2m")
 	d, err := time.ParseDuration(v)
 	if err != nil {
 		logrus.Warnf("invalid ADMIN_ALERT_WINDOW %q — using %s default", v, defaultAlertWindow)

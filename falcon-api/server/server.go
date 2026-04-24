@@ -3,13 +3,14 @@ package server
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
+	"hblabs.co/falcon/common/ownhttp"
 	"hblabs.co/falcon/common/system"
 )
 
@@ -21,7 +22,7 @@ type RouteGroup interface {
 
 // Run starts the HTTP server with all provided route groups mounted.
 func Run(groups ...RouteGroup) error {
-	port := helpers.ReadEnvOptional("PORT", "8080")
+	port := environment.ReadOptional("PORT", "8080")
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -89,13 +90,19 @@ func JWTMiddleware() gin.HandlerFunc {
 	}
 }
 
+// ginLogger delegates to the shared `ownhttp.LogRequest` so Gin-based
+// services emit the same log shape as net/http services (landing,
+// authorizer). Records start time before `c.Next()` so the duration
+// field reflects the full handler chain, including middleware.
 func ginLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		start := time.Now()
 		c.Next()
-		logrus.WithFields(logrus.Fields{
-			"method": c.Request.Method,
-			"path":   c.Request.URL.Path,
-			"status": c.Writer.Status(),
-		}).Info("request")
+		ownhttp.LogRequest(
+			c.Request.Method,
+			c.Request.URL.Path,
+			c.Writer.Status(),
+			time.Since(start),
+		)
 	}
 }

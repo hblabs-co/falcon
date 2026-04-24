@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/ownhttp"
 	"hblabs.co/falcon/common/system"
@@ -87,7 +87,7 @@ func handleMagic(c *gin.Context) {
 		return
 	}
 
-	magicURL := helpers.ReadEnvOptional("APP_SCHEME", "falcon") + "://auth?token=" + rawToken
+	magicURL := environment.ReadOptional("APP_SCHEME", "falcon") + "://auth?token=" + rawToken
 
 	evt := models.MagicLinkRequestedEvent{
 		Email:     body.Email,

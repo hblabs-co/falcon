@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/modules/platformkit"
@@ -28,9 +28,9 @@ const (
 // Both workers share the same processRetryBatch logic; only the error_name
 // filter and interval differ.
 func startRetryWorkers(ctx context.Context, p Platform, logger *logrus.Entry) {
-	inspectInterval := helpers.ParseDuration("RETRY_INSPECT_INTERVAL", defaultRetryInspectInterval.String())
-	serverInterval := helpers.ParseDuration("RETRY_SERVER_INTERVAL", defaultRetryServerInterval.String())
-	maxAttempts := helpers.ParseInt("MAX_RETRY_ATTEMPTS", defaultMaxRetryAttempts)
+	inspectInterval := environment.ParseDuration("RETRY_INSPECT_INTERVAL", defaultRetryInspectInterval.String())
+	serverInterval := environment.ParseDuration("RETRY_SERVER_INTERVAL", defaultRetryServerInterval.String())
+	maxAttempts := environment.ParseInt("MAX_RETRY_ATTEMPTS", defaultMaxRetryAttempts)
 
 	logger.Infof("[retry] workers started — inspect every %s, server every %s, max %d attempts",
 		inspectInterval, serverInterval, maxAttempts)

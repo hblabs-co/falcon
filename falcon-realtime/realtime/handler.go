@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/system"
 )
 
@@ -38,7 +38,7 @@ func (m *Module) Register(ctx context.Context) error {
 	// every message. Without this, JetStream would load-balance across
 	// replicas and only one instance would get each event — broken for
 	// realtime fan-out since a user may be connected to any replica.
-	replicaID := helpers.ReadEnvOptional("REALTIME_REPLICA_ID", "default")
+	replicaID := environment.ReadOptional("REALTIME_REPLICA_ID", "default")
 
 	if err := system.Subscribe(
 		ctx,

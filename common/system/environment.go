@@ -8,13 +8,13 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 )
 
 // MustEnv returns the value of the required environment variable key.
 // Calls logrus.Fatalf and exits if the variable is unset or empty.
 func MustEnv(key string) string {
-	v, err := helpers.ReadEnv(key)
+	v, err := environment.Read(key)
 	if err != nil {
 		logrus.Fatalf("%v", err)
 	}
@@ -44,7 +44,7 @@ func Platform() string {
 // PollInterval reads POLL_INTERVAL from the environment (e.g. "30s", "5m").
 // Defaults to 30s if unset or invalid.
 func PollInterval() time.Duration {
-	v := helpers.ReadEnvOptional("POLL_INTERVAL", "30s")
+	v := environment.ReadOptional("POLL_INTERVAL", "30s")
 	d, err := time.ParseDuration(v)
 	if err != nil {
 		log.Printf("invalid POLL_INTERVAL %q, using 30s default", v)
@@ -59,9 +59,9 @@ func PollInterval() time.Duration {
 //   - BATCH_BATCH_DELAY: longer pause between batches, e.g. "10s" (default 15s)
 func BatchCfg() BatchConfig {
 	cfg := BatchConfig{
-		Size:       helpers.ParseInt("BATCH_SIZE", 10),
-		ItemDelay:  helpers.ParseDuration("BATCH_ITEM_DELAY", "2s"),
-		BatchDelay: helpers.ParseDuration("BATCH_BATCH_DELAY", "10s"),
+		Size:       environment.ParseInt("BATCH_SIZE", 10),
+		ItemDelay:  environment.ParseDuration("BATCH_ITEM_DELAY", "2s"),
+		BatchDelay: environment.ParseDuration("BATCH_BATCH_DELAY", "10s"),
 	}
 
 	return cfg

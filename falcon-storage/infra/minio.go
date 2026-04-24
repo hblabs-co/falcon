@@ -10,7 +10,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 )
 
 var (
@@ -34,7 +34,7 @@ func GetMinioPublic() *minio.Client {
 }
 
 func initMinio() {
-	values, err := helpers.ReadEnvs("MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_PUBLIC_URL")
+	values, err := environment.ReadMany("MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_PUBLIC_URL")
 	if err != nil {
 		logrus.Fatalf("infra/minio: %v", err)
 	}

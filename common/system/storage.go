@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 )
 
@@ -45,7 +45,7 @@ func GetStorage() *Storage {
 func InitStorage(ctx context.Context) error {
 	var initErr error
 	storageOnce.Do(func() {
-		values, err := helpers.ReadEnvs("MONGODB_URI", "MONGODB_DATABASE")
+		values, err := environment.ReadMany("MONGODB_URI", "MONGODB_DATABASE")
 		if err != nil {
 			initErr = err
 

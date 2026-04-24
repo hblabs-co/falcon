@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/ownhttp"
 )
@@ -41,14 +41,14 @@ func (r SearchResult) GetEvent(projectID, platform string) models.MatchPendingEv
 // QDRANT_URL and QDRANT_COLLECTION are required.
 // QDRANT_VECTOR_DIM is optional (required only if EnsureCollection will be called).
 func NewFromEnv() (*Client, error) {
-	values, err := helpers.ReadEnvs("QDRANT_URL", "QDRANT_COLLECTION")
+	values, err := environment.ReadMany("QDRANT_URL", "QDRANT_COLLECTION")
 	if err != nil {
 		return nil, err
 	}
 	url, collection := values[0], values[1]
 
 	var vectorDim int
-	if dimStr := helpers.ReadEnvOptional("QDRANT_VECTOR_DIM", ""); dimStr != "" {
+	if dimStr := environment.ReadOptional("QDRANT_VECTOR_DIM", ""); dimStr != "" {
 		vectorDim, err = strconv.Atoi(dimStr)
 		if err != nil {
 			return nil, fmt.Errorf("QDRANT_VECTOR_DIM must be an integer: %w", err)

@@ -27,19 +27,29 @@ const bannerInnerWidth = 50
 //
 //	system.PrintStartupBanner("Falcon · Preview dev server", 8083,
 //	    "watching: server, ../assets/screenshots")
-func PrintStartupBanner(title string, port int, extras ...string) {
+func PrintStartupBannerAndPort(title string, port int, extras ...string) {
 	fmt.Println()
 	fmt.Println("  ╭──────────────────────────────────────────────────╮")
 	fmt.Printf("  │%s│\n", centerInWidth(title, bannerInnerWidth))
 	fmt.Println("  ╰──────────────────────────────────────────────────╯")
-	fmt.Printf("  ➜  Local:    http://localhost:%d\n", port)
-	for _, ip := range ownhttp.LanIPs() {
-		fmt.Printf("  ➜  Network:  http://%s:%d\n", ip, port)
+	// port <= 0 signals "this service has no HTTP listener" — e.g.
+	// NATS-only consumers (scout, match-engine, normalizer, …).
+	// Skip the URL lines so the banner doesn't lie about what's
+	// reachable.
+	if port > 0 {
+		fmt.Printf("  ➜  Local:    http://localhost:%d\n", port)
+		for _, ip := range ownhttp.LanIPs() {
+			fmt.Printf("  ➜  Network:  http://%s:%d\n", ip, port)
+		}
 	}
 	for _, line := range extras {
 		fmt.Printf("  %s\n", line)
 	}
 	fmt.Println()
+}
+
+func PrintStartupBanner(title string, extras ...string) {
+	PrintStartupBannerAndPort(title, 0, extras...)
 }
 
 // centerInWidth returns s padded with spaces on both sides so the

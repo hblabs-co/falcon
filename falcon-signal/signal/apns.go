@@ -11,7 +11,7 @@ import (
 	"github.com/sideshow/apns2/payload"
 	"github.com/sideshow/apns2/token"
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 )
 
@@ -21,7 +21,7 @@ type apnsClient struct {
 }
 
 func newAPNSClient() (*apnsClient, error) {
-	values, err := helpers.ReadEnvs("APNS_KEY_PATH", "APNS_KEY_ID", "APNS_TEAM_ID", "APNS_BUNDLE_ID")
+	values, err := environment.ReadMany("APNS_KEY_PATH", "APNS_KEY_ID", "APNS_TEAM_ID", "APNS_BUNDLE_ID")
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func newAPNSClient() (*apnsClient, error) {
 		TeamID:  teamID,
 	}
 
-	production := helpers.ReadEnvOptional("APNS_PRODUCTION", "false") == "true"
+	production := environment.ReadOptional("APNS_PRODUCTION", "false") == "true"
 	var client *apns2.Client
 	if production {
 		client = apns2.NewTokenClient(t).Production()

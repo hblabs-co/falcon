@@ -15,6 +15,7 @@ import (
 	"hblabs.co/falcon/api/signal"
 	apisystem "hblabs.co/falcon/api/system"
 	"hblabs.co/falcon/common/constants"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/system"
 )
 
@@ -38,6 +39,11 @@ func main() {
 		system.StreamStorage(),
 		system.StreamSignal(),
 	))
+
+	port := environment.ParseInt("PORT", 8080)
+	// `server.Run` reads PORT internally too; this is just for the
+	// banner so the operator sees the URL before the first request.
+	system.PrintStartupBannerAndPort(constants.ServiceAPI, port)
 
 	if err := server.Run(
 		admin.Routes{},

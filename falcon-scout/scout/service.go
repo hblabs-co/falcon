@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 	"hblabs.co/falcon/common/models"
 	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/modules/interfaces"
@@ -97,7 +97,7 @@ func (s *Service) RegisterPlatform(platform Platform) *Service {
 }
 
 func (s *Service) readAllowedPlatforms() {
-	envPlatforms := helpers.ReadEnvOptional("PLATFORMS", "hblabs.co")
+	envPlatforms := environment.ReadOptional("PLATFORMS", "hblabs.co")
 
 	parts := strings.Split(envPlatforms, ",")
 	s.AllowedPlatformsMap = make(map[string]bool, len(parts))

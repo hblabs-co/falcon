@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/helpers"
+	environment "hblabs.co/falcon/common/environment"
 )
 
 // Client is a single websocket connection. The struct is intentionally
@@ -97,7 +97,7 @@ var originCache struct {
 
 func allowedOrigins() []string {
 	originCache.once.Do(func() {
-		v := strings.TrimSpace(helpers.ReadEnvOptional("REALTIME_ALLOWED_ORIGINS", ""))
+		v := strings.TrimSpace(environment.ReadOptional("REALTIME_ALLOWED_ORIGINS", ""))
 		if v == "" {
 			return
 		}
