@@ -1,6 +1,6 @@
 # Falcon 🦅
 
-Created in Hamburg with ❤️, April 2026 - Visit https://falcon.hblabs.co
+Created in Hamburg with ❤️, April 2026 — Visit https://falcon.hblabs.co
 
 <p align="center">
   <img src="assets/ios-preview/en/p05.png" width="22%" alt="Falcon iOS screenshot 1" />
@@ -17,55 +17,92 @@ Created in Hamburg with ❤️, April 2026 - Visit https://falcon.hblabs.co
 
 ![Architecture](docs/falcon-architecture.png)
 
-## Microservices
+---
 
-**falcon-auth** — Handles authentication and authorization across the entire platform. Issues and validates JWT tokens, manages user registration and login, and acts as the identity provider for all other services.
+## Services
 
-**falcon-cv-ingest** — Accepts CV uploads in Word format from users. Extracts raw text from the documents, generates vector embeddings via an embeddings API, stores the binary file in MinIO, saves metadata in MongoDB, and stores the vector in Qdrant. Publishes a `cv.indexed` event to NATS when processing is complete.
+Every Go binary in the repo lives under `falcon-*`. Service-name
+constants are centralised in `common/constants/services.go` so the
+ops portal, Mongo `system` collection, and startup banners all agree
+on names.
 
-**falcon-scout** — Continuously scrapes freelance portals (freelance.de, gulp.de, malt.de, etc.) looking for new projects. Stores project data and metadata in MongoDB and publishes a `project.created` event to NATS for every new project detected, or `project.updated` when an existing project changes.
+### HTTP services (cluster-deployed)
 
-**falcon-dispatch** — Consumes `project.created` and `project.updated` events from NATS. Performs a fast vector similarity search in Qdrant to find users whose CVs are semantically close to the new project description. For each user above the similarity threshold, publishes a `match.pending` message to the match queue in NATS.
+| Name | Port | What it does |
+|------|------|--------------|
+| **falcon-api** | 8080 | Public REST API consumed by the iOS client. JWT-gated. Routes for matches, projects, CVs, companies, system status, admin. |
+| **falcon-landing** | 8080 | Static marketing site at falcon.hblabs.co. Serves localized HTML (EN/DE/ES), privacy/terms, App Store badges, `/ios` redirect. |
+| **falcon-realtime** | 8080 | WebSocket fan-out. Pushes `match.result`, `project.normalized`, `match.flipped` to connected iOS clients. Sticky-session sharded. |
 
-**falcon-match-engine** — Consumes `match.pending` messages from NATS. Fetches the full CV text and project description from MongoDB, calls the LLM to produce a detailed match score across six dimensions, and publishes a `match.result` event if the score exceeds the configured threshold.
+### NATS consumers (cluster-deployed, no HTTP)
 
-> ⚠️ **This is the only service that needs horizontal scaling.** Each LLM call takes several seconds. A single project can generate up to N `match.pending` messages (one per candidate). Add replicas of this service to process them in parallel — all pods share the same NATS durable consumer so each message is processed exactly once.
+| Name | What it does |
+|------|--------------|
+| **falcon-storage** | CV upload pipeline (MinIO presign → text extract → embedding → Qdrant). Includes Mistral OCR for PDFs. Also caches company logos. |
+| **falcon-normalizer** | LLM-backed normalization of project + CV text into structured JSON (title, requirements, contact, etc.) per language. |
+| **falcon-dispatch** | Vector-search dispatcher — forward (project → CVs) and reverse (new CV → recent projects). Publishes `match.pending`. |
+| **falcon-match-engine** | Scores each `match.pending` via LLM across six dimensions. Publishes `match.result` if above threshold. The only horizontally-scaled service. |
+| **falcon-signal** | Delivers push notifications via APNs (iOS), Live Activities, and magic-link emails via Mailjet. |
+| **falcon-scout** | Polls freelance project boards (redglobal.de, contractor.de, solcom.de, computerfutures.com, somi.de, constaff.com) and emits `project.created` / `project.updated`. |
 
-**falcon-signal** — Consumes `match.result` events from NATS and delivers real-time notifications to the matched user via their preferred channel — email, Telegram bot, push notification, or webhook.
+> ⚠️ **`falcon-match-engine` is the only service that needs horizontal
+> scaling.** Each LLM call takes several seconds; a single project
+> can fan out to N candidate matches. Add replicas to process them
+> in parallel — every pod shares the same NATS durable consumer so
+> each message lands on exactly one pod.
 
-## Infrastructure
+### Local-only tooling (not in the cluster)
 
-**MongoDB** — NoSQL document database used as the primary data store across services. Stores users metadata (ingested from CVs), raw project data scraped by falcon-scout, and match results. Chosen for its flexible schema, which accommodates evolving document structures without migrations.
+| Name | Port | What it does |
+|------|------|--------------|
+| **falcon-authorizer** | 8082 | Local helper that issues 30-day magic-link tokens for App Store reviewers and manual QA. Bearer-auth gated. |
+| **falcon-designer** | 8083 | Static design canvas + dashboard for Claude-generated mockups. Hot-reloads any HTML/JSX/CSS edit. |
+| **falcon-nest** | 8080 | Local dev portal that lists every service, every infra component, and `kubectl port-forward` cheat sheets. |
+| **falcon-import** | — | One-shot CLIs (e.g. recruiter ratings ingestion from Recruiter Rodeo). |
 
-**Qdrant** — Vector database purpose-built for high-performance similarity search. Stores the embeddings generated from CV text and project descriptions. falcon-dispatch queries Qdrant to find semantically similar CV/project pairs in milliseconds, even at large scale. Supports filtering and payload storage alongside vectors.
+### Backing services (infrastructure)
 
-**NATS JetStream** — Distributed messaging system with persistent, at-least-once delivery guarantees (JetStream layer on top of core NATS). Used as the event bus between all services: `cv.indexed`, `project.created`, `project.updated`, `match.pending`, and `match.result` events flow through it. JetStream provides durable subscriptions and replay, so no events are lost if a consumer is temporarily down.
+| Name | Local port | What it does |
+|------|-----------|--------------|
+| **MongoDB** | 27017 | Primary data store — users, CVs, projects, match results, normalized projects, errors/warnings, system metadata. Flexible schema, no migrations. |
+| **NATS JetStream** | 4222 (client) / 8222 (monitor) | At-least-once durable event bus between every service. Subjects: `cv.indexed`, `project.created`, `project.normalized`, `match.pending`, `match.result`, `match.flipped`. Replay survives consumer downtime. |
+| **Qdrant** | 6333 (HTTP) / 6334 (gRPC) | Vector database. Multi-vector storage — one Qdrant point per CV chunk, payload `cv_id` lets dispatch group chunks per CV at query time. |
+| **MinIO** | 9000 (S3 API) / 9001 (console) | S3-compatible object storage for CV originals (Word + PDF) and company logos. Public-read policy on the logos bucket so iOS Live Activities can load them via the App Group cache. |
+| **Ollama** | 11434 | Local inference runtime. Optional — the production stack runs Mistral; Ollama is the on-premise alternative for fully self-hosted deployments. See section below. |
 
-**Ollama** — Local inference server that runs embedding models on-premise. falcon-cv-ingest uses it to generate vector embeddings from CV text via an OpenAI-compatible API (`/v1/embeddings`). Running embeddings locally means user CV data never leaves the infrastructure, which is a hard requirement under GDPR. The model in use is `bge-m3`, chosen for its strong multilingual performance — relevant because CVs and project descriptions on the platform are predominantly in German.
-
-**MinIO** — S3-compatible object storage deployed on-premises. Stores the original CV binary files (Word documents) uploaded by users. Services access files through the standard S3 API, making it straightforward to swap for AWS S3 or GCS in production without code changes.
+---
 
 ## LLM strategy and GDPR
 
-Falcon uses two AI models, with different roles and different GDPR implications:
+Falcon's AI pipeline has two stages — **embedding** (CV text → vector)
+and **scoring** (CV × project → match score). Both stages currently
+run on **Mistral AI** in France (EU), which is what makes Falcon
+GDPR-compliant by design.
 
-| Model | Used by | Purpose |
-|-------|---------|---------|
-| `bge-m3` | `falcon-cv-ingest`, `falcon-dispatch` | Text → vector embeddings |
-| `qwen2.5:7b` / `mistral-small-latest` | `falcon-match-engine` | CV/project scoring |
+| Stage | Model | Provider | Notes |
+|-------|-------|----------|-------|
+| Embedding | `codestral-embed` | Mistral AI (EU) | Used by `falcon-storage` (CVs) and `falcon-dispatch` (projects). |
+| Match scoring | `mistral-small-latest` | Mistral AI (EU) | Used by `falcon-match-engine`. |
+| OCR (PDF CVs) | `mistral-ocr-latest` | Mistral AI (EU) | Used by `falcon-storage` for PDF uploads. |
+| Normalization | `mistral-small-latest` | Mistral AI (EU) | Used by `falcon-normalizer` for project + CV text → structured JSON. |
 
-CV and project text are **personal data** under GDPR. Two compliant options:
+CV and project text are **personal data** under GDPR. Mistral is
+EU-based, operates EU-hosted infrastructure, and doesn't train on
+submitted content — every stage of the pipeline stays inside the EU.
 
-- **Ollama (dev / on-premise)** — both models run locally via Ollama. Zero data egress. Recommended for development and for deployments where data must stay on-premise.
-- **Mistral AI (production)** — French company, EU servers, GDPR-compliant by design. Switch by changing `LLM_URL` + `LLM_MODEL` env vars in `falcon-match-engine`. No code changes needed.
+The pipeline is **model-agnostic**. A fully self-hosted alternative
+(Ollama with `bge-m3` for embeddings + `qwen2.5:7b` for scoring) is
+supported via env-var swap; no code changes needed.
 
-> ⚠️ Do not point `falcon-match-engine` at OpenAI, Anthropic, or any non-EU provider without a DPA review.
+> ⚠️ Do not point any of these env vars (`EMBEDDINGS_URL`, `LLM_URL`,
+> `OCR_URL`) at OpenAI, Anthropic, Google, or any non-EU provider
+> without a fresh DPA review. Mistral is the safe default.
 
 ## Running Ollama natively on Apple Silicon
 
-Docker on macOS runs inside a Linux VM with no access to the Metal GPU, forcing
-CPU-only inference (~23s per embedding). Running Ollama natively uses Metal and
-brings that down to under 1s.
+Docker on macOS runs inside a Linux VM with no access to the Metal
+GPU, forcing CPU-only inference (~23s per embedding). Running Ollama
+natively uses Metal and brings that down to under 1s.
 
 ```bash
 # Install
@@ -75,31 +112,36 @@ brew install ollama
 ollama serve
 
 # Pull both models
-ollama pull bge-m3        # embeddings — used by cv-ingest and dispatch
+ollama pull bge-m3        # embeddings — used by storage and dispatch
 ollama pull qwen2.5:7b    # LLM scoring — used by match-engine
 ```
 
-Ollama will start automatically on login after installation. The rest of the
-stack (`docker compose up`) connects to it at `http://host.docker.internal:11434`
-— make sure `EMBEDDINGS_URL` in your `.env` points there.
+Ollama will start automatically on login after installation. The
+rest of the stack (`docker compose up`) connects to it at
+`http://host.docker.internal:11434` — point `EMBEDDINGS_URL` and
+`LLM_URL` in your `.env` there to opt out of Mistral.
 
-> On Linux with an NVIDIA GPU, use the Docker service in `docker-compose.yml`
-> (see the commented block) and add the `nvidia` runtime instead.
+> On Linux with an NVIDIA GPU, use the Docker service in
+> `docker-compose.yml` (see the commented block) and add the
+> `nvidia` runtime instead.
 
 ## Production Infrastructure (k3s / k8s)
 
 ![Infrastructure](docs/k3s-infrastructure.png)
 
-All Falcon microservices and stateful components (MongoDB, Qdrant, NATS, MinIO)
-run as standard Kubernetes workloads and can be deployed to any k3s or k8s cluster.
+All Falcon microservices and stateful components (MongoDB, Qdrant,
+NATS, MinIO) run as standard Kubernetes workloads and can be
+deployed to any k3s or k8s cluster.
 
 ### Ollama on Apple Silicon
 
-Ollama cannot access the Metal GPU from inside a container (no Metal passthrough
-exists in any virtualisation layer on macOS). The solution is to run Ollama
-**natively on the host** and expose it to the cluster over HTTP.
+Ollama cannot access the Metal GPU from inside a container (no Metal
+passthrough exists in any virtualisation layer on macOS). The
+solution is to run Ollama **natively on the host** and expose it to
+the cluster over HTTP.
 
-Recommended setup with a Mac Mini (M-series) as a dedicated inference node:
+Recommended setup with a Mac Mini (M-series) as a dedicated
+inference node:
 
 1. Install and start Ollama natively on the Mac Mini:
    ```bash
@@ -108,18 +150,41 @@ Recommended setup with a Mac Mini (M-series) as a dedicated inference node:
    brew services start ollama   # starts on boot
    ```
 2. Add the Mac Mini as a k3s agent node normally.
-3. Create a Kubernetes `Service` + `Endpoints` pointing to `http://<mac-mini-ip>:11434`
-   so pods resolve Ollama via a stable in-cluster DNS name.
+3. Create a Kubernetes `Service` + `Endpoints` pointing to
+   `http://<mac-mini-ip>:11434` so pods resolve Ollama via a stable
+   in-cluster DNS name.
 4. Set `EMBEDDINGS_URL=http://ollama.default.svc.cluster.local/v1/embeddings`
-   in the `falcon-cv-ingest` deployment.
+   in the `falcon-storage` deployment (and `LLM_URL` in
+   `falcon-match-engine` if scoring also runs locally).
 
-This gives full Metal GPU acceleration (<1s per embedding) with zero changes to
-the application code. See `docs/k3s-infrastructure.puml` for the full topology.
+This gives full Metal GPU acceleration (<1s per embedding) with
+zero changes to the application code. See `docs/k3s-infrastructure.puml`
+for the full topology.
+
+### Deployment scripts
+
+```
+deployment/
+├── apps/        # one yaml per Falcon service
+├── infra/       # mongo, nats, qdrant, minio, ingress, namespace
+├── configs/     # configmap + secret + registry-access (gitignored)
+└── scripts/
+    ├── _lib.sh       # shared paths + namespace helpers
+    ├── rollout.sh    # zero-downtime rolling update
+    ├── redeploy.sh   # hard replace (immutable-field changes only)
+    └── logs.sh       # multiplexed log tail across every pod
+```
+
+Daily iteration: `deployment/scripts/rollout.sh` (or filter:
+`rollout.sh api signal`). Tail: `deployment/scripts/logs.sh`.
 
 ## Local UIs
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
+| **falcon-nest** (dev portal) | http://localhost:8080 | — |
+| **falcon-designer** | http://localhost:8083 | — |
 | MinIO console | http://localhost:9001 | `minioadmin` / `minioadmin` |
 | Qdrant dashboard | http://localhost:6333/dashboard | — |
 | NATS monitoring | http://localhost:8222 | — |
+| Ollama (if running) | http://localhost:11434 | — |
