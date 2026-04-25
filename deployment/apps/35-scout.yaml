@@ -30,7 +30,7 @@ spec:
             - secretRef:    {name: falcon-secrets}
           env:
             # Scraping interval — override per platform via their own
-            # env if needed. 30s is the common.system default.
+            # env if needed. 30s is the packages/system default.
             - {name: POLL_INTERVAL, value: "5m"}
           resources:
             # Colly holds a pool of HTTP clients and DOM parsers per

@@ -28,7 +28,7 @@
 #      changed, k8s won't notice the "update" and this script falls
 #      back to `kubectl rollout restart` to force one.
 #   3. Graceful SIGTERM handling in the Go binary — `system.Wait()` in
-#      common/system/context.go already covers this via
+#      packages/system/context.go already covers this via
 #      signal.NotifyContext(…, SIGTERM).
 
 set -euo pipefail
@@ -43,6 +43,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/_lib.sh"
 ORDER=(
   falcon-api
   falcon-realtime
+  falcon-admin
   falcon-signal
   falcon-normalizer
   falcon-match-engine
@@ -54,6 +55,7 @@ ORDER=(
 MANIFEST_FOR=(
   "$APPS_DIR/20-api.yaml"
   "$APPS_DIR/21-realtime.yaml"
+  "$APPS_DIR/22-admin.yaml"
   "$APPS_DIR/30-signal.yaml"
   "$APPS_DIR/31-normalizer.yaml"
   "$APPS_DIR/32-match-engine.yaml"
@@ -102,6 +104,25 @@ echo "--- configmap + secret apply first (picked up on next pod restart) ---"
 
 kubectl apply -n "$NAMESPACE" -f "$CONFIGS_DIR/10-configmap.yaml"
 kubectl apply -n "$NAMESPACE" -f "$CONFIGS_DIR/11-secret.yaml"
+
+# falcon-config bootstrap Job — HARD GATE. Apply it, block on
+# completion, then proceed with the Deployments. If the bootstrap
+# fails (timeout, backoffLimit hit), `set -e` aborts the script
+# BEFORE any service rolls — keeping the cluster on the previous
+# revision instead of half-rolled with a broken schema/migration.
+#
+# Re-applied on every invocation, including filtered runs like
+# `rollout.sh api`. The Job is idempotent and finishes in a second
+# or two on a healthy cluster, so the cost is negligible — and it
+# guarantees a partial rollout still inherits any new index added
+# in the same commit.
+#
+# Jobs are immutable on most spec fields, so delete-then-apply.
+echo "--- falcon-config bootstrap Job (gates the rollout) ---"
+kubectl delete job/falcon-config -n "$NAMESPACE" --ignore-not-found
+kubectl apply -n "$NAMESPACE" -f "$APPS_DIR/10-config.yaml"
+kubectl wait --for=condition=complete --timeout=180s \
+  -n "$NAMESPACE" job/falcon-config
 
 for svc in "${SERVICES[@]}"; do
   manifest="$(manifest_of "$svc")"

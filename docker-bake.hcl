@@ -27,8 +27,8 @@ variable "GO_VERSION" {
 // BUILD_TIME — RFC3339 timestamp stamped at bake-invocation time. The
 // same value is shared across every target of a single `bake` run, so
 // all services in a deploy report a consistent build time. Read at
-// runtime by common/system/context.go and logged on startup; makes it
-// trivial to confirm whether a pod is running a freshly-pushed image.
+// runtime by packages/system/context.go and logged on startup; makes
+// it trivial to confirm whether a pod is running a freshly-pushed image.
 variable "BUILD_TIME" {
   default = timestamp()
 }
@@ -39,7 +39,9 @@ group "default" {
   // are heavier than the other services. Uncomment when you need to
   // roll out scraper changes.
   targets = [
+    "falcon-admin",
     "falcon-api",
+    "falcon-config",
     "falcon-dispatch",
     "falcon-landing",
     "falcon-match-engine",
@@ -65,10 +67,22 @@ target "_defaults" {
   }
 }
 
+target "falcon-admin" {
+  inherits = ["_defaults"]
+  target   = "falcon-admin"
+  tags     = ["${REGISTRY}/falcon-admin:${TAG}"]
+}
+
 target "falcon-api" {
   inherits = ["_defaults"]
   target   = "falcon-api"
   tags     = ["${REGISTRY}/falcon-api:${TAG}"]
+}
+
+target "falcon-config" {
+  inherits = ["_defaults"]
+  target   = "falcon-config"
+  tags     = ["${REGISTRY}/falcon-config:${TAG}"]
 }
 
 target "falcon-dispatch" {

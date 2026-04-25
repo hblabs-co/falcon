@@ -27,6 +27,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/_lib.sh"
 ALL_SERVICES=(
   falcon-api
   falcon-realtime
+  falcon-admin
   falcon-signal
   falcon-normalizer
   falcon-match-engine

@@ -1,0 +1,80 @@
+## kubectl delete job/falcon-config -n falcon --ignore-not-found && \
+##   kubectl apply -f deployment/apps/10-config.yaml
+##
+## falcon-config — one-shot bootstrap Job. Runs ensureAllIndexes()
+## (and any future idempotent setup steps) on every deploy.
+##
+## Ordering: hard gate. The rollout/redeploy scripts apply this Job
+## first and `kubectl wait --for=condition=complete` before touching
+## any Deployment — if the bootstrap fails, the script aborts and
+## the apps are never updated. With Argo this would be a
+## sync-wave: -1; in pure k8s the gate is enforced in bash.
+## Rationale: better to surface a broken migration / mis-typed
+## connection string here than discover it as a half-rolled cluster
+## with old pods talking to a new schema.
+##
+## Why a Job and not a Deployment:
+##   - It must run to completion, not run continuously. Deployment
+##     would restart the pod after exit 0 forever.
+##   - `kubectl get jobs` gives a clear "did the bootstrap pass?"
+##     signal that's easier to read than scraping pod logs.
+##
+## Idempotency: every step inside falcon-config is safe to repeat
+## (EnsureIndex is a no-op if the index already exists, etc.), so
+## re-running the Job after a successful deploy doesn't break
+## anything. That property is what lets the rollout script just
+## "apply the Job every time" without conditional logic.
+##
+## Re-running:
+##   Jobs are largely immutable once created — `kubectl apply -f` on
+##   an existing Job fails on most spec changes. The deploy script
+##   deletes the Job first (--ignore-not-found is a safe no-op on a
+##   fresh cluster) and re-applies. ttlSecondsAfterFinished below
+##   also auto-cleans the completed Pod after a few minutes so a
+##   manual re-run only needs a fresh `apply`.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: falcon-config
+  namespace: falcon
+  labels: {app: falcon-config}
+spec:
+  # backoffLimit caps how many times the Pod is retried on failure.
+  # ensureAllIndexes is fast (<1s on a healthy mongo); 3 attempts is
+  # enough to ride out a transient mongo restart without masking a
+  # real bug behind an infinite retry loop.
+  backoffLimit: 3
+  # Auto-delete the Job + Pod 5 min after success. Without this,
+  # finished Jobs accumulate in `kubectl get jobs` and the operator
+  # has to clean them up by hand. Keep long enough that you can
+  # still `kubectl logs` the run if something looked off.
+  ttlSecondsAfterFinished: 300
+  # activeDeadlineSeconds bounds total runtime — if mongo is
+  # unreachable for 3 minutes, fail loud rather than spinning.
+  activeDeadlineSeconds: 180
+  template:
+    metadata:
+      labels: {app: falcon-config}
+    spec:
+      # OnFailure (vs Never) re-uses the same Pod across attempts —
+      # cheaper, faster restarts when mongo briefly hiccups during a
+      # cluster cold start.
+      restartPolicy: OnFailure
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-config
+          image: registry.4the.company/falcon-config:1.0.0
+          imagePullPolicy: Always
+          envFrom:
+            # Same shared config every Falcon service consumes —
+            # MONGODB_URI, MONGODB_DATABASE, NATS_URL, log level.
+            - configMapRef: {name: falcon-config}
+            - secretRef:    {name: falcon-secrets}
+          resources:
+            # Index reconciliation is light. requests guarantees the
+            # pod can schedule even on a busy node; limits keeps a
+            # runaway loop from competing with the apps.
+            requests: {cpu: "50m",  memory: "64Mi"}
+            limits:   {cpu: "300m", memory: "128Mi"}

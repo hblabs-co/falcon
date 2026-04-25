@@ -1,0 +1,82 @@
+## kubectl apply -f deployment/apps/22-admin.yaml
+## kubectl delete -f deployment/apps/22-admin.yaml
+# kubectl replace --force -f deployment/apps/22-admin.yaml
+#
+# falcon-admin — backoffice gateway used by falcon-nest. Exposes the
+# user / token / session / device / CV / matches / activity surface
+# behind a single bearer check (ADMIN_TOKEN).
+#
+# Deliberately INTERNAL-ONLY — no Ingress, no LoadBalancer. Reachable
+# only from inside the cluster at:
+#
+#   falcon-admin.falcon.svc.cluster.local
+#
+# Operators reach it via:
+#   - falcon-nest pod (when nest is deployed alongside) using the
+#     in-cluster DNS name above as ADMIN_URL.
+#   - Local laptop using `kubectl port-forward svc/falcon-admin
+#     8082:80 -n falcon` and pointing a local nest at
+#     ADMIN_URL=http://localhost:8082.
+#
+# If you ever want to expose this beyond the cluster, ADD a separate
+# private Ingress with mTLS or a network policy — do NOT just flip
+# this Service to type: LoadBalancer. The bearer alone is not enough
+# of a perimeter for a public endpoint.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falcon-admin
+  namespace: falcon
+  labels: {app: falcon-admin}
+spec:
+  # Single replica is plenty: this is a backoffice service hit by
+  # an operator, not a customer-facing path. Bump only if multiple
+  # operators end up working concurrently.
+  replicas: 1
+  selector: {matchLabels: {app: falcon-admin}}
+  template:
+    metadata:
+      labels: {app: falcon-admin}
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: falcon-admin
+          image: registry.4the.company/falcon-admin:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - {name: http, containerPort: 8080}
+          envFrom:
+            # Mongo, NATS, MinIO, log level — same shared config every
+            # other Falcon service consumes.
+            - configMapRef: {name: falcon-config}
+            # ADMIN_TOKEN lives here; without it the bearer middleware
+            # logs a loud warning and accepts every request, so the
+            # secret is REQUIRED for any non-dev deploy.
+            - secretRef:    {name: falcon-secrets}
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests: {cpu: "50m",  memory: "64Mi"}
+            limits:   {cpu: "300m", memory: "192Mi"}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: falcon-admin
+  namespace: falcon
+  labels: {app: falcon-admin}
+spec:
+  # ClusterIP is the default; spelled out here so a future reviewer
+  # can't miss that this Service is INTENTIONALLY not exposed.
+  type: ClusterIP
+  selector: {app: falcon-admin}
+  ports:
+    - {name: http, port: 80, targetPort: 8080}

@@ -35,7 +35,7 @@ spec:
             - {name: mongo, containerPort: 27017}
           env:
             # Database bootstrap — matches MONGODB_DATABASE in the
-            # ConfigMap and the value common.system uses.
+            # ConfigMap and the value packages/system uses.
             - {name: MONGO_INITDB_DATABASE, value: "falcon"}
           volumeMounts:
             - {name: data, mountPath: /data/db}

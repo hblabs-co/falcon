@@ -21,13 +21,12 @@ RUN apt-get update \
 
 # ─────────────────────────────────────────────────────────────────────────
 # Shared Go builder for every Falcon service. Layout (post-COPY):
-#   /src/common/                — hblabs.co/falcon/common
-#   /src/modules/<name>/        — hblabs.co/falcon/modules/<name>
+#   /src/packages/              — hblabs.co/falcon/packages (all shared libs)
 #   /src/<service>/             — hblabs.co/falcon/<service>
 #
-# All service go.mod files use `replace ../common` and similar, so we
-# must copy those local deps BEFORE running `go mod download`. Build
-# caches are mounted so repeat builds reuse the GOCACHE and GOMODCACHE.
+# All service go.mod files use `replace ../packages` so we must copy
+# the shared module BEFORE running `go mod tidy`. Build caches are
+# mounted so repeat builds reuse the GOCACHE and GOMODCACHE.
 # ─────────────────────────────────────────────────────────────────────────
 FROM golang:${GO_VERSION}-alpine AS main-builder
 ARG TARGETOS
@@ -39,13 +38,15 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     apk add --no-cache git
 
-# Shared modules — needed by every service via replace directives.
-COPY common/           /src/common/
-COPY modules/          /src/modules/
+# Shared module — every service references it via `replace
+# hblabs.co/falcon/packages => ../packages` in its go.mod.
+COPY packages/         /src/packages/
 
 # Per-service sources. Copying whole trees is fine; the build cache
 # keys off file contents, not the COPY instruction itself.
+COPY falcon-admin/        /src/falcon-admin/
 COPY falcon-api/          /src/falcon-api/
+COPY falcon-config/       /src/falcon-config/
 COPY falcon-dispatch/     /src/falcon-dispatch/
 COPY falcon-landing/      /src/falcon-landing/
 COPY falcon-match-engine/ /src/falcon-match-engine/
@@ -64,11 +65,23 @@ COPY falcon-scout/        /src/falcon-scout/
 # changes. CGO disabled everywhere since we only ship static binaries.
 ENV CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH}
 
+WORKDIR /src/falcon-admin
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go mod tidy && \
+    go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/falcon-admin .
+
 WORKDIR /src/falcon-api
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     go mod tidy && \
     go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/falcon-api .
+
+WORKDIR /src/falcon-config
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go mod tidy && \
+    go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/falcon-config .
 
 WORKDIR /src/falcon-dispatch
 RUN --mount=type=cache,target=/root/.cache/go-build \
@@ -149,11 +162,29 @@ RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificat
 # Per-service runtime images — all inherit from runtime-base. Each
 # EXPOSEs a relevant port via metadata only; actual listen is in-binary.
 # ─────────────────────────────────────────────────────────────────────────
+FROM runtime-base AS falcon-admin
+COPY --from=main-builder /out/falcon-admin /app
+USER app
+# Cluster default: every Falcon HTTP service listens on 8080. Local
+# `go run ./falcon-admin` falls back to 8082 (set inside main.go) so
+# port-forwarding doesn't collide with falcon-api on the same host.
+ENV PORT=8080
+EXPOSE 8080
+ENTRYPOINT ["/app"]
+
 FROM runtime-base AS falcon-api
 COPY --from=main-builder /out/falcon-api /app
 USER app
 ENV PORT=8080
 EXPOSE 8080
+ENTRYPOINT ["/app"]
+
+# falcon-config — one-shot bootstrap Job (see deployment/apps/10-config.yaml).
+# No PORT / EXPOSE because it doesn't listen on anything; runs to
+# completion and exits.
+FROM runtime-base AS falcon-config
+COPY --from=main-builder /out/falcon-config /app
+USER app
 ENTRYPOINT ["/app"]
 
 FROM runtime-base AS falcon-dispatch
