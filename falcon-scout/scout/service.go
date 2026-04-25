@@ -17,12 +17,6 @@ import (
 	"hblabs.co/falcon/scout/platformkit"
 )
 
-var indexes = []system.StorageIndexSpec{
-	system.NewIndexSpec(constants.MongoProjectsCollection, "platform_id", true),
-	system.NewIndexSpec(constants.MongoErrorsCollection, "service_name", false),
-	system.NewIndexSpec(constants.MongoErrorsCollection, "platform_id", false),
-}
-
 // Platform is the contract every scraping platform must fulfill.
 type Platform interface {
 
@@ -123,10 +117,6 @@ func (s *Service) shouldRun(name string) bool {
 func (s *Service) Run() {
 	ctx := system.Ctx()
 	s.readAllowedPlatforms()
-
-	if err := system.GetStorage().EnsureIndex(ctx, indexes...); err != nil {
-		logrus.Fatalf("ensure indexes: %v", err)
-	}
 
 	for _, p := range s.platforms {
 

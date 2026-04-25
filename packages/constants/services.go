@@ -20,4 +20,5 @@ const (
 	ServiceImport               = "falcon-import"
 	ServiceDesigner             = "falcon-designer"
 	ServiceNest                 = "falcon-nest"
+	ServiceConfig               = "falcon-config"
 )

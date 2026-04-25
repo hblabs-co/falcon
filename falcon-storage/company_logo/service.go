@@ -24,16 +24,6 @@ func newService(ctx context.Context) (*service, error) {
 	if err := infra.EnsureBucket(ctx, bucket, true); err != nil {
 		return nil, err
 	}
-
-	spec := system.CompoundIndexSpec{
-		Collection: constants.MongoCompaniesCollection,
-		Fields:     []string{"company_id"},
-		Unique:     true,
-	}
-	if err := system.GetStorage().EnsureCompoundIndex(ctx, spec); err != nil {
-		logrus.Fatalf("company_logo: ensure index: %v", err)
-	}
-
 	return &service{}, nil
 }
 

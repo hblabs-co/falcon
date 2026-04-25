@@ -101,6 +101,13 @@ services:
     description: One-shot importers (recruiter ratings from Recruiter Rodeo, etc.).
     tags: [cli, one-shot, reviews]
 
+  - name: falcon-config
+    kind: job
+    kindLabel: JOB
+    icon: wrench
+    description: Bootstrap job for shared infra config (Mongo indexes today, more later). Idempotent — runs as a k8s Job.
+    tags: [bootstrap, indexes, one-shot]
+
   - name: falcon-nest
     kind: http
     kindLabel: HTTP

@@ -20,18 +20,6 @@ func (Routes) Mount(r *gin.Engine) {
 	g := r.Group("/me", server.JWTMiddleware())
 	g.GET("", handleGetMe)
 	g.PUT("/config", handlePutConfig)
-
-	// Compound unique key (user_id, platform, device_id, name). device_id is
-	// an empty string for user-wide configs — Mongo treats "" as a real value,
-	// so user-wide and device-specific entries for the same name coexist on
-	// different rows without colliding.
-	if err := system.GetStorage().EnsureCompoundIndex(system.Ctx(), system.CompoundIndexSpec{
-		Collection: constants.MongoUsersConfigurationsCollection,
-		Fields:     []string{"user_id", "platform", "device_id", "name"},
-		Unique:     true,
-	}); err != nil {
-		logrus.Fatalf("configurations index: %v", err)
-	}
 }
 
 // handleGetMe returns configurations and the active CV for the authenticated user.

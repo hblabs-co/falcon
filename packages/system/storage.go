@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
-	"hblabs.co/falcon/packages/constants"
 	environment "hblabs.co/falcon/packages/environment"
 	"hblabs.co/falcon/packages/models"
 )
@@ -63,13 +62,10 @@ func InitStorage(ctx context.Context) error {
 			initErr = err
 			return
 		}
-		s := &Storage{db: client.Database(dbName)}
-		spec := NewIndexSpec(constants.MongoProjectsCollection, "id", true)
-		if err := s.EnsureIndex(ctx, spec); err != nil {
-			initErr = err
-			return
-		}
-		storage = s
+		// Indexes (including the projects.id unique that used to live
+		// here) are owned by falcon-config — kept out of every
+		// service's hot path so a bad index isn't fatal at boot.
+		storage = &Storage{db: client.Database(dbName)}
 	})
 	return initErr
 }

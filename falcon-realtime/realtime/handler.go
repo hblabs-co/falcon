@@ -9,13 +9,6 @@ import (
 	"hblabs.co/falcon/packages/system"
 )
 
-var indexes = []system.StorageIndexSpec{
-	system.NewIndexSpec(constants.MongoRealtimeStatsCollection, "device_id", false),
-	system.NewIndexSpec(constants.MongoRealtimeStatsCollection, "user_id", false),
-	system.NewIndexSpec(constants.MongoRealtimeStatsCollection, "event", false),
-	system.NewIndexSpec(constants.MongoRealtimeStatsCollection, "created_at", false),
-}
-
 // Module wires realtime into falcon-realtime. Each replica gets its own
 // consumer name suffix via REALTIME_REPLICA_ID so NATS fans out match
 // and project events to every replica (not just one) — required so a
@@ -25,10 +18,6 @@ type Module struct{}
 func NewModule() *Module { return &Module{} }
 
 func (m *Module) Register(ctx context.Context) error {
-	if err := system.GetStorage().EnsureIndex(ctx, indexes...); err != nil {
-		return err
-	}
-
 	svc := newService()
 	if err := svc.startHTTP(ctx); err != nil {
 		return err

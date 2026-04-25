@@ -27,31 +27,14 @@ type Service struct {
 	threshold float32
 }
 
-var indexes = []system.CompoundIndexSpec{
-	{
-		Collection: constants.MongoMatchResultsCollection,
-		Fields:     []string{"cv_id", "project_id"},
-		Unique:     true,
-	},
-	{
-		Collection: constants.MongoMatchResultsCollection,
-		Fields:     []string{"user_id", "scored_at"},
-		Unique:     false,
-	},
-}
-
-func NewService(ctx context.Context) (*Service, error) {
+// NewService builds the scorer and resolves config. Mongo indexes
+// for `match_results` live in falcon-config and are reconciled by
+// the bootstrap Job, not here.
+func NewService(_ context.Context) (*Service, error) {
 	llmClient, err := llm.NewFromEnv("") // translate prompt provided per-call in scorer
 	if err != nil {
 		return nil, fmt.Errorf("llm client: %w", err)
 	}
-
-	for _, idx := range indexes {
-		if err := system.GetStorage().EnsureCompoundIndex(ctx, idx); err != nil {
-			return nil, fmt.Errorf("ensure index %v: %w", idx.Fields, err)
-		}
-	}
-
 	return &Service{
 		scorer:    newScorer(llmClient),
 		threshold: environment.ParseFloat32("MATCH_ENGINE_SCORE_THRESHOLD", defaultScoreThreshold),

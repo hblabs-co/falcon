@@ -13,6 +13,7 @@
     {
       "name": "🚀 Falcon — All Services",
       "configurations": [
+        "Debug Config",
         "Debug Nest",
         "Debug API",
         "Debug Landing",
@@ -32,6 +33,14 @@
     }
   ],
   "configurations": [
+    {
+      "name": "Debug Config",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-config",
+      "output": "${workspaceFolder}/falcon-config/__debug_falcon-config"
+    },
     {
       "name": "Debug API",
       "type": "go",

@@ -60,17 +60,9 @@ type Service struct {
 	normalizePrompt string
 }
 
-var indexes = []system.StorageIndexSpec{
-	system.NewIndexSpec(constants.MongoNormalizedProjectsCollection, "project_id", true),
-	system.NewIndexSpec(constants.MongoNormalizedProjectsCollection, "company_id", false),
-	system.NewIndexSpec(constants.MongoNormalizedProjectsCollection, "display_updated_at", false),
-}
-
-// NewService creates the project normalizer and ensures DB indexes.
-func NewService(ctx context.Context, llmClient *llm.Client, normalizePrompt string) (*Service, error) {
-	if err := system.GetStorage().EnsureIndex(ctx, indexes...); err != nil {
-		return nil, fmt.Errorf("ensure indexes: %w", err)
-	}
+// NewService creates the project normalizer. Mongo indexes are
+// owned by falcon-config (run as a Job pre-deploy).
+func NewService(_ context.Context, llmClient *llm.Client, normalizePrompt string) (*Service, error) {
 	return &Service{llm: llmClient, normalizePrompt: normalizePrompt}, nil
 }
 

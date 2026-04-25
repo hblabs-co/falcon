@@ -28,6 +28,7 @@ where the thing runs:
 
 - <code>HTTP</code> : cluster-deployed, listens on HTTP.
 - <code>NATS</code> : cluster-deployed, NATS consumer (no HTTP).
+- <code>JOB</code>  : cluster-deployed as a one-shot Kubernetes Job (idempotent).
 - <code>LOCAL</code> : local-only tool, not in the cluster.
 - <code>INFRA</code> : backing service (datastore / broker / LLM runtime).
 
@@ -45,6 +46,9 @@ where the thing runs:
 | `NATS`  | **falcon-match-engine** | —           | Scores each `match.pending` via LLM across six dimensions. Publishes `match.result` if above threshold. The only horizontally-scaled service.                                                                |
 | `NATS`  | **falcon-signal**       | —           | Delivers push notifications via APNs (iOS), Live Activities, and magic-link emails via Mailjet.                                                                                                              |
 | `NATS`  | **falcon-scout**        | —           | Polls freelance project boards (redglobal.de, contractor.de, solcom.de, computerfutures.com, somi.de, constaff.com) and emits `project.created` / `project.updated`.                                         |
+|         |                         |             |                                                                                                                                                                                                              |
+|         |                         |             |                                                                                                                                                                                                              |
+| `JOB`   | **falcon-config**       | —           | Bootstrap job for shared infra config: declares every MongoDB index in one place (`indexes.go`), reconciles them, exits. Idempotent — re-runnable for free. Future home for any other one-shot config.       |
 |         |                         |             |                                                                                                                                                                                                              |
 |         |                         |             |                                                                                                                                                                                                              |
 | `LOCAL` | **falcon-authorizer**   | 8082        | Local helper that issues 30-day magic-link tokens for App Store reviewers and manual QA. Bearer-auth gated.                                                                                                  |
