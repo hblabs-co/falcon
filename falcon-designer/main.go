@@ -1,9 +1,10 @@
 // falcon-designer — local-only static design canvas.
 //
 // Layout:
-//   designs/<slug>/index.html     entry point of one design
-//   designs/<slug>/meta.json      optional title/description/tags
-//   ui/dashboard.html             "/" — index lists every design
+//
+//	designs/<slug>/index.html     entry point of one design
+//	designs/<slug>/meta.json      optional title/description/tags
+//	ui/dashboard.html             "/" — index lists every design
 //
 // Run:    go run .
 // Open:   http://localhost:8083 (and the LAN URL printed at startup)
@@ -28,10 +29,10 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"hblabs.co/falcon/common/constants"
-	environment "hblabs.co/falcon/common/environment"
-	"hblabs.co/falcon/common/ownhttp"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/ownhttp"
+	"hblabs.co/falcon/packages/system"
 )
 
 // designsDir holds one subfolder per design, each self-contained
@@ -89,6 +90,7 @@ func main() {
 	go runWatcher(watcher, hub, debounceWindow)
 
 	mux := http.NewServeMux()
+	ownhttp.RegisterVanillaHealthz(mux, constants.ServiceDesigner)
 
 	// Hot-reload SSE + the JS that subscribes to it.
 	mux.HandleFunc("/__reload", hub.ServeSSE("reload"))
