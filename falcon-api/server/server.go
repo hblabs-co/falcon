@@ -29,7 +29,11 @@ func Run(groups ...RouteGroup) error {
 	r.Use(ginLogger())
 	r.SetTrustedProxies(nil)
 
-	r.GET("/healthz", func(c *gin.Context) {
+	// Match GET + HEAD: Nest's status poller probes with HEAD first
+	// to avoid pulling the body. Gin doesn't auto-route HEAD onto a
+	// GET handler the way net/http's mux does, so without HEAD here
+	// every poll tick logs a spurious 404.
+	r.Match([]string{http.MethodGet, http.MethodHead}, "/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
@@ -92,8 +96,8 @@ func JWTMiddleware() gin.HandlerFunc {
 
 // ginLogger delegates to the shared `ownhttp.LogRequest` so Gin-based
 // services emit the same log shape as net/http services (landing,
-// authorizer). Records start time before `c.Next()` so the duration
-// field reflects the full handler chain, including middleware.
+// admin). Records start time before `c.Next()` so the duration field
+// reflects the full handler chain, including middleware.
 func ginLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()

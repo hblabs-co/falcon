@@ -124,7 +124,7 @@ func handleVerify(c *gin.Context) {
 	}
 
 	// Regular magic links are single-use to block replay. Test tokens
-	// issued by falcon-authorizer (`test: true`) stay multi-use for
+	// issued by falcon-admin (`test: true`) stay multi-use for
 	// their full 30-day TTL so an App Store reviewer can uninstall /
 	// reinstall the app and log back in with the same link.
 	if magic.Used && !magic.Test {
