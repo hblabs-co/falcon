@@ -18,7 +18,39 @@ var (
 	busOnce sync.Once
 	natConn *natsio.Conn
 	bus     jetstream.JetStream
+
+	// busWG counts in-flight NATS handlers across every Subscribe /
+	// SubscribeWithBackoff goroutine. RunForever waits on it during
+	// shutdown so we don't tear down the connection mid-handler.
+	busWG sync.WaitGroup
 )
+
+// drainBus is called by RunForever after every module's Shutdown has
+// returned. The dispatch goroutines exit naturally when their ctx is
+// cancelled (already plumbed through Subscribe), so this function
+// just waits for any handler that was mid-execution when SIGTERM
+// fired to complete — bounded by shutdownCtx.
+func drainBus(shutdownCtx context.Context) error {
+	if natConn == nil {
+		return nil
+	}
+	done := make(chan struct{})
+	go func() {
+		busWG.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+		// All handlers finished — close the connection cleanly.
+		natConn.Close()
+		return nil
+	case <-shutdownCtx.Done():
+		// Forced exit: the connection's Close will cancel pending
+		// publishes; the OS reaps everything else.
+		natConn.Close()
+		return fmt.Errorf("nats drain timeout: %w", shutdownCtx.Err())
+	}
+}
 
 // GetBus returns the process-wide JetStream handle.
 func GetBus() jetstream.JetStream { return bus }
@@ -146,7 +178,18 @@ func Subscribe(ctx context.Context, stream, consumer, subject string, handler fu
 		return fmt.Errorf("consumer %s messages: %w", consumer, err)
 	}
 
+	// Stop the iterator when the lifecycle ctx is cancelled. msgs.Next()
+	// blocks otherwise, so without this the dispatch goroutine never
+	// reaches the `if ctx.Err() != nil { return }` branch and the
+	// drain WaitGroup never decrements.
 	go func() {
+		<-ctx.Done()
+		msgs.Stop()
+	}()
+
+	busWG.Add(1)
+	go func() {
+		defer busWG.Done()
 		for {
 			msg, err := msgs.Next()
 			if err != nil {
@@ -209,6 +252,13 @@ func SubscribeWithBackoff(
 	}
 
 	go func() {
+		<-ctx.Done()
+		msgs.Stop()
+	}()
+
+	busWG.Add(1)
+	go func() {
+		defer busWG.Done()
 		for {
 			msg, err := msgs.Next()
 			if err != nil {

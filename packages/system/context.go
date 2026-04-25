@@ -2,7 +2,6 @@ package system
 
 import (
 	"context"
-	"os"
 	"os/signal"
 	"syscall"
 
@@ -19,33 +18,24 @@ func Ctx() context.Context {
 	return appCtx
 }
 
-// Init sets up the application context, cancelled on SIGINT or SIGTERM.
-// Must be called once from main before spawning goroutines.
-func Init() {
-	// BUILD_TIME is baked into the image by docker-bake (see
-	// docker-bake.hcl). Logging it first thing on startup lets you tell
-	// from the pod's logs whether it's running the image you just
-	// pushed, or an older cached one — invaluable when a rollout
-	// "didn't take" and you're not sure why.
-	buildTime := os.Getenv("BUILD_TIME")
-	if buildTime == "" {
-		buildTime = "unknown"
-	}
-	logrus.Infof("image built at %s", buildTime)
-
-	appCtx, appStop = signal.NotifyContext(
-		context.Background(),
-		syscall.SIGINT,
-		syscall.SIGTERM,
-	)
-
+// initWithStorage sets up the signal-cancellable context and connects
+// to MongoDB. Internal helper for Boot — services don't call it
+// directly (and main()s that skip Mongo go through initWithoutStorage
+// via Boot's WithoutStorage option).
+func initWithStorage() {
+	initWithoutStorage()
 	if err := InitStorage(Ctx()); err != nil {
 		logrus.Fatalf("storage init failed: %v", err)
 	}
 }
 
-// Wait blocks until the application context is cancelled, then releases signal resources.
-func Wait() {
-	<-appCtx.Done()
-	appStop()
+// initWithoutStorage sets up the signal-cancellable context and logs
+// BUILD_TIME, but skips Mongo. Used by Boot's WithoutStorage option
+// for local dev tools and CLIs that don't need persistence.
+func initWithoutStorage() {
+	appCtx, appStop = signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
 }

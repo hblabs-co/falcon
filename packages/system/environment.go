@@ -1,37 +1,23 @@
 package system
 
 import (
-	"errors"
-	"io/fs"
 	"log"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/packages/environment"
 )
 
 // MustEnv returns the value of the required environment variable key.
 // Calls logrus.Fatalf and exits if the variable is unset or empty.
+// .env loading is auto-handled by `packages/environment` on first
+// access — no LoadEnvs ceremony required.
 func MustEnv(key string) string {
 	v, err := environment.Read(key)
 	if err != nil {
 		logrus.Fatalf("%v", err)
 	}
 	return v
-}
-
-// LoadEnvs reads a local .env file into the process environment.
-// Missing file is intentionally NOT fatal: in container / k8s
-// deployments env vars come from the platform, not a file on disk.
-// Any OTHER error (permission denied, malformed file) still fatals
-// because that's a real misconfiguration.
-func LoadEnvs() {
-	err := godotenv.Load()
-	if err == nil || errors.Is(err, fs.ErrNotExist) {
-		return
-	}
-	log.Fatalf("error loading .env file: %v", err)
 }
 
 // Platform returns the PLATFORM environment variable. Fatals if not set.
