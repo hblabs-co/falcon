@@ -69,7 +69,7 @@ var singleFieldIndexes = []system.StorageIndexSpec{
 	system.NewIndexSpec(constants.MongoCVsCollection, "user_id", false),
 
 	// Users: prefix-regex on email powers the /tokens autocomplete
-	// in falcon-authorizer. Non-unique because legacy data may carry
+	// in falcon-admin. Non-unique because legacy data may carry
 	// duplicates — making it unique would make the Job fail before
 	// it can create the rest of the indexes.
 	system.NewIndexSpec(constants.MongoUsersCollection, "email", false),
