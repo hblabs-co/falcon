@@ -1,6 +1,46 @@
 package environment
 
-import "testing"
+import (
+	"os"
+	"sync"
+	"testing"
+)
+
+// resetLoadOnceForTesting wipes the sync.Once so a follow-up Read
+// re-runs godotenv.Load. Lives in the _test.go file so it's only
+// compiled into test binaries — production callers correctly see
+// the once-per-process semantics.
+func resetLoadOnceForTesting() {
+	loadOnce = sync.Once{}
+}
+
+// TestEnsureLoaded_LoadsDotEnvFile confirms the auto-load gate
+// reads a local .env into os.Environ on first access. Tests reset
+// loadOnce explicitly so multiple cases can each force a re-read
+// (in production the once-per-process semantics are correct, but
+// in tests we want determinism).
+func TestEnsureLoaded_LoadsDotEnvFile(t *testing.T) {
+	const envFile = ".env"
+	content := "TEST_LOAD_ENVS_VAR=expected_value\n"
+
+	if err := os.WriteFile(envFile, []byte(content), 0644); err != nil {
+		t.Fatalf("failed to create .env file: %v", err)
+	}
+	t.Cleanup(func() {
+		os.Remove(envFile)
+		os.Unsetenv("TEST_LOAD_ENVS_VAR")
+		resetLoadOnceForTesting()
+	})
+	resetLoadOnceForTesting()
+
+	// Any public Read should trigger ensureLoaded internally. Use
+	// ReadOptional so an unrelated unset key doesn't fail the test.
+	_ = ReadOptional("UNRELATED_KEY", "")
+
+	if got := os.Getenv("TEST_LOAD_ENVS_VAR"); got != "expected_value" {
+		t.Errorf("TEST_LOAD_ENVS_VAR = %q, want %q", got, "expected_value")
+	}
+}
 
 func TestRead(t *testing.T) {
 	tests := []struct {
