@@ -9,12 +9,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"hblabs.co/falcon/common/constants"
-	environment "hblabs.co/falcon/common/environment"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/modules/interfaces"
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/interfaces"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 var indexes = []system.StorageIndexSpec{

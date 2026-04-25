@@ -12,9 +12,9 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 const (
@@ -42,10 +42,10 @@ func Handler() http.Handler {
 	// Everything past this group goes through the bearer check.
 	admin := r.Group("/", requireBearer())
 	{
-		admin.POST("/test-link",        createTestLink)
-		admin.GET("/test-links",        listTestLinks)
-		admin.DELETE("/test-link/:id",  deleteOneTestLink)
-		admin.DELETE("/test-links",     purgeAllTestLinks)
+		admin.POST("/test-link", createTestLink)
+		admin.GET("/test-links", listTestLinks)
+		admin.DELETE("/test-link/:id", deleteOneTestLink)
+		admin.DELETE("/test-links", purgeAllTestLinks)
 	}
 
 	return r

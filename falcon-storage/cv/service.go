@@ -12,12 +12,12 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/modules/embeddings"
-	"hblabs.co/falcon/modules/ocr"
-	"hblabs.co/falcon/modules/qdrant"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/embeddings"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/ocr"
+	"hblabs.co/falcon/packages/qdrant"
+	"hblabs.co/falcon/packages/system"
 	"hblabs.co/falcon/storage/infra"
 )
 
@@ -219,10 +219,10 @@ func (s *service) index(ctx context.Context, evt models.CVIndexRequestedEvent) e
 			ID:     uuid.New().String(),
 			Vector: ch.Embedding,
 			Payload: map[string]string{
-				"cv_id":      cv.ID,
-				"user_id":    userID,
-				"filename":   cv.Filename,
-				"chunk_idx":  strconv.Itoa(ch.Index),
+				"cv_id":     cv.ID,
+				"user_id":   userID,
+				"filename":  cv.Filename,
+				"chunk_idx": strconv.Itoa(ch.Index),
 			},
 		}
 	}

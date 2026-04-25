@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 type Runner struct {

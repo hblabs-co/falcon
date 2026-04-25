@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 // Routes implements server.RouteGroup for signal endpoints.
@@ -22,12 +22,14 @@ func (Routes) Mount(r *gin.Engine) {
 
 // handleRegisterToken godoc
 // POST /device-token
-// Body: {
-//   "user_id":  "...",
-//   "device_id": "...",
-//   "token":    "<apns device token>",
-//   "live_activity_token": "<iOS 17.2+ push-to-start token>"  (optional)
-// }
+//
+//	Body: {
+//	  "user_id":  "...",
+//	  "device_id": "...",
+//	  "token":    "<apns device token>",
+//	  "live_activity_token": "<iOS 17.2+ push-to-start token>"  (optional)
+//	}
+//
 // Publishes signal.device_token.register to NATS — falcon-signal persists it.
 func handleRegisterIOSDeviceToken(c *gin.Context) {
 	var body struct {

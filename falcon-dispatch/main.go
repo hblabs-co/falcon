@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/system"
 	"hblabs.co/falcon/dispatch/dispatch"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/system"
 )
 
 func main() {

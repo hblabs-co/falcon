@@ -1,8 +1,8 @@
 package main
 
 import (
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/system"
 	"hblabs.co/falcon/scout/platforms/computerfuturescom"
 	"hblabs.co/falcon/scout/platforms/constaffcom"
 	"hblabs.co/falcon/scout/platforms/contractorde"

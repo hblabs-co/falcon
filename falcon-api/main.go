@@ -14,9 +14,9 @@ import (
 	"hblabs.co/falcon/api/server"
 	"hblabs.co/falcon/api/signal"
 	apisystem "hblabs.co/falcon/api/system"
-	"hblabs.co/falcon/common/constants"
-	environment "hblabs.co/falcon/common/environment"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/system"
 )
 
 func main() {

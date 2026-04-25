@@ -11,17 +11,17 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 // entry holds the stats parsed from the HTML for one company.
 type entry struct {
-	companyName      string
-	overallRating    float64
+	companyName        string
+	overallRating      float64
 	recommendationRate string
-	reviewCount      int
+	reviewCount        int
 }
 
 func main() {

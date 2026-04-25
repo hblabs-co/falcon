@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 // Routes implements server.RouteGroup for scrape endpoints.

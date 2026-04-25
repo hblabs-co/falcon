@@ -7,10 +7,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/api/server"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/helpers"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/helpers"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 const pageSize = 20
@@ -32,7 +32,7 @@ func (Routes) Mount(r *gin.Engine) {
 // TODO: support `?sort=` query param. Options:
 //   - sort=score          → score desc (best matches first)
 //   - sort=display        → JOIN with projects_normalized, sort by project freshness
-//                           (requires mongo aggregation pipeline)
+//     (requires mongo aggregation pipeline)
 //
 // Default stays scored_at desc which gives a "newest match for me" feed.
 func handleListMatches(c *gin.Context) {

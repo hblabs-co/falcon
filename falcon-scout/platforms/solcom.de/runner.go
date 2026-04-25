@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 type Runner struct {
@@ -40,7 +40,7 @@ func (r *Runner) SetBatchConfig(cfg platformkit.BatchConfig) {
 	r.batchFn = platformkit.ThrottledBatch[*ProjectCandidate](cfg)
 }
 
-func (r *Runner) Init(ctx context.Context) error    { return nil }
+func (r *Runner) Init(ctx context.Context) error { return nil }
 func (r *Runner) StartConsumers(ctx context.Context) error {
 	consumer := platformkit.ResolveConsumerName(Source)
 	r.logger.Warnf("subscription to → %s not completed", consumer)
@@ -206,4 +206,3 @@ func parseCandidateDate(s string) time.Time {
 	}
 	return time.Time{}
 }
-

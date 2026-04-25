@@ -3,7 +3,7 @@ package signal
 import (
 	"strings"
 
-	environment "hblabs.co/falcon/common/environment"
+	"hblabs.co/falcon/packages/environment"
 )
 
 // AdminConfig holds the set of email addresses that should receive operational

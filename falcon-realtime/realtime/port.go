@@ -3,7 +3,7 @@ package realtime
 import (
 	"fmt"
 
-	environment "hblabs.co/falcon/common/environment"
+	"hblabs.co/falcon/packages/environment"
 )
 
 const (

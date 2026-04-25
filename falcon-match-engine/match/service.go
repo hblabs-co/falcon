@@ -10,11 +10,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"hblabs.co/falcon/common/constants"
-	environment "hblabs.co/falcon/common/environment"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/modules/llm"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/llm"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 const defaultScoreThreshold = float32(6.0)

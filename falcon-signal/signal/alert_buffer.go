@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	environment "hblabs.co/falcon/common/environment"
+	"hblabs.co/falcon/packages/environment"
 )
 
 // defaultAlertWindow is used when ADMIN_ALERT_WINDOW is unset or invalid.

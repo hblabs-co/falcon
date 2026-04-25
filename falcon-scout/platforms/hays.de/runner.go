@@ -3,7 +3,7 @@ package haysde
 import (
 	"context"
 
-	"hblabs.co/falcon/modules/interfaces"
+	"hblabs.co/falcon/packages/interfaces"
 )
 
 const Source = "hays.de"

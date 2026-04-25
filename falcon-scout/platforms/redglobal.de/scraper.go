@@ -8,7 +8,7 @@ import (
 
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 // newCollector returns a colly collector pre-configured for redglobal scraping:

@@ -3,7 +3,7 @@ package waynicede
 import (
 	"context"
 
-	"hblabs.co/falcon/modules/interfaces"
+	"hblabs.co/falcon/packages/interfaces"
 )
 
 const Source = "waynice.de"

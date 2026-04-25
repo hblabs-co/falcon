@@ -11,8 +11,8 @@ import (
 	"github.com/sideshow/apns2/payload"
 	"github.com/sideshow/apns2/token"
 	"github.com/sirupsen/logrus"
-	environment "hblabs.co/falcon/common/environment"
-	"hblabs.co/falcon/common/models"
+	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/models"
 )
 
 type apnsClient struct {

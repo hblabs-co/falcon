@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 func (s *service) subscribe(ctx context.Context) error {

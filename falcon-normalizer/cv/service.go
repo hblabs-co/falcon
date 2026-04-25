@@ -9,10 +9,10 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/modules/llm"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/llm"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 // Service normalizes CVs via LLM.

@@ -6,7 +6,7 @@ import (
 	"maps"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 // implemnt retry

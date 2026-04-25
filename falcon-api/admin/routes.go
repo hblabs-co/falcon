@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 // Routes implements server.RouteGroup for admin endpoints.
@@ -31,7 +31,7 @@ func (Routes) Mount(r *gin.Engine) {
 	// call inserts one clearly-tagged warning row / fires one push,
 	// both easy to clean up later. Kept as GET-only (no POST mirror)
 	// so the route surface stays minimal.
-	g.GET("/signal/test-alert",      handleTestAlert)
+	g.GET("/signal/test-alert", handleTestAlert)
 	g.GET("/signal/test-last-match", handleTestLastMatch)
 }
 

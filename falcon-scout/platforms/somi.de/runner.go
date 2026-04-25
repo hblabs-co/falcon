@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 type Runner struct {
@@ -28,11 +28,11 @@ func (r *Runner) Name() string      { return Source }
 func (r *Runner) BaseURL() string   { return baseURL }
 func (r *Runner) CompanyID() string { return CompanyID }
 
-func (r *Runner) SetLogger(logger any)                       { r.logger = platformkit.ResolveLogger(logger) }
-func (r *Runner) SetSaveHandler(fn platformkit.SaveFn)       { r.save = fn }
-func (r *Runner) SetFilterHandler(fn platformkit.FilterFn)   { r.filter = fn }
-func (r *Runner) SetWarnHandler(fn platformkit.WarnFn)       { r.warn = fn }
-func (r *Runner) SetErrHandler(fn platformkit.ErrFn)         { r.err = fn }
+func (r *Runner) SetLogger(logger any)                     { r.logger = platformkit.ResolveLogger(logger) }
+func (r *Runner) SetSaveHandler(fn platformkit.SaveFn)     { r.save = fn }
+func (r *Runner) SetFilterHandler(fn platformkit.FilterFn) { r.filter = fn }
+func (r *Runner) SetWarnHandler(fn platformkit.WarnFn)     { r.warn = fn }
+func (r *Runner) SetErrHandler(fn platformkit.ErrFn)       { r.err = fn }
 func (r *Runner) SetBatchConfig(cfg platformkit.BatchConfig) {
 	r.batchFn = platformkit.ThrottledBatch[*ProjectCandidate](cfg)
 }

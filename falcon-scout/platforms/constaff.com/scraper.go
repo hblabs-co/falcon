@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gocolly/colly/v2"
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 var collectorCfg = platformkit.DefaultCollectorConfig(

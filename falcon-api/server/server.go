@@ -7,11 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"hblabs.co/falcon/common/constants"
-	environment "hblabs.co/falcon/common/environment"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/ownhttp"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/ownhttp"
+	"hblabs.co/falcon/packages/system"
 )
 
 // RouteGroup is implemented by every feature package that wants to register

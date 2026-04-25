@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 // fixedNow pins platformkit.NowFunc to 2026-04-16 so month-only inputs

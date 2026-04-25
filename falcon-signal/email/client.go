@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	mailjet "github.com/mailjet/mailjet-apiv3-go/v4"
-	"hblabs.co/falcon/common/system"
+	"hblabs.co/falcon/packages/system"
 )
 
 // Client wraps the Mailjet API client.

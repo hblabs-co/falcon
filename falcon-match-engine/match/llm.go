@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/modules/llm"
+	"hblabs.co/falcon/packages/llm"
+	"hblabs.co/falcon/packages/models"
 )
 
 const scoreSystemPrompt = `You are a strict technical recruiter evaluating freelance candidates.
@@ -105,7 +105,7 @@ type llmRaw struct {
 	// suffixes. Provides a fallback when the normalizer hasn't processed
 	// this project yet (race condition): service.go chains
 	//   normalized.display → raw stripped → project.Title.
-	ProjectTitle    string   `json:"project_title"`
+	ProjectTitle string `json:"project_title"`
 }
 
 // scorer wraps the shared LLM client with match-specific prompts and a translate
@@ -163,10 +163,10 @@ func (s *scorer) Score(
 	enTexts, esTexts := s.translate(ctx, deBytes, logFields)
 
 	result := &models.MatchResultEvent{
-		Score:        raw.Score,
-		Label:        models.LabelFromScore(raw.Score),
-		LLMModel:     s.llm.Model,
-		LLMProvider:  s.llm.Provider,
+		Score:       raw.Score,
+		Label:       models.LabelFromScore(raw.Score),
+		LLMModel:    s.llm.Model,
+		LLMProvider: s.llm.Provider,
 		// LLM-cleaned title — used as fallback when the normalizer hasn't
 		// produced projects_normalized.<lang>.title.display yet. service.go
 		// resolves the final title via normalized → this → raw chain.

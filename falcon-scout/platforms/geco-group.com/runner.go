@@ -3,7 +3,7 @@ package gecogroupcom
 import (
 	"context"
 
-	"hblabs.co/falcon/modules/interfaces"
+	"hblabs.co/falcon/packages/interfaces"
 )
 
 const Source = "geco-group.com"

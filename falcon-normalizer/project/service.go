@@ -11,10 +11,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/models"
-	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/modules/llm"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/llm"
+	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/packages/system"
 )
 
 // NormalizedProject is the document stored in projects_normalized.
@@ -235,8 +235,8 @@ func (s *Service) saveError(ctx context.Context, project *models.PersistedProjec
 //     for this project_id exists yet (unique index enforces exclusivity).
 //  2. Duplicate-key path: a doc already exists. Run an atomic UpdateOne
 //     that only matches if the existing doc is "reclaimable":
-//       - stale version (display_updated_at < target), OR
-//       - abandoned lock (status=in_progress with expired acquired_at).
+//     - stale version (display_updated_at < target), OR
+//     - abandoned lock (status=in_progress with expired acquired_at).
 //     If the update modifies 1 row, we took over. If 0, someone else
 //     is actively working or has already produced a current doc.
 //
@@ -328,4 +328,3 @@ func overrideCompanyName(data map[string]any, name string) {
 	}
 	data["company"] = map[string]any{"name": name}
 }
-

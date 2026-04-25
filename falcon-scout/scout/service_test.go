@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 // mockPlatform implements Platform for testing.

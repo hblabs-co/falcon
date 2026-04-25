@@ -3,7 +3,7 @@ package mamgruppecom
 import (
 	"context"
 
-	"hblabs.co/falcon/modules/interfaces"
+	"hblabs.co/falcon/packages/interfaces"
 )
 
 const Source = "mamgruppe.com"

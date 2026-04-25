@@ -3,7 +3,7 @@ package actcongmbhde
 import (
 	"context"
 
-	"hblabs.co/falcon/modules/interfaces"
+	"hblabs.co/falcon/packages/interfaces"
 )
 
 // https://www.akkodis.com/de-de/karriere/jobsuche?q=

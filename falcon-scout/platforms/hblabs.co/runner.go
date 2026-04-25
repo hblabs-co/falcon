@@ -3,7 +3,7 @@ package hblabsco
 import (
 	"context"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 type Runner struct {

@@ -4,11 +4,11 @@ import (
 	_ "embed"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/constants"
-	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/modules/llm"
 	"hblabs.co/falcon/normalizer/cv"
 	"hblabs.co/falcon/normalizer/project"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/llm"
+	"hblabs.co/falcon/packages/system"
 )
 
 //go:embed prompt.md

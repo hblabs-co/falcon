@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gocolly/colly/v2"
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 type Runner struct {

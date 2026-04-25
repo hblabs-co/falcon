@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 var apiClient = &http.Client{Timeout: 30 * time.Second}

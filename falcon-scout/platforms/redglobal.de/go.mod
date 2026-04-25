@@ -1,12 +1,9 @@
 module hblabs.co/falcon/scout/platforms/redglobalde
 
-replace hblabs.co/falcon/modules/platformkit => ../../../modules/platformkit
-
 go 1.26.1
 
 require (
 	github.com/gocolly/colly/v2 v2.3.0
-	hblabs.co/falcon/modules/platformkit v0.0.0-00010101000000-000000000000
 )
 
 require (

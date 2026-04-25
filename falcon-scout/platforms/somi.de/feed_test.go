@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 // fixedNow pins platformkit.NowFunc to 2026-04-16 for deterministic
@@ -461,7 +461,7 @@ func TestIsDurationString(t *testing.T) {
 
 		// range / dash variants
 		{"3 - 6 Monate", true},
-		{"3–6 Monate", true},  // en-dash
+		{"3–6 Monate", true},   // en-dash
 		{"3 — 6 Monate", true}, // em-dash
 
 		// "ca." variants

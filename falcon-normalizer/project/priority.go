@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/sirupsen/logrus"
-	"hblabs.co/falcon/common/models"
+	"hblabs.co/falcon/packages/models"
 )
 
 // handleMatchPending normalizes the project referenced by a pre-confirmed match.

@@ -3,7 +3,7 @@ package peakonede
 import (
 	"context"
 
-	"hblabs.co/falcon/modules/interfaces"
+	"hblabs.co/falcon/packages/interfaces"
 )
 
 const Source = "peak-one.de"

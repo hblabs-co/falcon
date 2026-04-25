@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 var apiClient = &http.Client{Timeout: 30 * time.Second}
@@ -28,17 +28,17 @@ type apiResponse struct {
 // apiProject maps a single entry inside `projects`. The API returns dates
 // as free-form German text and ClosingDate in Microsoft JSON format.
 type apiProject struct {
-	Begin               string   `json:"Begin"`       // "April 2026", "Mai 2026"
-	End                 string   `json:"End"`         // "12 Monate ++", "8 Months ++" (duration)
-	ID                  int      `json:"Id"`          // numeric, e.g. 14274
-	DisplayJobmarket    bool     `json:"DisplayJobmarket"`
-	JobDescriptionHTML  string   `json:"JobDescriptionHTML"`
-	ClosingDate         string   `json:"ClosingDate"` // "/Date(1777485600000+0000)/"
-	JobLocation         string   `json:"JobLocation"` // "D5 Köln/hybrid" | "Remote"
-	JobTitle            string   `json:"JobTitle"`
-	Type                int      `json:"Type"`        // 1 | 3 | 5
-	TypeStr             []string `json:"TypeStr"`     // ["Freiberuflich", "Contractor"]
-	User                string   `json:"User"`        // "JBA" (initials)
+	Begin              string   `json:"Begin"` // "April 2026", "Mai 2026"
+	End                string   `json:"End"`   // "12 Monate ++", "8 Months ++" (duration)
+	ID                 int      `json:"Id"`    // numeric, e.g. 14274
+	DisplayJobmarket   bool     `json:"DisplayJobmarket"`
+	JobDescriptionHTML string   `json:"JobDescriptionHTML"`
+	ClosingDate        string   `json:"ClosingDate"` // "/Date(1777485600000+0000)/"
+	JobLocation        string   `json:"JobLocation"` // "D5 Köln/hybrid" | "Remote"
+	JobTitle           string   `json:"JobTitle"`
+	Type               int      `json:"Type"`    // 1 | 3 | 5
+	TypeStr            []string `json:"TypeStr"` // ["Freiberuflich", "Contractor"]
+	User               string   `json:"User"`    // "JBA" (initials)
 }
 
 // fetchPage fetches a single page of constaff projects. page is 1-indexed.
@@ -117,17 +117,17 @@ func projectToCandidate(p apiProject) *ProjectCandidate {
 	location, remote := buildLocation(p.JobLocation)
 
 	return &ProjectCandidate{
-		PlatformID:  strconv.Itoa(p.ID),
-		URL:         detailPageURL(strconv.Itoa(p.ID)),
-		Source:      Source,
-		Title:       strings.TrimSpace(p.JobTitle),
-		Description: strings.TrimSpace(p.JobDescriptionHTML),
-		Location:    location,
-		Remote:      remote,
-		StartDate:   parseBeginDate(p.Begin),
-		EndDate:     "", // not provided — End is a duration, not a date
-		Duration:    strings.TrimSpace(p.End),
-		PostedAt:    "", // no publish date in API; ScrapedAt drives display_updated_at
+		PlatformID:      strconv.Itoa(p.ID),
+		URL:             detailPageURL(strconv.Itoa(p.ID)),
+		Source:          Source,
+		Title:           strings.TrimSpace(p.JobTitle),
+		Description:     strings.TrimSpace(p.JobDescriptionHTML),
+		Location:        location,
+		Remote:          remote,
+		StartDate:       parseBeginDate(p.Begin),
+		EndDate:         "", // not provided — End is a duration, not a date
+		Duration:        strings.TrimSpace(p.End),
+		PostedAt:        "", // no publish date in API; ScrapedAt drives display_updated_at
 		TypeLabel:       label,
 		IsANUE:          isANUE,
 		ContactInitials: strings.TrimSpace(p.User),

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 // parseProjectID extracts the numeric ID from text like "Projekt-ID 30290".

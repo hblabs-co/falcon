@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 // rssResponse is the top-level RSS XML structure.

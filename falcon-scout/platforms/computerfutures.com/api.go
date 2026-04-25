@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"hblabs.co/falcon/modules/platformkit"
+	"hblabs.co/falcon/scout/platformkit"
 )
 
 var apiClient = &http.Client{Timeout: 30 * time.Second}
@@ -28,34 +28,34 @@ type apiResponse struct {
 // apiResult maps a single item in the results array. Only the fields we need
 // are mapped; the rest (suggest, geoPoint, etc.) are ignored.
 type apiResult struct {
-	IndexID             string   `json:"indexId"`
-	JobReference        string   `json:"jobReference"`
-	Title               string   `json:"title"`
-	Slug                string   `json:"slug"`
-	Description         string   `json:"description"`
-	PostDate            string   `json:"postDate"`
-	ExpiryDate          string   `json:"expiryDate"`
-	JobType             string   `json:"jobType"`
-	StartDate           string   `json:"startDate"`
-	Duration            string   `json:"duration"`
-	Location            string   `json:"location"`
-	City                string   `json:"city"`
-	Country             string   `json:"country"`
-	RemoteAvailable     bool     `json:"remoteWorkingAvailable"`
-	Industry            []string `json:"industry"`
-	SalaryText          string   `json:"salaryText"`
-	SalaryFrom          float64  `json:"salaryFrom"`
-	SalaryTo            float64  `json:"salaryTo"`
-	SalaryCurrency      string   `json:"salaryCurrency"`
-	SalaryPer           string   `json:"salaryPer"`
-	SalaryBenefits      string   `json:"salaryBenefits"`
-	SalaryHidden        bool     `json:"salaryHidden"`
-	Skills              string   `json:"skills"`
-	ContactName         string   `json:"contactName"`
-	ContactEmail        string   `json:"contactEmail"`
-	ApplicationEmail    string   `json:"applicationEmail"`
-	LastUpdated         string   `json:"lastUpdated"`
-	ApplyURL            string   `json:"applyURL"`
+	IndexID          string   `json:"indexId"`
+	JobReference     string   `json:"jobReference"`
+	Title            string   `json:"title"`
+	Slug             string   `json:"slug"`
+	Description      string   `json:"description"`
+	PostDate         string   `json:"postDate"`
+	ExpiryDate       string   `json:"expiryDate"`
+	JobType          string   `json:"jobType"`
+	StartDate        string   `json:"startDate"`
+	Duration         string   `json:"duration"`
+	Location         string   `json:"location"`
+	City             string   `json:"city"`
+	Country          string   `json:"country"`
+	RemoteAvailable  bool     `json:"remoteWorkingAvailable"`
+	Industry         []string `json:"industry"`
+	SalaryText       string   `json:"salaryText"`
+	SalaryFrom       float64  `json:"salaryFrom"`
+	SalaryTo         float64  `json:"salaryTo"`
+	SalaryCurrency   string   `json:"salaryCurrency"`
+	SalaryPer        string   `json:"salaryPer"`
+	SalaryBenefits   string   `json:"salaryBenefits"`
+	SalaryHidden     bool     `json:"salaryHidden"`
+	Skills           string   `json:"skills"`
+	ContactName      string   `json:"contactName"`
+	ContactEmail     string   `json:"contactEmail"`
+	ApplicationEmail string   `json:"applicationEmail"`
+	LastUpdated      string   `json:"lastUpdated"`
+	ApplyURL         string   `json:"applyURL"`
 }
 
 // searchRequest is the body sent to the sthree search API.

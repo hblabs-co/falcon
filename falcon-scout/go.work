@@ -20,4 +20,7 @@ use (
 	./platforms/waynice.de
 	./platforms/wematch.de
 	./scout
+	./platformkit
+	../packages
+
 )

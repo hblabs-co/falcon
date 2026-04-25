@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	environment "hblabs.co/falcon/common/environment"
+	"hblabs.co/falcon/packages/environment"
 )
 
 // Client is a single websocket connection. The struct is intentionally

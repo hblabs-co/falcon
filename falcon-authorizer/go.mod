@@ -1,8 +1,6 @@
-module hblabs.co/falcon/falcon-authorizer
+module hblabs.co/falcon/authorizer
 
-replace hblabs.co/falcon/common => ../common
-
-replace hblabs.co/falcon/modules/interfaces => ../modules/interfaces
+replace hblabs.co/falcon/packages => ../packages
 
 go 1.26.1
 
@@ -10,8 +8,8 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/sirupsen/logrus v1.9.4
-	go.mongodb.org/mongo-driver/v2 v2.5.0
-	hblabs.co/falcon/common v0.0.0-00010101000000-000000000000
+	go.mongodb.org/mongo-driver/v2 v2.5.1
+	hblabs.co/falcon/packages v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -26,6 +24,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
@@ -34,7 +33,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/nats-io/nats.go v1.50.0 // indirect
+	github.com/nats-io/nats.go v1.51.0 // indirect
 	github.com/nats-io/nkeys v0.4.15 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
@@ -50,8 +49,7 @@ require (
 	golang.org/x/crypto v0.49.0 // indirect
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
-	hblabs.co/falcon/modules/interfaces v0.0.0-00010101000000-000000000000 // indirect
 )
