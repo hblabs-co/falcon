@@ -27,6 +27,23 @@ func (s *service) subscribe(ctx context.Context) error {
 	}
 	logrus.Infof("[cv] subscribed (core) → %s", constants.SubjectCVPrepareRequested)
 
+	// cv.download.requested — same core request/reply pattern. Lets
+	// falcon-admin (and any future caller) ask for a presigned
+	// download URL without needing its own MinIO client.
+	if err := system.SubscribeCore(
+		constants.SubjectCVDownloadRequested,
+		func(data []byte) (any, error) {
+			var evt models.CVDownloadRequestedEvent
+			if err := json.Unmarshal(data, &evt); err != nil {
+				return nil, err
+			}
+			return s.prepareDownload(context.Background(), evt)
+		},
+	); err != nil {
+		return err
+	}
+	logrus.Infof("[cv] subscribed (core) → %s", constants.SubjectCVDownloadRequested)
+
 	// cv.index.requested uses JetStream — durable, retryable.
 	if err := system.Subscribe(
 		ctx,

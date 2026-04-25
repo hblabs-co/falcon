@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,11 +15,11 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/embeddings"
+	"hblabs.co/falcon/storage/infra"
 	"hblabs.co/falcon/packages/models"
 	"hblabs.co/falcon/packages/ocr"
 	"hblabs.co/falcon/packages/qdrant"
 	"hblabs.co/falcon/packages/system"
-	"hblabs.co/falcon/storage/infra"
 )
 
 const (
@@ -29,6 +30,10 @@ const (
 	// than 10 min are usually stuck and should fail clean instead
 	// of succeeding against a still-open URL.
 	presignedOCRExpiry = 10 * time.Minute
+	// presignedDownloadExpiry — admin "download CV" link. Long
+	// enough to click "Save as", short enough that it can't be
+	// casually shared.
+	presignedDownloadExpiry = 5 * time.Minute
 )
 
 type service struct {
@@ -95,6 +100,61 @@ func (s *service) prepare(ctx context.Context, evt models.CVPrepareRequestedEven
 		UploadURL: uploadURL.String(),
 		ExpiresAt: expiresAt.Format(time.RFC3339),
 	}, nil
+}
+
+// prepareDownload looks up the user's CV in Mongo and returns a
+// presigned MinIO GET URL for the file. Used by falcon-admin
+// for the admin "download CV" button — keeps MinIO access on this
+// service instead of leaking the client to every consumer.
+//
+// Returns NotFound=true (with empty URL) when the user has no CV
+// or the CV record lacks a minio key, so callers don't have to
+// distinguish "no record" from "presign error" themselves.
+func (s *service) prepareDownload(ctx context.Context, evt models.CVDownloadRequestedEvent) (*models.CVDownloadPreparedEvent, error) {
+	if evt.UserID == "" {
+		return &models.CVDownloadPreparedEvent{RequestID: evt.RequestID, NotFound: true}, nil
+	}
+
+	var cv models.PersistedCV
+	if err := system.GetStorage().GetByField(ctx, constants.MongoCVsCollection,
+		"user_id", evt.UserID, &cv); err != nil {
+		// Treat any read failure (typically: doc not found) as
+		// "no CV". The mongo driver returns the same error shape
+		// either way; the caller only needs the boolean.
+		return &models.CVDownloadPreparedEvent{RequestID: evt.RequestID, NotFound: true}, nil
+	}
+	if cv.MinioBucket == "" || cv.MinioKey == "" {
+		return &models.CVDownloadPreparedEvent{RequestID: evt.RequestID, NotFound: true}, nil
+	}
+
+	reqParams := url.Values{}
+	if cv.Filename != "" {
+		reqParams.Set("response-content-disposition",
+			`attachment; filename="`+sanitizeFilename(cv.Filename)+`"`)
+	}
+	signed, err := infra.GetMinioPublic().PresignedGetObject(ctx,
+		cv.MinioBucket, cv.MinioKey, presignedDownloadExpiry, reqParams)
+	if err != nil {
+		return nil, fmt.Errorf("presign cv download: %w", err)
+	}
+
+	expiresAt := time.Now().Add(presignedDownloadExpiry)
+	logrus.Infof("[cv] presigned download user_id=%s key=%s request_id=%s",
+		evt.UserID, cv.MinioKey, evt.RequestID)
+	return &models.CVDownloadPreparedEvent{
+		RequestID: evt.RequestID,
+		URL:       signed.String(),
+		Filename:  cv.Filename,
+		ExpiresAt: expiresAt.Format(time.RFC3339),
+	}, nil
+}
+
+// sanitizeFilename strips characters that would break the
+// Content-Disposition header. MinIO/S3 quotes the value, but a
+// stray quote in the original filename would still escape.
+func sanitizeFilename(s string) string {
+	r := strings.NewReplacer(`"`, "", `\`, "", "\n", "", "\r", "")
+	return r.Replace(s)
 }
 
 // index runs the full pipeline: download → extract → embed → qdrant → publish cv.indexed.
