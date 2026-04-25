@@ -41,6 +41,27 @@ type CVPreparedEvent struct {
 	ExpiresAt string `json:"expires_at"` // RFC3339
 }
 
+// CVDownloadRequestedEvent is sent on "cv.download.requested" (core
+// request/reply) by any service that needs a presigned GET URL for
+// a user's CV — today, the falcon-admin admin UI. Storage
+// owns MinIO; everyone else asks via NATS.
+type CVDownloadRequestedEvent struct {
+	RequestID string `json:"request_id"`
+	UserID    string `json:"user_id"`
+}
+
+// CVDownloadPreparedEvent is the reply published by falcon-storage.
+// URL is empty + NotFound=true when the user has no CV (or no
+// minio key persisted), so callers don't have to disambiguate
+// "no CV" from "presign failed" themselves.
+type CVDownloadPreparedEvent struct {
+	RequestID string `json:"request_id"`
+	URL       string `json:"url,omitempty"`
+	Filename  string `json:"filename,omitempty"`
+	ExpiresAt string `json:"expires_at,omitempty"` // RFC3339
+	NotFound  bool   `json:"not_found,omitempty"`
+}
+
 // CVIndexRequestedEvent is published to "cv.index.requested" to trigger
 // async CV processing (text extraction, embedding, Qdrant upsert).
 type CVIndexRequestedEvent struct {

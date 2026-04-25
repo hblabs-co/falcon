@@ -26,7 +26,7 @@ func LogRequest(method, path string, status int, duration time.Duration) {
 }
 
 // LoggingMiddleware wraps a `next` handler for vanilla net/http
-// services (falcon-landing, falcon-authorizer, dev servers). Captures
+// services (falcon-landing, falcon-admin, dev servers). Captures
 // the response status and elapsed time, then hands off to LogRequest
 // so every service emits the same line shape.
 func LoggingMiddleware(next http.Handler) http.Handler {

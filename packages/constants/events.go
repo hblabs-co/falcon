@@ -26,6 +26,7 @@ const (
 	SubjectStorageCompanyLogoRequested  = "company_logo.requested"
 	SubjectStorageCompanyLogoDownloaded = "company_logo.downloaded"
 	SubjectCVPrepareRequested           = "cv.prepare.requested"
+	SubjectCVDownloadRequested          = "cv.download.requested"
 	SubjectCVIndexRequested             = "cv.index.requested"
 	SubjectCVIndexed                    = "cv.indexed"
 	SubjectCVNormalized                 = "cv.normalized"

@@ -16,7 +16,7 @@ import (
 // service last published?" via the public GET /system endpoint.
 //
 // Called once from each service's main after InitStorage. Services
-// that don't touch Mongo (authorizer, import) skip this call and
+// that don't touch Mongo (admin, import) skip this call and
 // simply don't appear in /system responses.
 //
 // publishDate is normally injected at build time (ldflags / env var)

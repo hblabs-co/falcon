@@ -10,7 +10,7 @@ const (
 	ServiceScout                = "falcon-scout"
 	ServiceAPI                  = "falcon-api"
 	ServiceAuth                 = "falcon-auth"
-	ServiceAuthorizer           = "falcon-authorizer"
+	ServiceAdmin                = "falcon-admin"
 	ServiceDispatch             = "falcon-dispatch"
 	ServiceMatchEngine          = "falcon-match-engine"
 	ServiceSignal               = "falcon-signal"
