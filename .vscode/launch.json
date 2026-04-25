@@ -2,21 +2,29 @@
   // Use IntelliSense to learn about possible attributes.
   // Hover to view descriptions of existing attributes.
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  //
+  // Each config sets an explicit `output` so the temp binary has a
+  // service-specific name. Activity Monitor (and `ps`, `lsof`, etc.)
+  // show __debug_falcon-api instead of the generic __debug_bin<hash>
+  // Delve emits by default — makes "which service is eating CPU?"
+  // answerable in one glance.
   "version": "0.2.0",
   "compounds": [
     {
       "name": "🚀 Falcon — All Services",
       "configurations": [
+        "Debug Nest",
         "Debug API",
         "Debug Landing",
         "Debug Authorizer",
-        "Debug Signal",
-        "Debug Scout",
-        "Debug Dispatch",
+        "Debug Designer",
         "Debug Realtime",
-        "Debug Match Engine",
+        "Debug Scout",
         "Debug Storage",
-        "Debug Normalizer"
+        "Debug Normalizer",
+        "Debug Dispatch",
+        "Debug Match Engine",
+        "Debug Signal",
       ],
       "stopAll": true,
       "preLaunchTask": "Docker: start infrastructure",
@@ -29,77 +37,104 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-api"
+      "program": "${workspaceFolder}/falcon-api",
+      "output": "${workspaceFolder}/falcon-api/__debug_falcon-api"
     },
     {
       "name": "Debug Landing",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-landing"
+      "program": "${workspaceFolder}/falcon-landing",
+      "output": "${workspaceFolder}/falcon-landing/__debug_falcon-landing"
     },
     {
       "name": "Debug Authorizer",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-authorizer"
+      "program": "${workspaceFolder}/falcon-authorizer",
+      "output": "${workspaceFolder}/falcon-authorizer/__debug_falcon-authorizer"
+    },
+    {
+      "name": "Debug Designer",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-designer",
+      "output": "${workspaceFolder}/falcon-designer/__debug_falcon-designer"
+    },
+    {
+      "name": "Debug Nest",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/falcon-nest",
+      "output": "${workspaceFolder}/falcon-nest/__debug_falcon-nest"
     },
     {
       "name": "Debug Signal",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-signal"
+      "program": "${workspaceFolder}/falcon-signal",
+      "output": "${workspaceFolder}/falcon-signal/__debug_falcon-signal"
     },
     {
       "name": "Debug Scout",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-scout/scout"
+      "program": "${workspaceFolder}/falcon-scout/scout",
+      "output": "${workspaceFolder}/falcon-scout/scout/__debug_falcon-scout"
     },
     {
       "name": "Debug Dispatch",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-dispatch"
+      "program": "${workspaceFolder}/falcon-dispatch",
+      "output": "${workspaceFolder}/falcon-dispatch/__debug_falcon-dispatch"
     },
     {
       "name": "Debug Match Engine",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-match-engine"
+      "program": "${workspaceFolder}/falcon-match-engine",
+      "output": "${workspaceFolder}/falcon-match-engine/__debug_falcon-match-engine"
     },
     {
       "name": "Debug Storage",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-storage"
+      "program": "${workspaceFolder}/falcon-storage",
+      "output": "${workspaceFolder}/falcon-storage/__debug_falcon-storage"
     },
     {
       "name": "Debug Normalizer",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-normalizer"
+      "program": "${workspaceFolder}/falcon-normalizer",
+      "output": "${workspaceFolder}/falcon-normalizer/__debug_falcon-normalizer"
     },
     {
       "name": "Debug Recruiter Rodeo Import",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-import/recruiter_rodeo"
+      "program": "${workspaceFolder}/falcon-import/recruiter_rodeo",
+      "output": "${workspaceFolder}/falcon-import/recruiter_rodeo/__debug_falcon-recruiter-rodeo-import"
     },
     {
       "name": "Debug Realtime",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-realtime"
+      "program": "${workspaceFolder}/falcon-realtime",
+      "output": "${workspaceFolder}/falcon-realtime/__debug_falcon-realtime"
     }
   ]
 }

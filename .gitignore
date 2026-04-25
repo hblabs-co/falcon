@@ -8,7 +8,6 @@ falcon-ios/**/Config.swift
 falcon-ios/**/xcuserdata/
 falcon-import/recruiter_rodeo/recruiters.html
 
-falcon-scout/scout/scout
 see_later
 
 # Secrets — match both the old flat layout and the post-reorg path
@@ -19,4 +18,18 @@ deployment/12-registry-access.yaml
 deployment/configs/11-secret.yaml
 deployment/configs/12-registry-access.yaml
 
-falcon-appstore-preview-maker/falcon-appstore-preview-maker
+
+falcon-api/falcon-api
+falcon-authorizer/falcon-authorizer
+falcon-designer/designer
+falcon-import/recruiter_rodeo/recruiter_rodeo
+# falcon-dispatch/falcon-dispatch
+# falcon-import/falcon-import
+# falcon-landing/falcon-landing
+# falcon-match-engine/falcon-match-engine
+falcon-nest/nest
+# falcon-normalizer/falcon-normalizer
+# falcon-realtime/falcon-realtime
+falcon-scout/scout/scout
+# falcon-signal/falcon-signal
+# falcon-storage/falcon-storage
