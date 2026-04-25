@@ -17,7 +17,7 @@
         "Debug Nest",
         "Debug API",
         "Debug Landing",
-        "Debug Authorizer",
+        "Debug Admin",
         "Debug Designer",
         "Debug Realtime",
         "Debug Scout",
@@ -58,12 +58,12 @@
       "output": "${workspaceFolder}/falcon-landing/__debug_falcon-landing"
     },
     {
-      "name": "Debug Authorizer",
+      "name": "Debug Admin",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/falcon-authorizer",
-      "output": "${workspaceFolder}/falcon-authorizer/__debug_falcon-authorizer"
+      "program": "${workspaceFolder}/falcon-admin",
+      "output": "${workspaceFolder}/falcon-admin/__debug_falcon-admin"
     },
     {
       "name": "Debug Designer",

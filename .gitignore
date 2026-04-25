@@ -10,6 +10,7 @@ falcon-import/recruiter_rodeo/recruiters.html
 
 see_later
 
+
 # Secrets — match both the old flat layout and the post-reorg path
 # under deployment/configs/. Keep both so a stashed/old branch can't
 # accidentally stage creds.
@@ -33,3 +34,4 @@ falcon-nest/nest
 falcon-scout/scout/scout
 # falcon-signal/falcon-signal
 # falcon-storage/falcon-storage
+falcon-config/config

@@ -1,4 +1,4 @@
-module hblabs.co/falcon/authorizer
+module hblabs.co/falcon/admin
 
 replace hblabs.co/falcon/packages => ../packages
 

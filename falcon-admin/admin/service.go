@@ -1,8 +1,6 @@
-package authorizer
+package admin
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -12,32 +10,28 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"hblabs.co/falcon/admin/issues"
+	"hblabs.co/falcon/admin/users"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/models"
 	"hblabs.co/falcon/packages/system"
 )
 
-const (
-	// Test tokens live long — 30 days covers a full Apple review cycle
-	// plus follow-up QA passes. Mongo's TTL index on `expires_at`
-	// auto-deletes them after expiry, so we don't need a cleanup cron.
-	testTokenTTL = 30 * 24 * time.Hour
-
-	// APP_SCHEME used in the generated magic URL. Hardcoded fallback
-	// matches the iOS app's URL scheme in Info.plist.
-	defaultAppScheme = "falcon"
-)
-
 // Handler returns the Gin engine with every admin endpoint wired up.
-// Kept in one place so the full API surface of the authorizer reads
-// top-to-bottom in this function.
+// Kept in one place so the full API surface of the admin service reads
+// top-to-bottom in this function. The user-centric subset (search +
+// per-user views + sessions + CV download) lives in the `users`
+// package and is mounted via users.Mount.
 func Handler() http.Handler {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	// Public — used by k8s-style health checks or a `watch curl`
-	// loop while debugging. No bearer required.
-	r.GET("/healthz", func(c *gin.Context) { c.String(http.StatusOK, "ok") })
+	// Public — used by k8s-style health checks, a `watch curl` loop,
+	// or Nest's status poller. Match GET + HEAD: Gin doesn't auto-
+	// route HEAD onto a GET handler, so without HEAD here every
+	// HEAD probe logs a spurious 404.
+	r.Match([]string{http.MethodGet, http.MethodHead}, "/healthz",
+		func(c *gin.Context) { c.String(http.StatusOK, "ok") })
 
 	// Everything past this group goes through the bearer check.
 	admin := r.Group("/", requireBearer())
@@ -46,19 +40,23 @@ func Handler() http.Handler {
 		admin.GET("/test-links", listTestLinks)
 		admin.DELETE("/test-link/:id", deleteOneTestLink)
 		admin.DELETE("/test-links", purgeAllTestLinks)
+		// User-centric admin (Nest's /users UI): autocomplete, magic
+		// links, JWT sessions, devices, CV download.
+		users.Mount(admin)
+		issues.Mount(admin)
 	}
 
 	return r
 }
 
 // requireBearer compares the request's `Authorization: Bearer <x>`
-// header against AUTHORIZER_TOKEN. If the env var is unset we let all
+// header against ADMIN_TOKEN. If the env var is unset we let all
 // requests through — convenient for a localhost-only smoke test, but
 // we log a warning so nobody ships the service with its door open.
 func requireBearer() gin.HandlerFunc {
-	want := os.Getenv("AUTHORIZER_TOKEN")
+	want := os.Getenv("ADMIN_TOKEN")
 	if want == "" {
-		logrus.Warn("[authorizer] AUTHORIZER_TOKEN not set — admin endpoints are UNAUTHENTICATED")
+		logrus.Warn("[admin] ADMIN_TOKEN not set — admin endpoints are UNAUTHENTICATED")
 	}
 	return func(c *gin.Context) {
 		if want == "" {
@@ -74,14 +72,15 @@ func requireBearer() gin.HandlerFunc {
 	}
 }
 
-// createTestLink generates a new long-lived multi-use magic token and
-// returns the deep-link URL. Body:
+// createTestLink generates a new long-lived multi-use magic token
+// and returns the deep-link URL. Body:
 //
 //	{ "email": "reviewer@apple.com", "device_id": "optional" }
 //
 // device_id is optional — if absent we mint a random `test-<nanoid>`
-// placeholder so the token model's Validate() passes without tying the
-// link to a specific phone.
+// placeholder so the token model's Validate() passes without tying
+// the link to a specific phone. user_id is left empty here; use
+// POST /users/:id/tokens (users package) to stamp it.
 func createTestLink(c *gin.Context) {
 	var body struct {
 		Email    string `json:"email" binding:"required,email"`
@@ -95,43 +94,18 @@ func createTestLink(c *gin.Context) {
 		body.DeviceID = "test-" + gonanoid.Must(12)
 	}
 
-	rawToken := gonanoid.Must(32)
-	now := time.Now()
-	doc := models.Token{
-		ID:        gonanoid.Must(),
-		Type:      models.TokenTypeMagicLink,
-		Email:     body.Email,
-		DeviceID:  body.DeviceID,
-		Platform:  "ios",
-		TokenHash: tokenHash(rawToken),
-		ExpiresAt: now.Add(testTokenTTL),
-		Used:      false,
-		Test:      true,
-		CreatedAt: now,
-	}
-	if err := doc.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := system.GetStorage().Set(
-		c.Request.Context(),
-		constants.MongoTokensCollection,
-		bson.M{"id": doc.ID},
-		doc,
-	); err != nil {
+	doc, link, err := users.MintTestLink(c.Request.Context(), body.Email, "", body.DeviceID)
+	if err != nil {
+		if vErr, ok := err.(users.ValidationError); ok {
+			c.JSON(http.StatusBadRequest, gin.H{"error": vErr.Error()})
+			return
+		}
 		logrus.Errorf("save test token: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
 
-	scheme := os.Getenv("APP_SCHEME")
-	if scheme == "" {
-		scheme = defaultAppScheme
-	}
-	link := scheme + "://auth?token=" + rawToken
-
-	logrus.Infof("[authorizer] created test link for %s (id=%s, expires=%s)",
+	logrus.Infof("[admin] created test link for %s (id=%s, expires=%s)",
 		body.Email, doc.ID, doc.ExpiresAt.Format(time.RFC3339))
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -143,8 +117,10 @@ func createTestLink(c *gin.Context) {
 	})
 }
 
-// listTestLinks returns every token with `test: true`. Hashes are never
-// leaked — only metadata. Re-issuing a link means creating a new one.
+// listTestLinks returns every token with `test: true`. Hashes are
+// never leaked — only metadata. Re-issuing a link means creating a
+// new one. Kept for backward compat with the original CLI flow; the
+// new UI uses the per-user endpoints in the users package instead.
 func listTestLinks(c *gin.Context) {
 	var tokens []models.Token
 	if err := system.GetStorage().GetMany(
@@ -173,10 +149,10 @@ func listTestLinks(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"count": len(out), "tokens": out})
 }
 
-// deleteOneTestLink removes a single test token by its id (the Token.ID
-// field from createTestLink / listTestLinks — NOT the raw magic link).
-// Safety rail: only deletes rows that have `test: true` so a stray id
-// can't nuke a real user's JWT.
+// deleteOneTestLink removes a single test token by its id (the
+// Token.ID field — NOT the raw magic link). Safety rail: only
+// deletes rows that have `test: true` so a stray id can't nuke a
+// real user's JWT.
 func deleteOneTestLink(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -192,13 +168,13 @@ func deleteOneTestLink(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
-	logrus.Infof("[authorizer] deleted test token %s", id)
+	logrus.Infof("[admin] deleted test token %s", id)
 	c.Status(http.StatusNoContent)
 }
 
-// purgeAllTestLinks wipes every token with `test: true`. Use after App
-// Store review wraps up so leftover long-lived links don't linger for
-// another ~29 days before the TTL catches up.
+// purgeAllTestLinks wipes every token with `test: true`. Use after
+// App Store review wraps up so leftover long-lived links don't
+// linger for another ~29 days before the TTL catches up.
 func purgeAllTestLinks(c *gin.Context) {
 	if err := system.GetStorage().DeleteMany(
 		c.Request.Context(),
@@ -209,11 +185,6 @@ func purgeAllTestLinks(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
-	logrus.Infof("[authorizer] purged all test tokens")
+	logrus.Infof("[admin] purged all test tokens")
 	c.Status(http.StatusNoContent)
-}
-
-func tokenHash(raw string) string {
-	sum := sha256.Sum256([]byte(raw))
-	return fmt.Sprintf("%x", sum)
 }
