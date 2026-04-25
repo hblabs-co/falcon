@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Falcon · Nest</title>
+<link rel="icon" type="image/png" href="/static/falcon-logo.png?v={{.V}}" />
+<link rel="apple-touch-icon" href="/static/falcon-logo.png?v={{.V}}" />
+<link rel="stylesheet" href="/static/styles.css?v={{.V}}" />
+<!-- Lucide icons (https://lucide.dev). The script scans for tags
+     with `data-lucide` and replaces each with the SVG. We call it
+     once on DOMContentLoaded; the hot-reload does a full page
+     reload so we don't need to re-run on every change. -->
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="hero">
+    <div class="logo"><img src="/static/falcon-logo.png?v={{.V}}" alt="Falcon" /></div>
+    <h1>Falcon · Nest</h1>
+    <p class="subtitle">Local dev portal — every service, every port, every reminder in one place.</p>
+    <div class="meta">
+      <div class="meta-row"><span class="k">env</span><span class="v">{{.Env}}</span></div>
+      <div class="meta-row"><span class="k">host</span><span class="v">{{.Host}}</span></div>
+      <div class="meta-row"><span class="k">user</span><span class="v">{{.User}}</span></div>
+      <div class="meta-row"><span class="k">started</span><span class="v">{{.StartedAt}}</span></div>
+    </div>
+    <a class="app-store-badge"
+       href="https://apps.apple.com/app/falcon-f%C3%BCr-freelancer/id6763169883"
+       target="_blank" rel="noopener"
+       title="Download Falcon on the App Store">
+      <img src="/static/badges/app-store.svg?v={{.V}}" alt="Download on the App Store" />
+    </a>
+  </aside>
+
+  <main class="sections">
+
+<section class="section">
+      <h2>
+        Falcon services
+        <span class="count">{{len .Apps}}</span>
+        <a class="appstore"
+           href="https://apps.apple.com/app/falcon-f%C3%BCr-freelancer/id6763169883"
+           target="_blank" rel="noopener"
+           title="Download Falcon on the App Store">
+          <svg viewBox="0 0 384 512" aria-hidden="true">
+            <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+          </svg>
+          <span>App Store</span>
+        </a>
+      </h2>
+      <p class="blurb">Go binaries that ship under <code>falcon-*</code>. HTTP services link to their local URL; NATS-only consumers don't have one.</p>
+      <div class="cards">
+        {{range .Apps}}
+          {{if .URL}}
+            <a class="card" href="{{.URL}}" target="_blank">
+              <div class="top">
+                <span class="name"><i class="icon" data-lucide="{{.EffectiveIcon}}"></i>{{.Name}}</span>
+                <div class="badges">
+                  {{if .EffectiveStatusURL}}
+                    <span class="health" data-status-url="{{.EffectiveStatusURL}}" title="Open health endpoint: {{.EffectiveStatusURL}}"><i data-lucide="heart-pulse"></i></span>
+                  {{end}}
+                  <span class="status {{status .Name}}" data-service="{{.Name}}"><span class="dot"></span><span class="label">{{status .Name}}</span></span>
+                  <span class="badge {{.Kind}}">{{.KindLabel}}</span>
+                </div>
+              </div>
+              <span class="desc">{{.Description}}</span>
+              {{if .Tags}}
+                <span class="tags">
+                  {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                </span>
+              {{end}}
+              <span class="url">{{.URL}}</span>
+            </a>
+          {{else}}
+            <div class="card">
+              <div class="top">
+                <span class="name"><i class="icon" data-lucide="{{.EffectiveIcon}}"></i>{{.Name}}</span>
+                <div class="badges">
+                  <span class="status {{status .Name}}" data-service="{{.Name}}"><span class="dot"></span><span class="label">{{status .Name}}</span></span>
+                  <span class="badge {{.Kind}}">{{.KindLabel}}</span>
+                </div>
+              </div>
+              <span class="desc">{{.Description}}</span>
+              {{if .Tags}}
+                <span class="tags">
+                  {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                </span>
+              {{end}}
+              <span class="no-url">no HTTP — NATS consumer</span>
+            </div>
+          {{end}}
+        {{end}}
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Infrastructure <span class="count">{{len .Infra}}</span></h2>
+      <p class="blurb">Stateful backing services (data + brokers + LLM). Click to open the local console where one exists.</p>
+      <div class="cards">
+        {{range .Infra}}
+          {{if .URL}}
+            <a class="card" href="{{.URL}}" target="_blank">
+              <div class="top">
+                <span class="name"><i class="icon" data-lucide="{{.EffectiveIcon}}"></i>{{.Name}}</span>
+                <div class="badges">
+                  {{if .EffectiveStatusURL}}
+                    <span class="health" data-status-url="{{.EffectiveStatusURL}}" title="Open health endpoint: {{.EffectiveStatusURL}}"><i data-lucide="heart-pulse"></i></span>
+                  {{end}}
+                  <span class="status {{status .Name}}" data-service="{{.Name}}"><span class="dot"></span><span class="label">{{status .Name}}</span></span>
+                  <span class="badge {{.Kind}}">{{.KindLabel}}</span>
+                </div>
+              </div>
+              <span class="desc">{{.Description}}</span>
+              {{if .Tags}}
+                <span class="tags">
+                  {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                </span>
+              {{end}}
+              <span class="url">{{.URL}}</span>
+            </a>
+          {{else}}
+            <div class="card">
+              <div class="top">
+                <span class="name"><i class="icon" data-lucide="{{.EffectiveIcon}}"></i>{{.Name}}</span>
+                <div class="badges">
+                  {{if .EffectiveStatusURL}}
+                    <span class="health" data-status-url="{{.EffectiveStatusURL}}" title="Open health endpoint: {{.EffectiveStatusURL}}"><i data-lucide="heart-pulse"></i></span>
+                  {{end}}
+                  <span class="status {{status .Name}}" data-service="{{.Name}}"><span class="dot"></span><span class="label">{{status .Name}}</span></span>
+                  <span class="badge {{.Kind}}">{{.KindLabel}}</span>
+                </div>
+              </div>
+              <span class="desc">{{.Description}}</span>
+              {{if .Tags}}
+                <span class="tags">
+                  {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                </span>
+              {{end}}
+              <span class="no-url">{{.PortHint}}</span>
+            </div>
+          {{end}}
+        {{end}}
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Port-forwards I always forget <span class="count">{{len .PortForwards}}</span></h2>
+      <p class="blurb">Cheat sheet for connecting local tools (Studio 3T, Lens, etc.) to remote cluster services. Copy the command, run, profit.</p>
+      <div class="pf-list">
+        {{range .PortForwards}}
+          <div class="pf">
+            <div>
+              <div class="label">{{.Label}}</div>
+              <div class="cmd">{{.Command}}</div>
+            </div>
+            <div class="target">{{.Target}}</div>
+          </div>
+        {{end}}
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="legal">
+  © {{.Year}} HB Labs SAS
+</footer>
+
+<button id="config-open" class="fab" title="Edit config.yaml" aria-label="Edit config">
+  <i data-lucide="pencil"></i>
+</button>
+<div id="config-backdrop" class="drawer-backdrop"></div>
+<aside id="config-drawer" class="drawer" aria-hidden="true">
+  <header class="drawer-head">
+    <div>
+      <h3>config.yaml</h3>
+      <p class="hint">Saved files are watched — the dashboard reloads on success.</p>
+    </div>
+    <span id="config-status" class="status-pill"></span>
+    <button id="config-close" class="icon-btn" title="Close" aria-label="Close drawer">
+      <i data-lucide="x"></i>
+    </button>
+  </header>
+  <div id="config-editor" class="drawer-editor"></div>
+  <footer class="drawer-foot">
+    <span class="kbd-hint"><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>S</kbd> to save · <kbd>Esc</kbd> to close</span>
+    <button id="config-save" class="btn-primary"><i data-lucide="save"></i><span>Save</span></button>
+  </footer>
+</aside>
+<script src="/static/editor.js?v={{.V}}"></script>
+
+<script>
+  // Replace every <i data-lucide="…"></i> with its SVG. Runs once
+  // per page load; hot-reload triggers full reloads so this is
+  // enough — no need to observe DOM mutations.
+  if (window.lucide) lucide.createIcons();
+
+  // Health shortcut: the card itself is an <a> wrapping the whole
+  // tile, so a nested <a> would be invalid HTML and silently
+  // restructured by the browser. Use a span that intercepts the
+  // click, stops it bubbling to the card link, and opens the
+  // health endpoint in its own tab.
+  document.querySelectorAll('.health[data-status-url]').forEach(function (el) {
+    el.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      window.open(el.dataset.statusUrl, '_blank', 'noopener');
+    });
+  });
+
+  // Live status feed. Opens a websocket to /ws/status and updates
+  // each card's status badge in-place on every server-sent snapshot,
+  // so an online → offline transition is visible within the poll
+  // interval without a page reload.
+  //
+  // Reconnect policy: exponential backoff starting at 1s, doubling up
+  // to 15s — covers everything from a server rebuild (back in 2–3s)
+  // to a laptop coming out of sleep, without hammering the server.
+  // Backoff resets on a successful open so a momentary blip doesn't
+  // permanently slow future reconnects.
+  (function () {
+    var backoff = 1000;
+    var maxBackoff = 15000;
+
+    function applySnapshot(statuses) {
+      if (!statuses) return;
+      Object.keys(statuses).forEach(function (name) {
+        var el = document.querySelector(
+          '.status[data-service="' + CSS.escape(name) + '"]'
+        );
+        if (!el) return;
+        var s = statuses[name];
+        el.className = 'status ' + s;
+        var label = el.querySelector('.label');
+        if (label) label.textContent = s;
+      });
+    }
+
+    function connect() {
+      var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      var ws;
+      try {
+        ws = new WebSocket(proto + '//' + location.host + '/ws/status');
+      } catch (e) {
+        scheduleReconnect();
+        return;
+      }
+      ws.onopen = function () {
+        backoff = 1000;
+        console.log('[status] connected');
+      };
+      ws.onmessage = function (ev) {
+        try {
+          var msg = JSON.parse(ev.data);
+          applySnapshot(msg && msg.statuses);
+        } catch (_) { /* ignore malformed frame */ }
+      };
+      ws.onclose = function () {
+        console.log('[status] disconnected, retrying in ' + backoff + 'ms');
+        scheduleReconnect();
+      };
+      ws.onerror = function () { try { ws.close(); } catch (_) {} };
+    }
+
+    function scheduleReconnect() {
+      setTimeout(connect, backoff);
+      backoff = Math.min(backoff * 2, maxBackoff);
+    }
+
+    connect();
+  })();
+</script>
+</body>
+</html>

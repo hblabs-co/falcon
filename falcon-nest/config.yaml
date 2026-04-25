@@ -1,0 +1,189 @@
+# falcon-nest — dashboard catalogue.
+#
+# Edit this file to add/remove services, infra, or port-forward
+# cheats. The server watches it (fsnotify) and reloads on save:
+#
+#   - the poller's probe set updates on the next tick
+#   - connected browser tabs reload automatically so the UI reflects
+#     the new names, URLs, tags, etc.
+#
+# Keep names kebab-case for services (they match common/constants/services.go).
+# `kind` drives the coloured pill on the card and — via portal.go's
+# kindIcons map — the default icon when `icon:` is omitted.
+
+services:
+  - name: falcon-api
+    kind: http
+    kindLabel: HTTP
+    url: http://localhost:8081
+    icon: server
+    description: Public REST API consumed by the clients (now just iOS).
+    tags: [iOS, REST, core]
+
+  - name: falcon-landing
+    kind: http
+    kindLabel: HTTP
+    url: http://localhost:8082
+    icon: globe
+    description: Static marketing site + privacy/terms.
+    tags: [web, marketing, contact]
+
+  - name: falcon-authorizer
+    kind: http
+    kindLabel: HTTP
+    url: http://localhost:8083
+    icon: key-round
+    description: Local helper for issuing 30-day magic-link tokens (App Store reviewers, manual QA).
+    tags: [internal, auth, qa]
+
+  - name: falcon-designer
+    kind: http
+    kindLabel: HTTP
+    url: http://localhost:8084
+    icon: palette
+    description: Static design canvas + dashboard for Claude-generated mockups.
+    tags: [dev, design, screenshot, Claude Design]
+
+  - name: falcon-realtime
+    kind: ws
+    kindLabel: WS
+    url: http://localhost:8090
+    icon: radio
+    description: WebSocket fan-out for match.result + project.normalized pushes.
+    tags: [ios, push, ws]
+
+  - name: falcon-signal
+    kind: nats
+    kindLabel: NATS
+    icon: bell
+    description: APNs push delivery + email magic links.
+    tags: [ios, push, email, live activities]
+
+  - name: falcon-storage
+    kind: nats
+    kindLabel: NATS
+    icon: archive
+    description: CV upload pipeline (MinIO + extract + embed + Qdrant) and company-logo cache.
+    tags: [cv, logos, pipeline, pdf, docx]
+
+  - name: falcon-normalizer
+    kind: nats
+    kindLabel: NATS
+    icon: wand
+    description: LLM-backed project + CV normalization (Mistral).
+    tags: [ai, cv, json]
+
+  - name: falcon-match-engine
+    kind: nats
+    kindLabel: NATS
+    icon: target
+    description: Scores CV ↔ project matches via LLM, publishes match.result.
+    tags: [ai, core]
+
+  - name: falcon-dispatch
+    kind: nats
+    kindLabel: NATS
+    icon: compass
+    description: Forward + reverse vector search dispatch (Qdrant).
+    tags: [ai, search]
+
+  - name: falcon-scout
+    kind: nats
+    kindLabel: NATS
+    icon: binoculars
+    description: Polls freelance project boards (redglobal.de, contractor.de, …) and emits new projects.
+    tags: [scraping, projects, background, rss]
+
+  - name: falcon-import
+    kind: tool
+    kindLabel: CLI
+    icon: download
+    description: One-shot importers (recruiter ratings from Recruiter Rodeo, etc.).
+    tags: [cli, one-shot, reviews]
+
+  - name: falcon-nest
+    kind: http
+    kindLabel: HTTP
+    url: http://localhost:8080
+    icon: feather
+    description: This portal.
+    tags: [dev, portal]
+
+infra:
+  - name: mongo
+    kind: infra
+    kindLabel: DB
+    url: mongodb://localhost:27017
+    icon: database
+    statusHost: localhost:27017
+    description: Document store for everything Falcon — projects, matches, users, CVs.
+    tags: [core, db]
+
+  - name: nats
+    kind: infra
+    kindLabel: BUS
+    url: http://localhost:8222
+    icon: share-2
+    description: Message broker (JetStream). Monitoring UI on 8222, client port 4222.
+    tags: [core, bus]
+
+  - name: qdrant
+    kind: infra
+    kindLabel: VEC
+    url: http://localhost:6333/dashboard
+    icon: boxes
+    statusURL: http://localhost:6333/readyz
+    description: Vector DB (CV chunks + project embeddings).
+    tags: [ai, vectors]
+
+  - name: minio · api
+    kind: infra
+    kindLabel: S3
+    url: http://localhost:9000
+    icon: hard-drive
+    statusURL: http://localhost:9000/minio/health/live
+    description: S3-compatible object storage. CV PDFs, company logos.
+    portHint: API on :9000
+    tags: [storage, s3]
+
+  - name: minio · console
+    kind: infra
+    kindLabel: UI
+    url: http://localhost:9001
+    icon: monitor
+    # No /healthz — probe the console root (302 → /login counts as up).
+    statusURL: http://localhost:9001
+    description: "MinIO web console. Default creds: minioadmin / minioadmin."
+    tags: [storage, ui]
+
+  - name: ollama
+    kind: infra
+    kindLabel: LLM
+    url: http://localhost:11434
+    icon: brain
+    # Ollama's root answers 200 "Ollama is running" — no /healthz.
+    statusURL: http://localhost:11434
+    description: Local LLM runtime — only needed when running embeddings off-line; prod uses Mistral.
+    portHint: optional, only if `ollama serve` is up
+    tags: [ai, optional]
+
+portForwards:
+  - label: Mongo (Studio 3T)
+    command: kubectl port-forward -n falcon svc/mongo 27017:27017
+    target: localhost:27017
+
+  - label: Qdrant dashboard
+    command: kubectl port-forward -n falcon svc/qdrant 6333:6333
+    target: localhost:6333/dashboard
+
+  - label: MinIO console (prod inspect)
+    command: kubectl port-forward -n falcon svc/minio 9001:9001
+    target: localhost:9001
+
+  - label: NATS monitor
+    command: kubectl port-forward -n falcon svc/nats 8222:8222
+    target: localhost:8222
+
+  - label: falcon-realtime (debug WS)
+    command: kubectl port-forward -n falcon svc/falcon-realtime 8090:80
+    target: localhost:8090/ws
