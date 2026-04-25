@@ -31,13 +31,12 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
+	// One-shot Job — no NATS, no HTTP listener, no shutdown phase.
+	// WithoutRegistration because the bootstrap job isn't a long-running
+	// service; it shouldn't appear in the /system listing as if it were.
+	ctx := system.Boot(constants.ServiceConfig, system.WithoutRegistration())
 
-	system.PrintStartupBanner(constants.ServiceConfig)
-
-	created, err := ensureAllIndexes(system.Ctx())
+	created, err := ensureAllIndexes(ctx)
 	if err != nil {
 		logrus.Errorf("config bootstrap failed: %v", err)
 		os.Exit(1)

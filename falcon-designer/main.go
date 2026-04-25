@@ -25,12 +25,10 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
-	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/fswatch"
 	"hblabs.co/falcon/packages/ownhttp"
 	"hblabs.co/falcon/packages/system"
 )
@@ -68,26 +66,41 @@ type design struct {
 }
 
 func main() {
-	system.LoadEnvs()
-
 	port := environment.ParseInt("PORT", 8083)
 	screenshotsDir := environment.ReadOptional("SCREENSHOTS_DIR", "../assets/ios-screenshots")
 	debounceWindow := environment.ParseDuration("DEBOUNCE_WINDOW", "100ms")
 
+	ctx := system.Boot(constants.ServiceDesigner,
+		system.WithPort(port),
+		system.WithoutStorage(), // local-only dev tool, no Mongo
+		system.WithBannerExtras(
+			"watching:",
+			"    - "+designsDir,
+			"    - "+uiDir,
+			"    - "+screenshotsDir,
+		),
+	)
+
 	hub := ownhttp.NewHub()
 
-	watcher, err := fsnotify.NewWatcher()
+	// Hot-reload watcher. Same shape as falcon-nest's: shared
+	// `packages/fswatch` helper handles recursive AddTree, debounce,
+	// Chmod-noise filtering, and per-burst onChange. We just provide
+	// the trees and the broadcast callback.
+	watcher, err := fswatch.New(debounceWindow)
 	if err != nil {
 		log.Fatalf("watcher: %v", err)
 	}
 	defer watcher.Close()
-
 	for _, root := range []string{designsDir, uiDir, screenshotsDir} {
-		if err := watchTree(watcher, root); err != nil {
+		if err := watcher.AddTree(root); err != nil {
 			log.Printf("warn: watch %s: %v (continuing)", root, err)
 		}
 	}
-	go runWatcher(watcher, hub, debounceWindow)
+	go watcher.Run(ctx, func(path string) {
+		log.Printf("[hot-reload] change detected → broadcasting reload (%s)", path)
+		hub.Broadcast()
+	})
 
 	mux := http.NewServeMux()
 	ownhttp.RegisterVanillaHealthz(mux, constants.ServiceDesigner)
@@ -124,15 +137,9 @@ func main() {
 		log.Printf("mounted /%s/ → %s", d.Slug, root)
 	}
 
-	system.PrintStartupBannerAndPort(constants.ServiceDesigner, port,
-		"watching:",
-		"    - "+designsDir,
-		"    - "+uiDir,
-		"    - "+screenshotsDir,
-	)
-
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), mux); err != nil {
-		log.Fatalf("listen: %v", err)
+	srv := ownhttp.NewServerModule(constants.ServiceDesigner, fmt.Sprintf(":%d", port), mux)
+	if err := system.RunForever(ctx, srv); err != nil {
+		log.Fatalf("run: %v", err)
 	}
 }
 
@@ -246,61 +253,6 @@ func looksLikeHTMLRequest(path string) bool {
 	}
 	ext := strings.ToLower(filepath.Ext(path))
 	return ext == ".html" || ext == ".htm" || ext == ""
-}
-
-// watchTree adds `root` and every subdirectory under it to the
-// watcher. fsnotify is not recursive on Linux/macOS so we expand
-// once at startup. New subdirs created later won't be auto-watched —
-// fine for stable asset trees; for new designs you re-run the server.
-func watchTree(w *fsnotify.Watcher, root string) error {
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return w.Add(path)
-		}
-		return nil
-	})
-}
-
-// runWatcher debounces rapid file-write bursts (editors often write
-// multiple times during a save) and broadcasts one reload per burst.
-func runWatcher(w *fsnotify.Watcher, hub *ownhttp.Hub, window time.Duration) {
-	var (
-		timer    *time.Timer
-		mu       sync.Mutex
-		lastFile string
-	)
-	fire := func() {
-		mu.Lock()
-		defer mu.Unlock()
-		log.Printf("[hot-reload] change detected → broadcasting reload (%s)", lastFile)
-		hub.Broadcast()
-	}
-	for {
-		select {
-		case ev, ok := <-w.Events:
-			if !ok {
-				return
-			}
-			if ev.Op == fsnotify.Chmod {
-				continue
-			}
-			mu.Lock()
-			lastFile = ev.Name
-			mu.Unlock()
-			if timer != nil {
-				timer.Stop()
-			}
-			timer = time.AfterFunc(window, fire)
-		case err, ok := <-w.Errors:
-			if !ok {
-				return
-			}
-			log.Printf("[hot-reload] watcher error: %v", err)
-		}
-	}
 }
 
 // captureWriter buffers the response body so designHandler can splice

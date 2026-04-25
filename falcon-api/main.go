@@ -20,19 +20,8 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
-	ctx := system.Ctx()
-	if err := system.InitStorage(ctx); err != nil {
-		logrus.Fatalf("storage init: %v", err)
-	}
-
-	// Self-register in the `system` collection on boot so GET /system
-	// always reflects the currently-running set of services. Reads
-	// BUILD_TIME for the publish date; falls back to now if unset.
-	system.RegisterServiceFromBuildTime(ctx, constants.ServiceAPI)
+	port := environment.ParseInt("PORT", 8080)
+	ctx := system.Boot(constants.ServiceAPI, system.WithPort(port))
 
 	system.InitBus(system.MergeBusConfigs(
 		system.StreamScrape(),
@@ -40,12 +29,7 @@ func main() {
 		system.StreamSignal(),
 	))
 
-	port := environment.ParseInt("PORT", 8080)
-	// `server.Run` reads PORT internally too; this is just for the
-	// banner so the operator sees the URL before the first request.
-	system.PrintStartupBannerAndPort(constants.ServiceAPI, port)
-
-	if err := server.Run(
+	srv := server.NewModule(
 		admin.Routes{},
 		auth.Routes{},
 		scrape.Routes{},
@@ -56,7 +40,8 @@ func main() {
 		me.Routes{},
 		companies.Routes{},
 		apisystem.Routes{},
-	); err != nil {
-		logrus.Fatalf("server: %v", err)
+	)
+	if err := system.RunForever(ctx, srv); err != nil {
+		logrus.Fatalf("run: %v", err)
 	}
 }

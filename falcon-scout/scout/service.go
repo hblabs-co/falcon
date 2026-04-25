@@ -114,12 +114,15 @@ func (s *Service) shouldRun(name string) bool {
 	return ok
 }
 
-func (s *Service) Run() {
-	ctx := system.Ctx()
+// Register implements system.Module. Bootstraps every registered
+// platform (allowlisted via PLATFORMS env), wires its handlers, and
+// launches its background workers + polling loop. Returns once every
+// platform is up; the goroutines themselves drain on ctx-cancel via
+// system.RunForever's shutdown loop.
+func (s *Service) Register(ctx context.Context) error {
 	s.readAllowedPlatforms()
 
 	for _, p := range s.platforms {
-
 		if !s.shouldRun(p.Name()) {
 			continue
 		}
@@ -139,11 +142,11 @@ func (s *Service) Run() {
 		})
 
 		if err := p.Init(ctx); err != nil {
-			logger.Fatalf("init: %v", err)
+			return fmt.Errorf("platform %s init: %w", p.Name(), err)
 		}
 
 		if err := p.StartConsumers(ctx); err != nil {
-			logger.Fatalf("subscribe: %v", err)
+			return fmt.Errorf("platform %s subscribe: %w", p.Name(), err)
 		}
 
 		go p.StartWorkers(ctx)
@@ -161,9 +164,7 @@ func (s *Service) Run() {
 
 		logger.Info("platform registered and running")
 	}
-
-	system.Wait()
-	logrus.Info("all scout platforms stopped")
+	return nil
 }
 
 // metadataRefreshInterval controls how often the service re-fetches well-known

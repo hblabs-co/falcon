@@ -25,14 +25,9 @@ type entry struct {
 }
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
+	// One-shot CLI — no service-registration row needed.
+	system.Boot(constants.ServiceImport, system.WithoutRegistration())
 	ctx := context.Background()
-	if err := system.InitStorage(ctx); err != nil {
-		logrus.Fatalf("storage: %v", err)
-	}
 
 	htmlPath := resolveHTMLPath()
 	logrus.Infof("reading HTML from %s", htmlPath)

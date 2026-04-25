@@ -8,22 +8,14 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
-	system.PrintStartupBanner(constants.ServiceSignal)
-	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceSignal)
+	ctx := system.Boot(constants.ServiceSignal)
 
 	system.InitBus(system.MergeBusConfigs(
 		system.StreamSignal(),
 		system.StreamMatches(),
 	))
 
-	if err := system.Run(system.Ctx(), signal.NewModule()); err != nil {
-		logrus.Fatalf("start: %v", err)
+	if err := system.RunForever(ctx, signal.NewModule()); err != nil {
+		logrus.Fatalf("run: %v", err)
 	}
-
-	system.Wait()
-	logrus.Info("service stopped")
 }

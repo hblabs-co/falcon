@@ -20,8 +20,11 @@ type RouteGroup interface {
 	Mount(r *gin.Engine)
 }
 
-// Run starts the HTTP server with all provided route groups mounted.
-func Run(groups ...RouteGroup) error {
+// NewModule builds the gin engine, mounts every route group, and
+// wraps it in an ownhttp.ServerModule so falcon-api participates in
+// the standard system.RunForever lifecycle (graceful Shutdown,
+// SIGTERM-aware). Replaces the old Run() entrypoint.
+func NewModule(groups ...RouteGroup) *ownhttp.ServerModule {
 	port := environment.ReadOptional("PORT", "8080")
 
 	r := gin.New()
@@ -41,7 +44,7 @@ func Run(groups ...RouteGroup) error {
 		g.Mount(r)
 	}
 
-	return r.Run(":" + port)
+	return ownhttp.NewServerModule(constants.ServiceAPI, ":"+port, r)
 }
 
 // JWTMiddleware validates Bearer tokens signed with HS256, checks they haven't

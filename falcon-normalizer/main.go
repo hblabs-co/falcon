@@ -21,20 +21,13 @@ var translatePrompt string
 var cvNormalizePrompt string
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
+	ctx := system.Boot(constants.ServiceNormalizer)
 
-	system.PrintStartupBanner(constants.ServiceNormalizer)
-
-	system.InitBus(system.MergeBusConfigs(system.StreamProjects(), system.StreamMatches(), system.StreamStorage()))
-
-	ctx := system.Ctx()
-	if err := system.InitStorage(ctx); err != nil {
-		logrus.Fatalf("storage init: %v", err)
-	}
-
-	system.RegisterServiceFromBuildTime(ctx, constants.ServiceNormalizer)
+	system.InitBus(system.MergeBusConfigs(
+		system.StreamProjects(),
+		system.StreamMatches(),
+		system.StreamStorage(),
+	))
 
 	// Shared LLM client — translate prompt is the same for all modules.
 	llmClient, err := llm.NewFromEnv(translatePrompt)
@@ -42,21 +35,15 @@ func main() {
 		logrus.Fatalf("llm client: %v", err)
 	}
 
-	// Project normalizer module.
 	projectSvc, err := project.NewService(ctx, llmClient, normalizePrompt)
 	if err != nil {
 		logrus.Fatalf("project service: %v", err)
 	}
-	if err := projectSvc.Register(ctx); err != nil {
-		logrus.Fatalf("project register: %v", err)
-	}
-
-	// CV normalizer module.
 	cvSvc := cv.NewService(llmClient, cvNormalizePrompt)
-	if err := cvSvc.Register(ctx); err != nil {
-		logrus.Fatalf("cv register: %v", err)
-	}
 
-	logrus.Info("falcon-normalizer started — project + cv modules registered")
-	system.Wait()
+	// project.Service and cv.Service already implement system.Module via
+	// their Register(ctx) method — pass them straight in.
+	if err := system.RunForever(ctx, projectSvc, cvSvc); err != nil {
+		logrus.Fatalf("run: %v", err)
+	}
 }

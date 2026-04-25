@@ -63,11 +63,11 @@ func NewService() (*Service, error) {
 	}, nil
 }
 
-// Run subscribes to project events (forward dispatch) and cv.indexed
-// (reverse dispatch / backfill) and blocks until ctx is cancelled.
-func (s *Service) Run() error {
-	ctx := system.Ctx()
-
+// Register implements system.Module. Subscribes to project events
+// (forward dispatch) and cv.indexed (reverse dispatch / backfill);
+// returns immediately — the long-lived consumer goroutines are
+// anchored to ctx and will drain on SIGTERM via system.RunForever.
+func (s *Service) Register(ctx context.Context) error {
 	for _, subject := range []string{constants.SubjectProjectCreated, constants.SubjectProjectUpdated} {
 		consumer := "dispatch-" + strings.ReplaceAll(subject, ".", "-")
 		if err := system.Subscribe(ctx, constants.StreamProjects, consumer, subject, s.handleProjectEvent); err != nil {
@@ -86,7 +86,6 @@ func (s *Service) Run() error {
 	logrus.Infof("subscribed to %s (backfill window: %dh, cap: %d projects)",
 		constants.SubjectCVIndexed, s.backfillHours, s.backfillMaxProject)
 
-	system.Wait()
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/system"
 	"hblabs.co/falcon/scout/platforms/computerfuturescom"
@@ -13,12 +14,7 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
-	system.PrintStartupBanner(constants.ServiceScout)
-	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceScout)
+	ctx := system.Boot(constants.ServiceScout)
 
 	system.InitBus(system.MergeBusConfigs(
 		system.StreamProjects(),
@@ -27,8 +23,7 @@ func main() {
 		system.StreamSignal(),
 	))
 
-	service := NewService()
-	service.
+	service := NewService().
 		// RegisterPlatform(actcongmbhde.New()).
 		// RegisterPlatform(akkodiscom.New()).
 		RegisterPlatform(computerfuturescom.New()).
@@ -46,6 +41,9 @@ func main() {
 		RegisterPlatform(somide.New()).
 		// RegisterPlatform(waynicede.New()).
 		// RegisterPlatform(wematchde.New()).
-		RegisterPlatform(redglobalde.New()).
-		Run()
+		RegisterPlatform(redglobalde.New())
+
+	if err := system.RunForever(ctx, service); err != nil {
+		logrus.Fatalf("run: %v", err)
+	}
 }

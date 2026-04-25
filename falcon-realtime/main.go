@@ -8,12 +8,7 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
-	system.PrintStartupBannerAndPort(constants.ServiceRealtime, realtime.GetParsedPort())
-	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceRealtime)
+	ctx := system.Boot(constants.ServiceRealtime, system.WithPort(realtime.GetParsedPort()))
 
 	system.InitBus(system.MergeBusConfigs(
 		system.StreamRealtime(),
@@ -21,10 +16,7 @@ func main() {
 		system.StreamMatches(),
 	))
 
-	if err := system.Run(system.Ctx(), realtime.NewModule()); err != nil {
-		logrus.Fatalf("start: %v", err)
+	if err := system.RunForever(ctx, realtime.NewModule()); err != nil {
+		logrus.Fatalf("run: %v", err)
 	}
-
-	system.Wait()
-	logrus.Info("service stopped")
 }

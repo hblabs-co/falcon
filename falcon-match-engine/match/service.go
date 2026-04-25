@@ -41,12 +41,14 @@ func NewService(_ context.Context) (*Service, error) {
 	}, nil
 }
 
-// Run subscribes to match.pending and blocks until ctx is cancelled.
-// Scale by adding replicas — all pods share the durable consumer "match-engine"
-// so NATS delivers each message to exactly one pod.
-func (s *Service) Run() error {
-	ctx := system.Ctx()
-
+// Register implements system.Module. Subscribes to match.pending +
+// project.normalized and starts the retry/sweep loops; returns
+// immediately. All goroutines are anchored to ctx so SIGTERM drains
+// them via system.RunForever.
+//
+// Scale by adding replicas — all pods share the durable consumer
+// "match-engine" so NATS delivers each message to exactly one pod.
+func (s *Service) Register(ctx context.Context) error {
 	if err := system.Subscribe(ctx, constants.StreamMatches, "match-engine", constants.SubjectMatchPending, s.handleMatchPending); err != nil {
 		return fmt.Errorf("subscribe: %w", err)
 	}
@@ -66,7 +68,6 @@ func (s *Service) Run() error {
 	// stale flags on its own schedule.
 	s.startNormalizedSweep(ctx)
 
-	system.Wait()
 	return nil
 }
 

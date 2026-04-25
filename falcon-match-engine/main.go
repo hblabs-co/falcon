@@ -8,27 +8,15 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
-	system.PrintStartupBanner(constants.ServiceMatchEngine)
-
+	ctx := system.Boot(constants.ServiceMatchEngine)
 	system.InitBus(system.StreamMatches())
-
-	ctx := system.Ctx()
-	if err := system.InitStorage(ctx); err != nil {
-		logrus.Fatalf("storage init: %v", err)
-	}
-
-	system.RegisterServiceFromBuildTime(ctx, constants.ServiceMatchEngine)
 
 	svc, err := match.NewService(ctx)
 	if err != nil {
 		logrus.Fatalf("service init: %v", err)
 	}
 
-	if err := svc.Run(); err != nil {
+	if err := system.RunForever(ctx, svc); err != nil {
 		logrus.Fatalf("run: %v", err)
 	}
 }

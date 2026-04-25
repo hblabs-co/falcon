@@ -8,13 +8,7 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
-	system.PrintStartupBanner(constants.ServiceDispatch)
-	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceDispatch)
-
+	ctx := system.Boot(constants.ServiceDispatch)
 	system.InitBus(system.StreamProjects())
 
 	svc, err := dispatch.NewService()
@@ -22,7 +16,7 @@ func main() {
 		logrus.Fatalf("service init: %v", err)
 	}
 
-	if err := svc.Run(); err != nil {
+	if err := system.RunForever(ctx, svc); err != nil {
 		logrus.Fatalf("run: %v", err)
 	}
 }

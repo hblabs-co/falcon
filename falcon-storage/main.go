@@ -9,24 +9,11 @@ import (
 )
 
 func main() {
-	system.LoadEnvs()
-	system.ConfigLogger()
-	system.Init()
-
-	system.PrintStartupBanner(constants.ServiceStorage)
-	system.RegisterServiceFromBuildTime(system.Ctx(), constants.ServiceStorage)
-
+	ctx := system.Boot(constants.ServiceStorage)
 	// cv.prepare.requested / cv.prepared are NATS core request/reply — not in any stream.
 	system.InitBus(system.StreamStorage())
 
-	if err := system.Run(
-		system.Ctx(),
-		company_logo.NewModule(),
-		cv.NewModule(),
-	); err != nil {
-		logrus.Fatalf("start: %v", err)
+	if err := system.RunForever(ctx, company_logo.NewModule(), cv.NewModule()); err != nil {
+		logrus.Fatalf("run: %v", err)
 	}
-
-	system.Wait()
-	logrus.Info("service stopped")
 }
