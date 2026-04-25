@@ -5,10 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"hblabs.co/falcon/common/constants"
-	environment "hblabs.co/falcon/common/environment"
-	"hblabs.co/falcon/common/system"
-	"hblabs.co/falcon/falcon-landing/landing"
+	"hblabs.co/falcon/landing/landing"
+	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/environment"
+	"hblabs.co/falcon/packages/system"
 )
 
 func main() {

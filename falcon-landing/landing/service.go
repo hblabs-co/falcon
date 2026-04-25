@@ -9,11 +9,10 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
-	"hblabs.co/falcon/common/ownhttp"
+	"hblabs.co/falcon/packages/ownhttp"
 )
 
 // Embedded assets: template, per-language locale JSON, and the raw
@@ -72,12 +71,11 @@ var (
 	// ~10KB, not worth re-decoding per request.
 	logoPNG []byte
 
-	// Cache-buster token appended to every /static/* URL in the
-	// rendered HTML. Changes on every process start, so a new deploy
-	// (or a local `go run` restart) forces browsers to re-fetch
-	// images even though we serve them with `immutable`. Unix
-	// seconds is short, unique enough, and zero deps.
-	buildToken = strconv.FormatInt(time.Now().Unix(), 10)
+	// assetVer is the cache-buster appended to every /static/* URL
+	// in the rendered HTML. Initialised at process start, never
+	// bumped — landing has no hot-reload, so a redeploy (= new
+	// process = new token) is the natural busting cadence.
+	assetVer = ownhttp.NewAssetVersion()
 )
 
 // Init loads locales + template + logo. Called once at process start.
@@ -180,7 +178,7 @@ func Handler() http.Handler {
 	mux.HandleFunc("/favicon.png", serveLogo)
 	mux.HandleFunc("/favicon.ico", serveLogo) // browsers often probe .ico first.
 
-	mux.HandleFunc("/robots.txt",  serveRobots)
+	mux.HandleFunc("/robots.txt", serveRobots)
 	mux.HandleFunc("/sitemap.xml", serveSitemap)
 
 	// Branded shortlink to the App Store listing — used by the
@@ -194,7 +192,7 @@ func Handler() http.Handler {
 	// (so an asset at embed path `static/hbarcos.jpeg` should be
 	// reachable at /static/hbarcos.jpeg without the prefix duplicated).
 	staticSub, _ := fs.Sub(staticFS, "static")
-	mux.Handle("/static/", http.StripPrefix("/static/", cacheStatic(http.FileServer(http.FS(staticSub)))))
+	mux.Handle("/static/", http.StripPrefix("/static/", ownhttp.CacheImmutable(http.FileServer(http.FS(staticSub)))))
 
 	mux.HandleFunc("/", root)
 
@@ -297,7 +295,7 @@ func render(w http.ResponseWriter, lang string) {
 		"T":       locales[lang],
 		"Now":     time.Now().Year(),
 		"Screens": screenshotFiles,
-		"V":       buildToken,
+		"V":       assetVer.Current(),
 	}
 	if err := tmpl.ExecuteTemplate(w, "index.html.tmpl", data); err != nil {
 		http.Error(w, "template error", http.StatusInternalServerError)
@@ -388,17 +386,6 @@ func serveSitemap(w http.ResponseWriter, r *http.Request) {
 
 	b.WriteString(`</urlset>` + "\n")
 	_, _ = w.Write([]byte(b.String()))
-}
-
-// cacheStatic wraps a FileServer handler so every embedded asset gets
-// the aggressive 1-week immutable cache header. Safe because the only
-// way these files change is a new binary deploy (which also changes
-// the image tag if you follow the usual rollout).
-func cacheStatic(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "public, max-age=604800, immutable")
-		next.ServeHTTP(w, r)
-	})
 }
 
 func contains(haystack []string, needle string) bool {
