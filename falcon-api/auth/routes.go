@@ -170,6 +170,19 @@ func handleVerify(c *gin.Context) {
 		return
 	}
 
+	// Stamp users.last_logged_in_at so the cv-reminder & login-reminder
+	// loops can tell apart "never signed in" from "signed in once but
+	// JWT TTL'd out". Best-effort: a transient Mongo failure here just
+	// means the next reminder tick will (correctly) check the JWT
+	// fallback in the migration. Don't fail the verify on this.
+	if _, err := system.GetStorage().UpdateOne(ctx,
+		constants.MongoUsersCollection,
+		bson.M{"id": userID},
+		bson.M{"$set": bson.M{"last_logged_in_at": time.Now(), "updated_at": time.Now()}},
+	); err != nil {
+		logrus.Warnf("[auth] stamp last_logged_in_at for %s: %v", userID, err)
+	}
+
 	logrus.Infof("[auth] user %s verified via magic link", magic.Email)
 	c.JSON(http.StatusOK, gin.H{"token": token, "user_id": userID, "email": magic.Email})
 }

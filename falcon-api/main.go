@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/sirupsen/logrus"
 
-	"hblabs.co/falcon/api/admin"
 	"hblabs.co/falcon/api/auth"
 	"hblabs.co/falcon/api/companies"
 	"hblabs.co/falcon/api/cv"
@@ -30,7 +29,6 @@ func main() {
 	))
 
 	srv := server.NewModule(
-		admin.Routes{},
 		auth.Routes{},
 		scrape.Routes{},
 		cv.Routes{},
