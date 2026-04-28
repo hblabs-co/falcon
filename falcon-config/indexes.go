@@ -142,6 +142,11 @@ var compoundIndexes = []system.CompoundIndexSpec{
 	// config-name uniqueness. The api upserts on this exact tuple so
 	// the unique constraint is the invariant, not just an optimization.
 	{Collection: constants.MongoUsersConfigurationsCollection, Fields: []string{"user_id", "platform", "device_id", "name"}, Unique: true},
+
+	// User reminders: one row per (user_id, kind). The cv-reminder
+	// loop in falcon-signal upserts on this pair every time it sends,
+	// and selects against `kind + stopped` to skip terminated users.
+	{Collection: constants.MongoUserRemindersCollection, Fields: []string{"user_id", "kind"}, Unique: true},
 }
 
 // ensureAllIndexes runs every index spec through the storage helper.

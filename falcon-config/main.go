@@ -42,4 +42,15 @@ func main() {
 		os.Exit(1)
 	}
 	logrus.Infof("[config] bootstrap done — %d index(es) reconciled", created)
+
+
+	// Backfill users.last_logged_in_at for users with a currently-
+	// live JWT but missing the field. Without this, the login-
+	// reminder loop would re-target users whose first login pre-
+	// dates the field, since their JWT row would TTL out and we'd
+	// lose the only evidence they ever signed in.
+	if _, err := ensureUserLastLogin(ctx); err != nil {
+		logrus.Errorf("ensureUserLastLogin failed: %v", err)
+		os.Exit(1)
+	}
 }
