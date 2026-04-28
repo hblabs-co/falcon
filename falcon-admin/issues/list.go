@@ -2,7 +2,6 @@ package issues
 
 import (
 	"net/http"
-	"sort"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,92 +12,90 @@ import (
 	"hblabs.co/falcon/packages/system"
 )
 
-// listIssues returns a unified, paginated list across the errors
-// and warnings collections, sorted by occurred_at desc.
+// listIssues returns a paginated list of errors OR warnings, sorted
+// by occurred_at desc. The unified "all" tab from earlier was dropped
+// in the UI — operators triage one bucket at a time — but the
+// response still includes BOTH total_errors and total_warns so the
+// other tab's count badge can update without an extra round-trip.
 //
 // Query params:
 //
-//	type     = "all" | "error" | "warning"   (default "all")
+//	type     = "error" | "warning"           (default "error")
 //	resolved = "true" | "false"              (default "false")
 //	page     = 1-indexed page number         (default 1)
 //	page_size= results per page              (default 20, max 100)
 //	service  = optional service_name filter
 //
-// For type="all" we run the page query against each collection
-// and merge in Go. The merge over-fetches a bit (page * pageSize
-// per collection) so we always hand back a coherent slice without
-// the cursor gymnastics a true union would require.
+// freelance.de is filtered out unconditionally: operators flagged it
+// as a known-noisy platform whose errors and warnings are always
+// expected. Re-enable by removing the explicit exclusion below.
 func listIssues(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	typ := c.DefaultQuery("type", "all")
-	if typ != "all" && typ != TypeError && typ != TypeWarning {
-		typ = "all"
+	typ := c.DefaultQuery("type", TypeError)
+	if typ != TypeError && typ != TypeWarning {
+		typ = TypeError
 	}
 	resolved := c.DefaultQuery("resolved", "false") == "true"
 	page := parsePositive(c.Query("page"), 1, 10000)
 	pageSize := parsePositive(c.Query("page_size"), 20, 100)
 	service := c.Query("service")
 
-	filter := bson.M{}
-	// Default behaviour is "show only what's still open": resolved
-	// rows hide unless the caller explicitly asks for them.
+	// Shared "scope" filter — applied to both the page query and the
+	// counts so the badge numbers always match what the operator
+	// would see if they switched tabs.
+	scope := bson.M{
+		"platform": bson.M{"$ne": "freelance.de"},
+	}
 	if !resolved {
-		filter["resolved"] = bson.M{"$ne": true}
+		scope["resolved"] = bson.M{"$ne": true}
 	}
 	if service != "" {
-		filter["service_name"] = service
+		scope["service_name"] = service
 	}
 
-	var (
-		out         []issueView
-		totalErrors int64
-		totalWarns  int64
-	)
+	// Counts for BOTH collections, regardless of the type being paged.
+	// Cheap with the resolved/platform indexes; lets the UI update the
+	// other tab's badge from the same payload.
+	totalErrors, err := system.GetStorage().Count(ctx, constants.MongoErrorsCollection, scope)
+	if err != nil {
+		respondInternal(c, "count errors", err)
+		return
+	}
+	totalWarns, err := system.GetStorage().Count(ctx, constants.MongoWarningsCollection, scope)
+	if err != nil {
+		respondInternal(c, "count warnings", err)
+		return
+	}
 
-	if typ == TypeError || typ == "all" {
+	var out []issueView
+	switch typ {
+	case TypeError:
 		var errs []models.ServiceError
-		total, err := system.GetStorage().FindPage(ctx,
-			constants.MongoErrorsCollection, filter,
-			"occurred_at", true, page, pageSize, &errs)
-		if err != nil {
+		if _, err := system.GetStorage().FindPage(ctx,
+			constants.MongoErrorsCollection, scope,
+			"occurred_at", true, page, pageSize, &errs); err != nil {
 			respondInternal(c, "list errors", err)
 			return
 		}
-		totalErrors = total
 		for _, e := range errs {
 			out = append(out, errorToView(e))
 		}
-	}
-	if typ == TypeWarning || typ == "all" {
+	case TypeWarning:
 		var warns []models.ServiceWarning
-		total, err := system.GetStorage().FindPage(ctx,
-			constants.MongoWarningsCollection, filter,
-			"occurred_at", true, page, pageSize, &warns)
-		if err != nil {
+		if _, err := system.GetStorage().FindPage(ctx,
+			constants.MongoWarningsCollection, scope,
+			"occurred_at", true, page, pageSize, &warns); err != nil {
 			respondInternal(c, "list warnings", err)
 			return
 		}
-		totalWarns = total
 		for _, w := range warns {
 			out = append(out, warningToView(w))
 		}
 	}
 
-	// Sort merged slice by occurred_at desc (errors and warnings
-	// were each sorted server-side, but interleaving by time
-	// requires a final pass).
-	sort.SliceStable(out, func(i, j int) bool {
-		return out[i].OccurredAt.After(out[j].OccurredAt)
-	})
-	if len(out) > pageSize {
-		out = out[:pageSize]
-	}
-
-	total := totalErrors + totalWarns
-	if typ == TypeError {
-		total = totalErrors
-	} else if typ == TypeWarning {
+	total := totalErrors
+	if typ == TypeWarning {
 		total = totalWarns
 	}
 
@@ -131,6 +128,12 @@ func errorToView(e models.ServiceError) issueView {
 		UserID:          e.UserID,
 		CVID:            e.CVID,
 		RetryCount:      e.RetryCount,
+		// Heavy details — the UI shows them in an expandable panel
+		// that's collapsed by default, so the per-row weight only
+		// matters when the operator clicks "details". Worth the
+		// payload size to avoid a second round-trip per row.
+		StackTrace: e.StackTrace,
+		HTML:       e.HTML,
 	}
 }
 
@@ -145,6 +148,11 @@ func warningToView(w models.ServiceWarning) issueView {
 		Resolved:   w.Resolved,
 		OccurredAt: w.OccurredAt,
 		Platform:   w.Platform,
+		// Warnings carry an HTML snapshot instead of a stack trace —
+		// scout uses it to capture markup state at the moment a
+		// drift warning fires. Same expandable-panel treatment as
+		// the error stack trace.
+		HTML: w.HTML,
 	}
 }
 

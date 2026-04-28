@@ -2,9 +2,12 @@ package users
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/models"
 	"hblabs.co/falcon/packages/system"
@@ -34,7 +37,40 @@ func getUser(c *gin.Context) {
 	detail.ActiveTokens = countActive(tokens)
 	detail.ActiveSessions = countActive(sessions)
 	detail.DeviceCount = len(devices)
+	// Surface the cv-reminder bookkeeping when a row exists. Absent
+	// row = signal hasn't sent yet for this user (either pre-grace
+	// or new user since the loop started). We don't synthesise an
+	// empty summary; UI infers "no reminders yet" from missing field.
+	if rem, ok := loadCVReminder(ctx, id); ok {
+		detail.CVReminder = &cvReminderSummary{
+			Count:   rem.Count,
+			FirstAt: rem.FirstAt,
+			LastAt:  rem.LastAt,
+			Stopped: rem.Stopped,
+		}
+	}
 	c.JSON(http.StatusOK, detail)
+}
+
+// loadCVReminder reads the cv-reminder row for a user. Returns
+// (zero, false) when none exists yet — that's expected for users
+// who registered after signal restarted but before the first tick,
+// or for users still inside the 1-day grace period.
+func loadCVReminder(ctx context.Context, userID string) (models.UserReminder, bool) {
+	var rem models.UserReminder
+	err := system.GetStorage().Get(ctx, constants.MongoUserRemindersCollection,
+		bson.M{"user_id": userID, "kind": string(models.UserReminderKindCVUpload)},
+		&rem)
+	if err != nil {
+		if !errors.Is(err, mongo.ErrNoDocuments) {
+			// Logging skipped — this is a best-effort enrichment for
+			// the UI; a transient Mongo hiccup shouldn't fail the
+			// main user fetch.
+			_ = err
+		}
+		return models.UserReminder{}, false
+	}
+	return rem, true
 }
 
 // loadUserOr404 reads the user document by id and writes a 404

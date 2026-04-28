@@ -20,6 +20,9 @@ func Mount(g *gin.RouterGroup) {
 	g.GET("/stats", getStats)
 
 	g.GET("/users/search", searchUsers)
+	// Recency-sorted paginated list. Powers nest's "browse all
+	// users" view when no specific user is being inspected.
+	g.GET("/users", listUsers)
 	g.GET("/users/:id", getUser)
 
 	g.GET("/users/:id/tokens", listUserTokens)

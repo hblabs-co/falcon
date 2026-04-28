@@ -40,6 +40,16 @@ func Handler() http.Handler {
 		admin.GET("/test-links", listTestLinks)
 		admin.DELETE("/test-link/:id", deleteOneTestLink)
 		admin.DELETE("/test-links", purgeAllTestLinks)
+		// One-shot operational triggers (publish-to-NATS): scan
+		// today's scrape, fire admin alert, fire admin push, fire
+		// templated test push. Lived in falcon-api before the admin
+		// service split; moved here so the whole admin surface is
+		// reachable behind one bearer.
+		admin.POST("/scout/scan-today", triggerScanToday)
+		admin.GET("/signal/test-alert", triggerTestAlert)
+		admin.GET("/signal/test-last-match", triggerTestLastMatch)
+		admin.GET("/signal/test-push", triggerTestPush)
+		admin.GET("/signal/test-email", triggerTestEmail)
 		// User-centric admin (Nest's /users UI): autocomplete, magic
 		// links, JWT sessions, devices, CV download.
 		users.Mount(admin)

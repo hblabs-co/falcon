@@ -31,14 +31,28 @@ type userView struct {
 // userDetail is what /users/:id returns: the row itself plus the
 // counts the UI needs for header badges. HasCV gates the "download
 // CV" button — the file may exist in Mongo but not be downloadable
-// (no minio key persisted).
+// (no minio key persisted). CVReminder, when present, summarises
+// what the cv-reminder loop has done for this user (count, last
+// send, terminal flag) so the nest UI can render "Reminded N× —
+// last 2d ago" next to the "No CV" badge.
 type userDetail struct {
 	userView
-	ActiveTokens   int    `json:"active_tokens"`
-	ActiveSessions int    `json:"active_sessions"`
-	DeviceCount    int    `json:"device_count"`
-	HasCV          bool   `json:"has_cv"`
-	CVFilename     string `json:"cv_filename,omitempty"`
+	ActiveTokens   int                 `json:"active_tokens"`
+	ActiveSessions int                 `json:"active_sessions"`
+	DeviceCount    int                 `json:"device_count"`
+	HasCV          bool                `json:"has_cv"`
+	CVFilename     string              `json:"cv_filename,omitempty"`
+	CVReminder     *cvReminderSummary  `json:"cv_reminder,omitempty"`
+}
+
+// cvReminderSummary mirrors models.UserReminder fields the UI cares
+// about. Kept here (not in models) because it's an admin-API view
+// shape; if other callers need it later we can promote it.
+type cvReminderSummary struct {
+	Count   int       `json:"count"`
+	FirstAt time.Time `json:"first_at,omitempty"`
+	LastAt  time.Time `json:"last_at,omitempty"`
+	Stopped bool      `json:"stopped"`
 }
 
 // tokenView is the per-row representation used by both the magic-
