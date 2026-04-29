@@ -169,5 +169,5 @@ func parsePositive(raw string, def, max int) int {
 
 func respondInternal(c *gin.Context, what string, err error) {
 	logrus.Errorf("[admin] %s: %v", what, err)
-	c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+	system.RespondInternal(c)
 }

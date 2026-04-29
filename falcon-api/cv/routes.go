@@ -34,8 +34,7 @@ func handlePrepare(c *gin.Context) {
 	var body struct {
 		Filename string `json:"filename" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
 
@@ -67,8 +66,7 @@ func handleIndex(c *gin.Context) {
 	var body struct {
 		Email string `json:"email" binding:"required,email"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
 
@@ -78,7 +76,7 @@ func handleIndex(c *gin.Context) {
 	}
 	if err := system.Publish(c.Request.Context(), constants.SubjectCVIndexRequested, evt); err != nil {
 		logrus.Errorf("publish cv.index.requested: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to queue index request"})
+		system.RespondInternal(c, "failed to queue index request")
 		return
 	}
 

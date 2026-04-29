@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>{{.Title}}</title>
+  <link rel="icon" type="image/png" href="https://falcon.hblabs.co/favicon.png">
+  <link rel="apple-touch-icon" href="https://falcon.hblabs.co/favicon.png">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      max-width: 480px;
+      margin: 4rem auto;
+      padding: 2rem;
+      color: #1d1d1f;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1.5rem;
+    }
+    h1 { font-size: 1.5rem; margin-top: 0; }
+    .ok { color: #1c7c2c; }
+    .err { color: #c1272d; }
+    p { margin: 0.75rem 0; text-align: left; }
+    .muted { color: #6e6e73; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <img class="logo" src="https://falcon.hblabs.co/favicon.png" alt="Falcon">
+{{if .OK}}
+  <h1 class="ok">You're unsubscribed</h1>
+  <p>{{.Email}} will no longer receive reminders from Falcon.</p>
+  <p class="muted">If you unsubscribed by accident or changed your mind, request a fresh magic-link in the app and we'll include you again.</p>
+{{else}}
+  <h1 class="err">Unsubscribe failed</h1>
+  <p>This link is invalid or has expired. If you meant to unsubscribe, contact us at <a href="mailto:start@falcon.hblabs.co">start@falcon.hblabs.co</a>.</p>
+{{end}}
+</body>
+</html>

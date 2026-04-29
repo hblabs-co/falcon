@@ -30,7 +30,7 @@ func triggerScanToday(c *gin.Context) {
 		"triggered_by": "admin",
 	}); err != nil {
 		logrus.Errorf("publish scan-today: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to trigger scan"})
+		system.RespondInternal(c, "failed to trigger scan")
 		return
 	}
 	c.JSON(http.StatusAccepted, gin.H{"status": "scan triggered"})
@@ -55,7 +55,7 @@ func triggerTestAlert(c *gin.Context) {
 	}
 	if err := system.GetStorage().Insert(ctx, constants.MongoWarningsCollection, warn); err != nil {
 		logrus.Errorf("insert test warning: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create test warning"})
+		system.RespondInternal(c, "failed to create test warning")
 		return
 	}
 
@@ -65,7 +65,7 @@ func triggerTestAlert(c *gin.Context) {
 	}
 	if err := system.Publish(ctx, constants.SubjectSignalAdminAlert, evt); err != nil {
 		logrus.Errorf("publish test admin_alert: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to publish test alert"})
+		system.RespondInternal(c, "failed to publish test alert")
 		return
 	}
 
@@ -92,7 +92,7 @@ func triggerTestLastMatch(c *gin.Context) {
 	evt := models.AdminTestMatchEvent{Index: index}
 	if err := system.Publish(c.Request.Context(), constants.SubjectSignalAdminTestMatch, evt); err != nil {
 		logrus.Errorf("publish admin_test_match: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to trigger test match push"})
+		system.RespondInternal(c, "failed to trigger test match push")
 		return
 	}
 	c.JSON(http.StatusAccepted, gin.H{
@@ -136,7 +136,7 @@ func triggerTestEmail(c *gin.Context) {
 	evt := models.AdminTestEmailEvent{TemplateID: tpl, Lang: lang, Vars: vars}
 	if err := system.Publish(c.Request.Context(), constants.SubjectSignalAdminTestEmail, evt); err != nil {
 		logrus.Errorf("publish admin_test_email: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to trigger test email"})
+		system.RespondInternal(c, "failed to trigger test email")
 		return
 	}
 	c.JSON(http.StatusAccepted, gin.H{
@@ -167,7 +167,7 @@ func triggerTestPush(c *gin.Context) {
 	evt := models.AdminTestPushEvent{TemplateID: tpl, Lang: lang}
 	if err := system.Publish(c.Request.Context(), constants.SubjectSignalAdminTestPush, evt); err != nil {
 		logrus.Errorf("publish admin_test_push: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to trigger test push"})
+		system.RespondInternal(c, "failed to trigger test push")
 		return
 	}
 	c.JSON(http.StatusAccepted, gin.H{

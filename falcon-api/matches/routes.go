@@ -68,7 +68,7 @@ func handleListMatches(c *gin.Context) {
 		page, pageSize, &docs)
 	if err != nil {
 		logrus.Errorf("list matches user=%s page=%d: %v", uid, page, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch matches"})
+		system.RespondInternal(c, "failed to fetch matches")
 		return
 	}
 	// Empty result must serialise as `[]`, not `null` — the iOS decoder
@@ -118,8 +118,7 @@ func handleMarkViewed(c *gin.Context) {
 		ProjectID string `json:"project_id" binding:"required"`
 		CVID      string `json:"cv_id"      binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
 
@@ -134,7 +133,7 @@ func handleMarkViewed(c *gin.Context) {
 		bson.M{"$set": bson.M{"viewed": true}},
 	); err != nil {
 		logrus.Errorf("mark viewed user=%s project=%s cv=%s: %v", uid, body.ProjectID, body.CVID, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to mark viewed"})
+		system.RespondInternal(c, "failed to mark viewed")
 		return
 	}
 

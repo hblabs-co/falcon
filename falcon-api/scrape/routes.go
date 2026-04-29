@@ -29,8 +29,7 @@ func handleScrape(c *gin.Context) {
 		Platform string `json:"platform" binding:"required"`
 		URL      string `json:"url"      binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
 
@@ -43,7 +42,7 @@ func handleScrape(c *gin.Context) {
 
 	if err := system.Publish(c.Request.Context(), subject, event); err != nil {
 		logrus.Errorf("publish %s: %v", subject, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to queue scrape request"})
+		system.RespondInternal(c, "failed to queue scrape request")
 		return
 	}
 

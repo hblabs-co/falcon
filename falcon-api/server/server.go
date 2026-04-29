@@ -77,7 +77,7 @@ func JWTMiddleware() gin.HandlerFunc {
 		// Check revocation via jti.
 		if jti, _ := claims["jti"].(string); jti != "" {
 			var stored models.Token
-			if err := system.GetStorage().GetById(c.Request.Context(), constants.MongoTokensCollection, jti, &stored); err == nil {
+			if err := system.GetStorage().GetById(c.Request.Context(), constants.MongoAuthTokensCollection, jti, &stored); err == nil {
 				if stored.Revoked {
 					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token revoked"})
 					return

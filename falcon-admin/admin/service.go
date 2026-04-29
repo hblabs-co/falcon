@@ -12,7 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/admin/issues"
 	"hblabs.co/falcon/admin/users"
+	"hblabs.co/falcon/packages/auth"
 	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/datasource"
 	"hblabs.co/falcon/packages/models"
 	"hblabs.co/falcon/packages/system"
 )
@@ -50,6 +52,15 @@ func Handler() http.Handler {
 		admin.GET("/signal/test-last-match", triggerTestLastMatch)
 		admin.GET("/signal/test-push", triggerTestPush)
 		admin.GET("/signal/test-email", triggerTestEmail)
+		// Auth surface — declared in `packages/auth` as system.Endpoint
+		// values so the auth subsystem owns its own routes. Mount each
+		// here under the bearer-protected admin group. See AUTH.md.
+		system.MountEndpoints(admin,
+			auth.ListBlocksEndpoint,
+			auth.CreateBlockEndpoint,
+			auth.DeleteBlockEndpoint,
+			auth.ListIntentsEndpoint,
+		)
 		// User-centric admin (Nest's /users UI): autocomplete, magic
 		// links, JWT sessions, devices, CV download.
 		users.Mount(admin)
@@ -96,10 +107,10 @@ func createTestLink(c *gin.Context) {
 		Email    string `json:"email" binding:"required,email"`
 		DeviceID string `json:"device_id"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
+	body.Email = datasource.NormalizeEmail(body.Email)
 	if body.DeviceID == "" {
 		body.DeviceID = "test-" + gonanoid.Must(12)
 	}
@@ -111,7 +122,7 @@ func createTestLink(c *gin.Context) {
 			return
 		}
 		logrus.Errorf("save test token: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		system.RespondInternal(c)
 		return
 	}
 
@@ -140,7 +151,7 @@ func listTestLinks(c *gin.Context) {
 		&tokens,
 	); err != nil {
 		logrus.Errorf("list test tokens: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		system.RespondInternal(c)
 		return
 	}
 
@@ -175,7 +186,7 @@ func deleteOneTestLink(c *gin.Context) {
 		bson.M{"id": id, "test": true},
 	); err != nil {
 		logrus.Errorf("delete test token %s: %v", id, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		system.RespondInternal(c)
 		return
 	}
 	logrus.Infof("[admin] deleted test token %s", id)
@@ -192,7 +203,7 @@ func purgeAllTestLinks(c *gin.Context) {
 		bson.M{"test": true},
 	); err != nil {
 		logrus.Errorf("purge test tokens: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		system.RespondInternal(c)
 		return
 	}
 	logrus.Infof("[admin] purged all test tokens")

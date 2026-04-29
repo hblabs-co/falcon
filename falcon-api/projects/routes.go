@@ -135,7 +135,7 @@ func handleListProjects(c *gin.Context) {
 		listFilter, "display_updated_at", true, page, pageSize, &docs)
 	if err != nil {
 		logrus.Errorf("list projects page=%d: %v", page, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch projects"})
+		system.RespondInternal(c, "failed to fetch projects")
 		return
 	}
 

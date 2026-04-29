@@ -41,7 +41,7 @@ func ensureUserLastLogin(ctx context.Context) (int64, error) {
 	storage := system.GetStorage()
 
 	userIDs, err := storage.Distinct(ctx,
-		constants.MongoTokensCollection,
+		constants.MongoAuthTokensCollection,
 		"user_id",
 		bson.M{"type": "jwt", "user_id": bson.M{"$ne": ""}},
 	)

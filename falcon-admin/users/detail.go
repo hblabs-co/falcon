@@ -8,7 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"hblabs.co/falcon/packages/auth"
 	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/datasource"
 	"hblabs.co/falcon/packages/models"
 	"hblabs.co/falcon/packages/system"
 )
@@ -31,11 +33,11 @@ func getUser(c *gin.Context) {
 		detail.HasCV = cv.MinioBucket != "" && cv.MinioKey != ""
 		detail.CVFilename = cv.Filename
 	}
-	tokens, _ := listTestTokensFor(ctx, user)
-	sessions, _ := listSessionsFor(ctx, user)
+	tokens, _ := auth.ListTestTokensFor(ctx, user)
+	sessions, _ := auth.ListSessionsFor(ctx, user)
 	devices, _ := listDevicesFor(ctx, id)
-	detail.ActiveTokens = countActive(tokens)
-	detail.ActiveSessions = countActive(sessions)
+	detail.ActiveTokens = auth.CountActiveTokens(tokens)
+	detail.ActiveSessions = auth.CountActiveTokens(sessions)
 	detail.DeviceCount = len(devices)
 	// Surface the cv-reminder bookkeeping when a row exists. Absent
 	// row = signal hasn't sent yet for this user (either pre-grace
@@ -75,15 +77,16 @@ func loadCVReminder(ctx context.Context, userID string) (models.UserReminder, bo
 
 // loadUserOr404 reads the user document by id and writes a 404
 // response if missing. Returns (user, true) on success, (nil, false)
-// when the caller should bail out.
+// when the caller should bail out. Thin gin wrapper over
+// `datasource.FindUserByID` so the query primitive lives in one
+// place (shared with the analog in `packages/auth/test_tokens.go`).
 func loadUserOr404(c *gin.Context, id string) (*models.User, bool) {
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "id required"})
 		return nil, false
 	}
-	var u models.User
-	if err := system.GetStorage().GetById(c.Request.Context(),
-		constants.MongoUsersCollection, id, &u); err != nil {
+	u, err := datasource.FindUserByID(c.Request.Context(), id)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return nil, false
 	}

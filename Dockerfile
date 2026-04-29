@@ -156,7 +156,12 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM alpine:3.20 AS runtime-base
 ARG BUILD_TIME=unknown
 ENV BUILD_TIME=${BUILD_TIME}
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+# tzdata: required by services that pin a non-UTC timezone via
+# time.LoadLocation (today: falcon-signal's cv-reminder loop, which
+# gates sending on Berlin business hours). Without it, LoadLocation
+# returns ErrLocationNotFound and the service silently falls back to
+# UTC — off by ~1–2 h depending on DST.
+RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates tzdata
 
 # ─────────────────────────────────────────────────────────────────────────
 # Per-service runtime images — all inherit from runtime-base. Each

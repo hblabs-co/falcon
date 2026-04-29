@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/api/server"
+	"hblabs.co/falcon/packages/auth"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/models"
 	"hblabs.co/falcon/packages/system"
@@ -20,6 +21,10 @@ func (Routes) Mount(r *gin.Engine) {
 	g := r.Group("/me", server.JWTMiddleware())
 	g.GET("", handleGetMe)
 	g.PUT("/config", handlePutConfig)
+	// Auth-domain opt-out handler lives in `packages/auth` (writes
+	// `auth_optouts`, the same collection the public `/unsubscribe`
+	// page targets). Mounted here so the JWT middleware applies.
+	g.POST("/reminders/opt-out", auth.OptOutReminders)
 }
 
 // handleGetMe returns configurations and the active CV for the authenticated user.
@@ -53,7 +58,7 @@ func handleGetMe(c *gin.Context) {
 	var configs []models.UserConfig
 	if err := system.GetStorage().GetMany(ctx, constants.MongoUsersConfigurationsCollection, configFilter, &configs); err != nil {
 		logrus.Errorf("get configs user=%s platform=%s device=%s: %v", uid, platform, deviceID, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch configurations"})
+		system.RespondInternal(c, "failed to fetch configurations")
 		return
 	}
 
@@ -120,9 +125,10 @@ func handlePutConfig(c *gin.Context) {
 	}
 	if err := system.GetStorage().Set(ctx, constants.MongoUsersConfigurationsCollection, filter, cfg); err != nil {
 		logrus.Errorf("put config user=%s platform=%s device=%s name=%s: %v", uid, req.Platform, req.DeviceID, req.Name, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save configuration"})
+		system.RespondInternal(c, "failed to save configuration")
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
+

@@ -1,10 +1,9 @@
 package users
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"hblabs.co/falcon/packages/system"
 )
 
 // respondInternal logs the underlying cause server-side and returns
@@ -12,5 +11,5 @@ import (
 // real message in the log. Used by every handler in this package.
 func respondInternal(c *gin.Context, what string, err error) {
 	logrus.Errorf("[admin] %s: %v", what, err)
-	c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+	system.RespondInternal(c)
 }

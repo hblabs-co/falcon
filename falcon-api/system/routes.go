@@ -48,7 +48,7 @@ func handleListSystem(c *gin.Context) {
 	if err := commonsystem.GetStorage().GetMany(ctx, constants.MongoSystemCollection,
 		bson.M{}, &docs); err != nil {
 		logrus.Errorf("list system: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list system"})
+		commonsystem.RespondInternal(c, "failed to list system")
 		return
 	}
 

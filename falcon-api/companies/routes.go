@@ -57,7 +57,7 @@ func handleListCompanies(c *gin.Context) {
 	if err := system.GetStorage().GetMany(ctx, constants.MongoCompaniesCollection,
 		bson.M{}, &docs); err != nil {
 		logrus.Errorf("list companies: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list companies"})
+		system.RespondInternal(c, "failed to list companies")
 		return
 	}
 

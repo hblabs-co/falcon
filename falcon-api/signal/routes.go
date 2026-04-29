@@ -38,8 +38,7 @@ func handleRegisterIOSDeviceToken(c *gin.Context) {
 		Token             string `json:"token"               binding:"required"`
 		LiveActivityToken string `json:"live_activity_token"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
 
@@ -51,7 +50,7 @@ func handleRegisterIOSDeviceToken(c *gin.Context) {
 	}
 	if err := system.Publish(c.Request.Context(), constants.SubjectSignalDeviceTokenRegister, evt); err != nil {
 		logrus.Errorf("publish device_token.register: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to register token"})
+		system.RespondInternal(c, "failed to register token")
 		return
 	}
 
@@ -71,8 +70,7 @@ func handleLogoutIOSDeviceToken(c *gin.Context) {
 		DeviceID string `json:"device_id" binding:"required"`
 		UserID   string `json:"user_id"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
 
@@ -80,7 +78,7 @@ func handleLogoutIOSDeviceToken(c *gin.Context) {
 	// we want the tokens collection to stop recognising this session
 	// immediately, not just after expiry. Missing rows is a no-op.
 	if body.UserID != "" {
-		if err := system.GetStorage().DeleteMany(c.Request.Context(), constants.MongoTokensCollection, bson.M{
+		if err := system.GetStorage().DeleteMany(c.Request.Context(), constants.MongoAuthTokensCollection, bson.M{
 			"user_id":   body.UserID,
 			"device_id": body.DeviceID,
 			"type":      models.TokenTypeJWT,
@@ -95,7 +93,7 @@ func handleLogoutIOSDeviceToken(c *gin.Context) {
 	}
 	if err := system.Publish(c.Request.Context(), constants.SubjectSignalDeviceTokenLogout, evt); err != nil {
 		logrus.Errorf("publish device_token.logout: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to logout device"})
+		system.RespondInternal(c, "failed to logout device")
 		return
 	}
 
@@ -113,8 +111,7 @@ func handleLiveActivityUpdateToken(c *gin.Context) {
 		DeviceID string `json:"device_id" binding:"required"`
 		Token    string `json:"token"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !system.BindJSONOrAbort(c, &body) {
 		return
 	}
 
@@ -124,7 +121,7 @@ func handleLiveActivityUpdateToken(c *gin.Context) {
 	}
 	if err := system.Publish(c.Request.Context(), constants.SubjectSignalLiveActivityUpdate, evt); err != nil {
 		logrus.Errorf("publish live_activity_update_token: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to persist token"})
+		system.RespondInternal(c, "failed to persist token")
 		return
 	}
 

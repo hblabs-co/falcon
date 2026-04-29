@@ -11,15 +11,19 @@ const (
 	MongoErrorsCollection              = "errors"
 	MongoWarningsCollection            = "warnings"
 	MongoUsersCollection               = "users"
+	MongoUserRemindersCollection       = "user_reminders"
 	MongoUsersConfigurationsCollection = "users_configurations"
-	MongoTokensCollection              = "tokens"
+	MongoTokensCollection              = "auth_tokens"
+	MongoAuthIntentsCollection         = "auth_intents"
+	MongoAuthBlocksCollection          = "auth_blocks"
+	MongoAuthOptOutsCollection         = "auth_optouts"
 	MongoRealtimeStatsCollection       = "realtime_stats"
 	// MongoSystemCollection stores one doc per service (keyed by
 	// service_name) with self-reported metadata. Consumed by the
 	// public GET /system endpoint — publish dates today, future
 	// additions (version, git commit, etc.) slot in without schema
 	// churn since docs are flat maps.
-	MongoSystemCollection              = "system"
+	MongoSystemCollection = "system"
 )
 
 // System document field keys. Centralised so services and the /system
