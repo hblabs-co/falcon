@@ -14,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"hblabs.co/falcon/packages/constants"
+	"hblabs.co/falcon/packages/datasource"
 	"hblabs.co/falcon/packages/embeddings"
 	"hblabs.co/falcon/storage/infra"
 	"hblabs.co/falcon/packages/models"
@@ -296,6 +297,36 @@ func (s *service) index(ctx context.Context, evt models.CVIndexRequestedEvent) e
 		"updated_at":     time.Now(),
 	})
 
+	// 6b. Flip the user's denormalised cv_uploaded flag to true.
+	//     Owned by storage on the live path so the cv-reminder loop
+	//     in falcon-signal can filter `users.cv_uploaded=false`
+	//     without joining into `cvs`. Backfill of historical users
+	//     is handled by falcon-config's ensureUserCVFlag at boot.
+	//
+	//     We log every outcome explicitly — silent success makes
+	//     drift impossible to debug after the fact (you can't tell
+	//     "ran and modified 1" from "ran and matched 0" from "never
+	//     ran"). Three outcomes:
+	//       - modifiedCount=1: happy path
+	//       - modifiedCount=0: filter didn't match (user missing,
+	//         or already true) — surfaces silent drift
+	//       - error: Mongo issue, the boot reconciler will catch up
+	if userID != "" {
+		modified, err := system.GetStorage().UpdateOne(ctx,
+			constants.MongoUsersCollection,
+			bson.M{"id": userID, "cv_uploaded": bson.M{"$ne": true}},
+			bson.M{"$set": bson.M{"cv_uploaded": true, "updated_at": time.Now()}},
+		)
+		switch {
+		case err != nil:
+			log.Warnf("flip user.cv_uploaded for %s: %v (non-fatal — reconciler will fix on next boot)", userID, err)
+		case modified == 0:
+			log.Warnf("flip user.cv_uploaded for %s: matched 0 rows — user missing or flag already true", userID)
+		default:
+			log.Infof("flipped user.cv_uploaded=true for %s", userID)
+		}
+	}
+
 	// 7. Publish cv.indexed and transition to normalizing.
 	out := models.CVIndexedEvent{CVID: cv.ID, UserID: userID}
 	if err := system.Publish(ctx, constants.SubjectCVIndexed, out); err != nil {
@@ -348,15 +379,12 @@ func (s *service) replaceExistingCV(ctx context.Context, userID, currentCVID str
 	return nil
 }
 
+// upsertUser delegates to the shared datasource.FindOrCreateUser so
+// the CV-upload flow (which can create a user without going
+// through magic-link verify) uses the same race-safe primitive
+// as `/auth/verify`. With the unique index on `users.email`, a
+// concurrent CV-upload + verify for the same email converge on
+// the same user_id instead of writing two rows.
 func (s *service) upsertUser(ctx context.Context, email string) (string, error) {
-	var user models.User
-	if err := system.GetStorage().Get(ctx, constants.MongoUsersCollection, bson.M{"email": email}, &user); err == nil {
-		return user.ID, nil
-	}
-	now := time.Now()
-	user = models.User{ID: gonanoid.Must(), Email: email, CreatedAt: now, UpdatedAt: now}
-	if err := system.GetStorage().SetById(ctx, constants.MongoUsersCollection, user.ID, &user); err != nil {
-		return "", fmt.Errorf("create user: %w", err)
-	}
-	return user.ID, nil
+	return datasource.FindOrCreateUser(ctx, email)
 }

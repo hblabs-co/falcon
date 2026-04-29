@@ -128,7 +128,7 @@ func (s *Service) handleMagicLink(data []byte) error {
 		return fmt.Errorf("unmarshal signal.magic_link: %w", err)
 	}
 
-	lang := s.resolveUserLanguage(evt.Email, evt.Platform)
+	lang := s.ResolveUserLanguage(evt.Email, evt.Platform)
 
 	if err := s.mail.SendMagicLink(evt.Email, evt.MagicLink, lang); err != nil {
 		return fmt.Errorf("send magic link to %s: %w", evt.Email, err)
@@ -179,9 +179,9 @@ func (s *Service) resolveDeviceLanguage(userID, platform, deviceID string) strin
 	return "de"
 }
 
-// resolveUserLanguage looks up the user's app_language config for the given platform.
+// ResolveUserLanguage looks up the user's app_language config for the given platform.
 // Falls back to "en" if not found.
-func (s *Service) resolveUserLanguage(email, platform string) string {
+func (s *Service) ResolveUserLanguage(email, platform string) string {
 	ctx := context.Background()
 
 	// Find the user by email.

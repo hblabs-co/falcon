@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -23,6 +24,12 @@ type assetDef struct {
 }
 
 type templateDef struct {
+	// Name is the human-readable label for the template (e.g.
+	// "Magic link login"). Distinct from the YAML key, which is the
+	// stable id used in code. Exposed via List() so the admin UI /
+	// HTTP layer can render a friendly picker without duplicating
+	// the mapping anywhere.
+	Name         string                       `yaml:"name"`
 	Translations map[string]map[string]string `yaml:"translations"`
 	HTML         string                       `yaml:"html"`
 }
@@ -31,6 +38,35 @@ type config struct {
 	Assets    map[string]assetDef    `yaml:"assets"`
 	Shared    map[string]string      `yaml:"shared"`
 	Templates map[string]templateDef `yaml:"templates"`
+}
+
+// TemplateMeta is the public-facing summary of a single template,
+// safe to serialise to JSON for an admin endpoint that wants to list
+// what's available. Doesn't include the HTML body or the translation
+// strings — those are internal to render.
+type TemplateMeta struct {
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Languages []string `json:"languages"`
+}
+
+// List returns every email template's metadata, sorted by id so the
+// output is stable across calls. Use from HTTP handlers that want to
+// expose the catalogue (e.g. an admin "send test email" picker).
+func List() []TemplateMeta {
+	out := make([]TemplateMeta, 0, len(cfg.Templates))
+	for id, def := range cfg.Templates {
+		langs := make([]string, 0, len(def.Translations))
+		for lang := range def.Translations {
+			langs = append(langs, lang)
+		}
+		out = append(out, TemplateMeta{ID: id, Name: def.Name, Languages: langs})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	for i := range out {
+		sort.Strings(out[i].Languages)
+	}
+	return out
 }
 
 // --- Package state ---

@@ -29,6 +29,7 @@ shared:
 
 templates:
   admin_alert:
+    name: "Admin operational alert"
     fields:
       - subject
       - heading
@@ -147,6 +148,7 @@ templates:
       </html>
 
   login:
+    name: "Magic link login"
     fields:
       - subject
       - title
@@ -242,6 +244,222 @@ templates:
                   </table>
                 </td>
               </tr>
+            </table>
+          </td></tr>
+        </table>
+      </body>
+      </html>
+
+
+  cv_reminder:
+    name: "CV upload reminder"
+    fields:
+      - subject
+      - heading
+      - intro
+      - bullet_matches
+      - bullet_push
+      - bullet_apply
+      - cta
+      - cta_hint
+      - footer_note
+      - built_by
+      - unsubscribe
+    translations:
+      en:
+        subject: "Upload your CV to start getting matches"
+        heading: "Almost there"
+        intro: "Your account is ready, but you haven't uploaded a CV yet. Without one, Falcon can't match you to projects."
+        bullet_matches: "Get matches scored against every new project as it's published."
+        bullet_push: "Receive a push the moment a strong match shows up."
+        bullet_apply: "Apply directly from the app — your contact details stay yours."
+        cta: "Upload CV"
+        cta_hint: "Open the app and tap the avatar to upload."
+        footer_note: "You're getting this because you signed up but haven't uploaded a CV yet. We'll stop pinging once you do (or after 30 days)."
+        built_by: "Built by"
+        unsubscribe: "Unsubscribe"
+      de:
+        subject: "Lade deinen Lebenslauf hoch, um Treffer zu bekommen"
+        heading: "Fast geschafft"
+        intro: "Dein Konto ist bereit, aber du hast noch keinen Lebenslauf hochgeladen. Ohne ihn kann Falcon dich keinen Projekten zuordnen."
+        bullet_matches: "Bekomme Treffer-Bewertungen für jedes neue Projekt, sobald es veröffentlicht wird."
+        bullet_push: "Erhalte eine Push-Benachrichtigung, sobald ein starker Treffer auftaucht."
+        bullet_apply: "Bewirb dich direkt aus der App — deine Kontaktdaten bleiben bei dir."
+        cta: "Lebenslauf hochladen"
+        cta_hint: "Öffne die App und tippe auf das Avatar, um hochzuladen."
+        footer_note: "Du bekommst das, weil du dich registriert hast, aber noch keinen Lebenslauf hochgeladen hast. Sobald du es tust (oder nach 30 Tagen), hören wir auf."
+        built_by: "Gebaut von"
+        unsubscribe: "Abmelden"
+      es:
+        subject: "Sube tu CV para empezar a recibir coincidencias"
+        heading: "Casi listo"
+        intro: "Tu cuenta ya está lista, pero todavía no has subido un CV. Sin él, Falcon no puede emparejarte con proyectos."
+        bullet_matches: "Recibe coincidencias evaluadas contra cada proyecto nuevo apenas se publique."
+        bullet_push: "Recibe una notificación cuando aparezca una coincidencia fuerte."
+        bullet_apply: "Aplica directo desde la app — tus datos de contacto siguen siendo tuyos."
+        cta: "Subir CV"
+        cta_hint: "Abre la app y toca el avatar para subirlo."
+        footer_note: "Recibes esto porque te registraste pero aún no has subido un CV. Dejaremos de avisarte apenas lo subas (o después de 30 días)."
+        built_by: "Hecho por"
+        unsubscribe: "Darse de baja"
+    html: |
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:48px 16px;">
+          <tr><td align="center">
+            <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.08);">
+              <tr><td align="center" style="padding:36px 40px 0;">
+                <img src="{{.Asset.falcon_logo}}" alt="Falcon" width="56" height="56" style="display:block;border-radius:14px;">
+              </td></tr>
+              <tr><td align="center" style="padding:20px 40px 0;">
+                <h1 style="margin:0;font-size:24px;font-weight:700;color:#1d1d1f;letter-spacing:-0.3px;">{{.T.heading}}</h1>
+              </td></tr>
+              <tr><td align="center" style="padding:10px 40px 0;">
+                <p style="margin:0;font-size:15px;line-height:22px;color:#3a3a3c;">{{.T.intro}}</p>
+              </td></tr>
+              <tr><td style="padding:24px 56px 0;">
+                <ul style="margin:0;padding-left:18px;font-size:14px;line-height:22px;color:#3a3a3c;">
+                  <li style="margin:0 0 8px;">{{.T.bullet_matches}}</li>
+                  <li style="margin:0 0 8px;">{{.T.bullet_push}}</li>
+                  <li style="margin:0;">{{.T.bullet_apply}}</li>
+                </ul>
+              </td></tr>
+              <tr><td align="center" style="padding:28px 40px 8px;">
+                <a href="{{.Var.upload_link}}" style="display:inline-block;padding:13px 28px;background:#0a84ff;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;">{{.T.cta}}</a>
+              </td></tr>
+              <tr><td align="center" style="padding:6px 40px 28px;">
+                <p style="margin:0;font-size:12px;line-height:18px;color:#8e8e93;">{{.T.cta_hint}}</p>
+              </td></tr>
+              <tr><td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #e5e5ea;margin:0;"></td></tr>
+              <tr><td align="center" style="padding:18px 40px 12px;">
+                <p style="margin:0;font-size:11px;line-height:18px;color:#aeaeb2;">{{.T.footer_note}}</p>
+              </td></tr>
+              <tr><td align="center" style="padding:0 40px 16px;">
+                <a href="{{.Var.unsubscribe_url}}" style="font-size:11px;color:#8e8e93;text-decoration:underline;">{{.T.unsubscribe}}</a>
+              </td></tr>
+              <tr><td align="center" style="padding:0 40px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:8px;">
+                      <img src="{{.Asset.hblabs_logo}}" alt="HB Labs" width="20" height="20" style="display:block;">
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <span style="font-size:11px;color:#aeaeb2;">{{.T.built_by}} </span>
+                      <a href="{{.Shared.company_url}}" style="font-size:11px;color:#8e8e93;text-decoration:none;font-weight:600;">{{.Shared.company_name}}</a>
+                    </td>
+                  </tr>
+                </table>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body>
+      </html>
+
+
+  login_reminder:
+    name: "Login + push reminder"
+    fields:
+      - subject
+      - heading
+      - intro
+      - bullet_push
+      - bullet_realtime
+      - bullet_apply
+      - cta
+      - cta_hint
+      - footer_note
+      - built_by
+      - unsubscribe
+    translations:
+      en:
+        subject: "Open the Falcon app to start receiving matches"
+        heading: "We have your CV — now we need you back"
+        intro: "Your CV is uploaded and indexed. To actually start receiving matches you need to open the app and enable notifications, otherwise we have no way to alert you when one shows up."
+        bullet_push: "Push notification the moment a strong match shows up."
+        bullet_realtime: "Live activity on the lock screen for top candidates."
+        bullet_apply: "One-tap apply directly from the notification."
+        cta: "Open Falcon"
+        cta_hint: "Open the app on your iPhone, sign in, and accept push notifications."
+        footer_note: "You're getting this because your CV is uploaded but you haven't activated push on the iOS app yet. We'll stop pinging once you do (or after 30 days)."
+        built_by: "Built by"
+        unsubscribe: "Unsubscribe"
+      de:
+        subject: "Öffne die Falcon-App, um Treffer zu empfangen"
+        heading: "Wir haben deinen Lebenslauf — jetzt brauchen wir dich zurück"
+        intro: "Dein Lebenslauf ist hochgeladen und indiziert. Damit du Treffer empfängst, musst du die App öffnen und Push-Benachrichtigungen erlauben — sonst können wir dich nicht alarmieren."
+        bullet_push: "Push-Benachrichtigung sobald ein starker Treffer auftaucht."
+        bullet_realtime: "Live Activity auf dem Sperrbildschirm für Top-Kandidaten."
+        bullet_apply: "Mit einem Tap direkt aus der Benachrichtigung bewerben."
+        cta: "Falcon öffnen"
+        cta_hint: "Öffne die App auf deinem iPhone, melde dich an und erlaube Push-Benachrichtigungen."
+        footer_note: "Du bekommst das, weil dein Lebenslauf hochgeladen ist, aber du Push in der iOS-App noch nicht aktiviert hast. Sobald du es tust (oder nach 30 Tagen), hören wir auf."
+        built_by: "Gebaut von"
+        unsubscribe: "Abmelden"
+      es:
+        subject: "Abre la app Falcon para empezar a recibir coincidencias"
+        heading: "Tenemos tu CV — ahora te necesitamos de vuelta"
+        intro: "Tu CV está subido e indexado. Para empezar a recibir coincidencias necesitas abrir la app y aceptar notificaciones, sino no podemos avisarte cuando aparezca una."
+        bullet_push: "Notificación push apenas aparezca una coincidencia fuerte."
+        bullet_realtime: "Live Activity en la pantalla bloqueada para los mejores candidatos."
+        bullet_apply: "Aplica directo desde la notificación con un toque."
+        cta: "Abrir Falcon"
+        cta_hint: "Abre la app en tu iPhone, inicia sesión y acepta las notificaciones."
+        footer_note: "Recibes esto porque tu CV está subido pero no has activado push en la app iOS. Dejaremos de avisarte apenas lo hagas (o después de 30 días)."
+        built_by: "Hecho por"
+        unsubscribe: "Darse de baja"
+    html: |
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="margin:0;padding:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:48px 16px;">
+          <tr><td align="center">
+            <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.08);">
+              <tr><td align="center" style="padding:36px 40px 0;">
+                <img src="{{.Asset.falcon_logo}}" alt="Falcon" width="56" height="56" style="display:block;border-radius:14px;">
+              </td></tr>
+              <tr><td align="center" style="padding:20px 40px 0;">
+                <h1 style="margin:0;font-size:24px;font-weight:700;color:#1d1d1f;letter-spacing:-0.3px;">{{.T.heading}}</h1>
+              </td></tr>
+              <tr><td align="center" style="padding:10px 40px 0;">
+                <p style="margin:0;font-size:15px;line-height:22px;color:#3a3a3c;">{{.T.intro}}</p>
+              </td></tr>
+              <tr><td style="padding:24px 56px 0;">
+                <ul style="margin:0;padding-left:18px;font-size:14px;line-height:22px;color:#3a3a3c;">
+                  <li style="margin:0 0 8px;">{{.T.bullet_push}}</li>
+                  <li style="margin:0 0 8px;">{{.T.bullet_realtime}}</li>
+                  <li style="margin:0;">{{.T.bullet_apply}}</li>
+                </ul>
+              </td></tr>
+              <tr><td align="center" style="padding:28px 40px 8px;">
+                <a href="{{.Var.app_link}}" style="display:inline-block;padding:13px 28px;background:#0a84ff;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;">{{.T.cta}}</a>
+              </td></tr>
+              <tr><td align="center" style="padding:6px 40px 28px;">
+                <p style="margin:0;font-size:12px;line-height:18px;color:#8e8e93;">{{.T.cta_hint}}</p>
+              </td></tr>
+              <tr><td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #e5e5ea;margin:0;"></td></tr>
+              <tr><td align="center" style="padding:18px 40px 12px;">
+                <p style="margin:0;font-size:11px;line-height:18px;color:#aeaeb2;">{{.T.footer_note}}</p>
+              </td></tr>
+              <tr><td align="center" style="padding:0 40px 16px;">
+                <a href="{{.Var.unsubscribe_url}}" style="font-size:11px;color:#8e8e93;text-decoration:underline;">{{.T.unsubscribe}}</a>
+              </td></tr>
+              <tr><td align="center" style="padding:0 40px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:8px;">
+                      <img src="{{.Asset.hblabs_logo}}" alt="HB Labs" width="20" height="20" style="display:block;">
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <span style="font-size:11px;color:#aeaeb2;">{{.T.built_by}} </span>
+                      <a href="{{.Shared.company_url}}" style="font-size:11px;color:#8e8e93;text-decoration:none;font-weight:600;">{{.Shared.company_name}}</a>
+                    </td>
+                  </tr>
+                </table>
+              </td></tr>
             </table>
           </td></tr>
         </table>

@@ -1,0 +1,65 @@
+# Push Notification Template Framework
+#
+# Mirrors the email/templates.yaml shape but trims it to what an APNs
+# alert actually carries: title, optional subtitle, body, optional
+# category. No HTML, no assets — APNs is plain text.
+#
+# To add a new push template:
+#   1. New entry under "templates:" with a unique id (e.g. "match_summary")
+#   2. Translations for each language (en, de, es) covering at least
+#      `title` and `body`. `subtitle` is optional.
+#   3. Optional: a top-level `category` and `sound` for iOS-side handling.
+#   4. From Go: push.Render("template_id", lang) → push.Payload
+#
+# Variable substitution is NOT supported in v1 — translations are plain
+# strings. If a future template needs interpolation (e.g. user name), we
+# can switch each field to a text/template at compile time without
+# breaking existing entries.
+
+templates:
+  cv_reminder:
+    name: "CV upload reminder"
+    fields:
+      - title
+      - subtitle
+      - body
+    category: "CV_REMINDER"
+    sound: "default"
+    translations:
+      en:
+        title: "✨ Upload your CV"
+        subtitle: "1 step left"
+        body: "Add your CV to start getting matches scored against new projects. 🚀"
+      de:
+        title: "✨ Lade deinen Lebenslauf hoch"
+        subtitle: "Noch 1 Schritt"
+        body: "Lade deinen Lebenslauf hoch, um Treffer zu neuen Projekten zu bekommen. 🚀"
+      es:
+        title: "✨ Sube tu CV"
+        subtitle: "Falta 1 paso"
+        body: "Sube tu CV para empezar a recibir coincidencias contra proyectos nuevos. 🚀"
+
+  # admin_test_push is the catch-all template the /admin/signal/test-push
+  # endpoint uses by default. It exercises the templated push path
+  # end-to-end without putting anything user-facing in the wild.
+  admin_test_push:
+    name: "Admin test push"
+    fields:
+      - title
+      - subtitle
+      - body
+    category: "ADMIN_TEST"
+    sound: "default"
+    translations:
+      en:
+        title: "Falcon admin test"
+        subtitle: "Templated push"
+        body: "If you're seeing this, the push template pipeline is working end-to-end. Safe to ignore."
+      de:
+        title: "Falcon Admin-Test"
+        subtitle: "Template-Push"
+        body: "Wenn du das siehst, funktioniert die Push-Template-Pipeline. Kannst du ignorieren."
+      es:
+        title: "Prueba de admin Falcon"
+        subtitle: "Push con template"
+        body: "Si ves esto, la pipeline de push templates está funcionando. Puedes ignorarlo."

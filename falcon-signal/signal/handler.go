@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/system"
+	"hblabs.co/falcon/signal/reminders"
 )
 
 // Module wires the signal pipeline into falcon-signal.
@@ -18,6 +19,12 @@ func (m *Module) Register(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Log loaded templates so the operator can confirm at boot what's
+	// available and catch typos in templates.yaml early. Both packages
+	// load via init() — by the time we get here both catalogues are
+	// final and won't change at runtime.
+	logTemplates()
 
 	if err := system.Subscribe(
 		ctx,
@@ -88,6 +95,28 @@ func (m *Module) Register(ctx context.Context) error {
 	if err := system.Subscribe(
 		ctx,
 		constants.StreamSignal,
+		"falcon-signal-admin-test-push",
+		constants.SubjectSignalAdminTestPush,
+		svc.handleAdminTestPush,
+	); err != nil {
+		return err
+	}
+	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalAdminTestPush)
+
+	if err := system.Subscribe(
+		ctx,
+		constants.StreamSignal,
+		"falcon-signal-admin-test-email",
+		constants.SubjectSignalAdminTestEmail,
+		svc.handleAdminTestEmail,
+	); err != nil {
+		return err
+	}
+	logrus.Infof("[signal] subscribed → %s", constants.SubjectSignalAdminTestEmail)
+
+	if err := system.Subscribe(
+		ctx,
+		constants.StreamSignal,
 		"falcon-signal-live-activity-update",
 		constants.SubjectSignalLiveActivityUpdate,
 		svc.handleLiveActivityUpdateToken,
@@ -101,6 +130,16 @@ func (m *Module) Register(ctx context.Context) error {
 	// loop flushes every ADMIN_ALERT_WINDOW (default 2m) and sends the
 	// consolidated notifications via the AdminNotifier.
 	go runAlertFlushLoop(ctx, svc.alertBuf, svc.admin)
+
+	// Reminder loops (cv-upload, login-after-cv) live in the
+	// dedicated reminders package — wired with signal's mail + apns
+	// + language-resolver as injected dependencies. Each loop runs
+	// every *_INTERVAL (default 1h), only acts inside the 08:00–
+	// 20:00 Berlin window, and respects auth_optouts. State per
+	// user persisted in user_reminders.
+	remindersSvc := reminders.New(svc.mail, svc.apns, svc)
+	go remindersSvc.RunCVLoop(ctx)
+	go remindersSvc.RunLoginLoop(ctx)
 
 	return nil
 }

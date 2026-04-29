@@ -13,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"hblabs.co/falcon/packages/environment"
 	"hblabs.co/falcon/packages/models"
+	"hblabs.co/falcon/signal/push"
 )
 
 type apnsClient struct {
@@ -294,6 +295,48 @@ func (a *apnsClient) SendAdminAlert(ctx context.Context, deviceToken string, sub
 	}
 
 	logrus.Infof("admin apns sent — apns_id=%s device=%s…", resp.ApnsID, deviceToken[:8])
+	return nil
+}
+
+// SendTemplated delivers a generic template-rendered push to a single
+// device. The Payload (title / subtitle / body / category / sound)
+// comes pre-rendered from push.Render so this method stays free of
+// any localisation logic — its only job is to map the Payload onto
+// the apns2 wire format. extra carries arbitrary key/value strings
+// that get attached as APNs custom data so the iOS app can decide
+// what to do on tap (e.g. {"deeplink": "falcon://upload"}).
+func (a *apnsClient) SendTemplated(ctx context.Context, deviceToken string, p push.Payload, extra map[string]string) error {
+	pl := payload.NewPayload().
+		AlertTitle(p.Title).
+		AlertBody(p.Body)
+	if p.Subtitle != "" {
+		pl = pl.AlertSubtitle(p.Subtitle)
+	}
+	if p.Category != "" {
+		pl = pl.Category(p.Category)
+	}
+	if p.Sound != "" {
+		pl = pl.Sound(p.Sound)
+	} else {
+		pl = pl.Sound("default")
+	}
+	for k, v := range extra {
+		pl = pl.Custom(k, v)
+	}
+
+	notification := &apns2.Notification{
+		DeviceToken: deviceToken,
+		Topic:       a.bundleID,
+		Payload:     pl,
+	}
+	resp, err := a.client.PushWithContext(ctx, notification)
+	if err != nil {
+		return fmt.Errorf("apns push: %w", err)
+	}
+	if !resp.Sent() {
+		return fmt.Errorf("apns rejected: %s (%d)", resp.Reason, resp.StatusCode)
+	}
+	logrus.Infof("templated apns sent — apns_id=%s device=%s…", resp.ApnsID, deviceToken[:8])
 	return nil
 }
 

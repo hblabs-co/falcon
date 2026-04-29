@@ -7,6 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"hblabs.co/falcon/packages/admin"
 	"hblabs.co/falcon/packages/constants"
 	"hblabs.co/falcon/packages/models"
 	"hblabs.co/falcon/packages/system"
@@ -72,7 +73,7 @@ func fromWarning(w *models.ServiceWarning) adminAlertSubject {
 type AdminNotifier struct {
 	apns   *apnsClient
 	mail   *email.Client
-	config AdminConfig
+	config admin.Config
 }
 
 // NewAdminNotifier wires an AdminNotifier from the existing apns + mail
@@ -81,7 +82,7 @@ func NewAdminNotifier(apns *apnsClient, mail *email.Client) *AdminNotifier {
 	return &AdminNotifier{
 		apns:   apns,
 		mail:   mail,
-		config: LoadAdminConfig(),
+		config: admin.Load(),
 	}
 }
 
