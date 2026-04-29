@@ -36,6 +36,16 @@ func main() {
 	// service; it shouldn't appear in the /system listing as if it were.
 	ctx := system.Boot(constants.ServiceConfig, system.WithoutRegistration())
 
+	// Migrate the legacy `tokens` collection to `auth_tokens` BEFORE
+	// the index reconciliation runs — otherwise the new index specs
+	// (which reference the new name via MongoAuthTokensCollection) would
+	// create indexes on an empty collection while live data still
+	// sits under the old name.
+	if err := renameLegacyTokens(ctx); err != nil {
+		logrus.Errorf("rename legacy tokens collection failed: %v", err)
+		os.Exit(1)
+	}
+
 	created, err := ensureAllIndexes(ctx)
 	if err != nil {
 		logrus.Errorf("config bootstrap failed: %v", err)
@@ -43,6 +53,15 @@ func main() {
 	}
 	logrus.Infof("[config] bootstrap done — %d index(es) reconciled", created)
 
+	// Reconcile users.cv_uploaded against the cvs collection. Runs
+	// after indexes so the new compound index on user_reminders is
+	// already in place by the time signal starts upserting reminder
+	// rows. Idempotent — repeat boots are no-ops once everyone's
+	// in sync.
+	if _, _, err := ensureUserCVFlag(ctx); err != nil {
+		logrus.Errorf("ensureUserCVFlag failed: %v", err)
+		os.Exit(1)
+	}
 
 	// Backfill users.last_logged_in_at for users with a currently-
 	// live JWT but missing the field. Without this, the login-

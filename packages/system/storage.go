@@ -2,6 +2,7 @@ package system
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -134,6 +135,48 @@ func (s *Storage) GetMany(ctx context.Context, collection string, filter bson.M,
 	return cursor.All(ctx, results)
 }
 
+// RenameCollection renames `from` to `to` inside the same database.
+// Idempotent for use as a bootstrap migration step:
+//
+//   - Both missing      → no-op (fresh DB; the new name will be created
+//     by the first write at its own collection name).
+//   - Only `to` exists  → no-op (a previous boot already migrated).
+//   - Only `from` exists → rename via Mongo's admin command.
+//   - Both exist        → error; an operator must investigate before
+//     dropping or merging — silently dropping either side risks
+//     losing data.
+//
+// Mongo's renameCollection is an admin-database command that
+// operates on fully-qualified collection names; it preserves
+// indexes and is atomic from clients' perspective.
+func (s *Storage) RenameCollection(ctx context.Context, from, to string) error {
+	names, err := s.db.ListCollectionNames(ctx, bson.M{"name": bson.M{"$in": []string{from, to}}})
+	if err != nil {
+		return fmt.Errorf("list collections: %w", err)
+	}
+	fromExists, toExists := false, false
+	for _, n := range names {
+		switch n {
+		case from:
+			fromExists = true
+		case to:
+			toExists = true
+		}
+	}
+	if !fromExists {
+		return nil // already migrated, or fresh DB — nothing to do
+	}
+	if toExists {
+		return fmt.Errorf("rename %q → %q: both collections exist; resolve manually", from, to)
+	}
+	dbName := s.db.Name()
+	res := s.db.Client().Database("admin").RunCommand(ctx, bson.D{
+		{Key: "renameCollection", Value: dbName + "." + from},
+		{Key: "to", Value: dbName + "." + to},
+	})
+	return res.Err()
+}
+
 // EnsureIndex creates an index on field in collection if it does not already exist.
 // Pass unique=true to enforce uniqueness.
 func (s *Storage) EnsureIndex(ctx context.Context, specs ...StorageIndexSpec) error {
@@ -226,6 +269,22 @@ func (s *Storage) BulkUpdate(ctx context.Context, collection string, filter bson
 		return 0, err
 	}
 	return res.ModifiedCount, nil
+}
+
+// Distinct returns the unique values of `field` across documents
+// matching `filter`. Wraps Mongo's distinct command and coerces the
+// result to []string — callers that need other types can switch to
+// the raw driver. Returns an empty slice when no document matches.
+func (s *Storage) Distinct(ctx context.Context, collection, field string, filter bson.M) ([]string, error) {
+	res := s.db.Collection(collection).Distinct(ctx, field, filter)
+	if err := res.Err(); err != nil {
+		return nil, err
+	}
+	var out []string
+	if err := res.Decode(&out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // UpdateOne applies update to AT MOST one document matching filter. Does

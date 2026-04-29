@@ -68,17 +68,40 @@ var singleFieldIndexes = []system.StorageIndexSpec{
 	// proportional to the catalogue size.
 	system.NewIndexSpec(constants.MongoCVsCollection, "user_id", false),
 
-	// Users: prefix-regex on email powers the /tokens autocomplete
-	// in falcon-admin. Non-unique because legacy data may carry
-	// duplicates — making it unique would make the Job fail before
-	// it can create the rest of the indexes.
-	system.NewIndexSpec(constants.MongoUsersCollection, "email", false),
+	// Users: email is the natural key for "is this person already
+	// a user?" — used by `datasource.FindOrCreateUser` and the
+	// auth_intents context snapshot. Unique guarantees no
+	// concurrent verifies create two `User` rows for the same
+	// email; FindOrCreateUser handles the duplicate-key error by
+	// re-fetching the winner's id (reports.md B3). If the live DB
+	// has historical duplicates, dedupe them BEFORE applying this
+	// index — the Job fails fast otherwise.
+	system.NewIndexSpec(constants.MongoUsersCollection, "email", true),
+	// `id` is the gonanoid primary key stored in the `id` BSON field
+	// (NOT `_id` — the default `_id` index doesn't help us). Hit on
+	// every login by `handleVerify` (UpdateOne {id: userID} for
+	// last_logged_in_at) and across falcon-api/me when looking up
+	// "who is this JWT's subject?". Without this, every UpdateOne
+	// is a COLLSCAN (reports.md N4).
+	system.NewIndexSpec(constants.MongoUsersCollection, "id", true),
 
 	// Tokens: per-user views match by user_id (new) or email
 	// (legacy, before user_id was stamped). Both halves of the OR
-	// in /users/:id/tokens want the index.
-	system.NewIndexSpec(constants.MongoTokensCollection, "user_id", false),
-	system.NewIndexSpec(constants.MongoTokensCollection, "email", false),
+	// in /users/:id/tokens want the index. token_hash is unique —
+	// every magic-link is a distinct nanoid → SHA-256 hash, and
+	// /auth/verify hits this index on every login (without it the
+	// query is a collection scan). Unique also adds defense in
+	// depth against the single-use race fixed by the CAS in
+	// verify.go.
+	system.NewIndexSpec(constants.MongoAuthTokensCollection, "user_id", false),
+	system.NewIndexSpec(constants.MongoAuthTokensCollection, "email", false),
+	system.NewIndexSpec(constants.MongoAuthTokensCollection, "token_hash", true),
+	// `id` is the gonanoid primary key stored in the `id` BSON
+	// field. Hit on every login by the CAS in `handleVerify`
+	// (UpdateOne {id, used:false}) and by `issueJWT` (Set {id:
+	// tokenID}). Without this, both filters are COLLSCANs that
+	// grow with the 30-day JWT TTL window (reports.md N4).
+	system.NewIndexSpec(constants.MongoAuthTokensCollection, "id", true),
 
 	// APNs device tokens: signal sends a push by user_id; the admin
 	// UI lists devices by user_id. device_id is unique because
@@ -105,6 +128,23 @@ var singleFieldIndexes = []system.StorageIndexSpec{
 	// platform. Used by /admin and the warnings dashboards.
 	system.NewIndexSpec(constants.MongoErrorsCollection, "service_name", false),
 	system.NewIndexSpec(constants.MongoErrorsCollection, "platform_id", false),
+
+	// Auth intents: append-only log of magic-link requests. Queries
+	// hit by email (customer support, abuse), by client.ip (abuse),
+	// by device_id (correlated abuse), and by recency. IP is now
+	// nested under the embedded clientmeta.ClientMeta — see
+	// packages/clientmeta. Caveat: IP isn't 1:1 with users (NAT,
+	// CGNAT, VPN); the index helps aggregations and forensic
+	// lookups but the abuse threshold must be tuned for shared IPs.
+	system.NewIndexSpec(constants.MongoAuthIntentsCollection, "email", false),
+	system.NewIndexSpec(constants.MongoAuthIntentsCollection, "client.ip", false),
+	system.NewIndexSpec(constants.MongoAuthIntentsCollection, "device_id", false),
+	system.NewIndexSpec(constants.MongoAuthIntentsCollection, "requested_at", false),
+
+	// Auth blocks: lookup by email is the hot path (every magic-link
+	// request checks this collection). Unique because we want at most
+	// one active block row per email.
+	system.NewIndexSpec(constants.MongoAuthBlocksCollection, "email", true),
 }
 
 // ── TTL indexes (auto-delete on expiry) ───────────────────────────
@@ -117,7 +157,7 @@ type ttlIndexSpec struct{ Collection, Field string }
 var ttlIndexes = []ttlIndexSpec{
 	// Magic-link tokens have a hard 30-day expiry. Without this,
 	// expired tokens accumulate forever.
-	{constants.MongoTokensCollection, "expires_at"},
+	{constants.MongoAuthTokensCollection, "expires_at"},
 }
 
 // ── Compound indexes ──────────────────────────────────────────────
@@ -147,6 +187,12 @@ var compoundIndexes = []system.CompoundIndexSpec{
 	// loop in falcon-signal upserts on this pair every time it sends,
 	// and selects against `kind + stopped` to skip terminated users.
 	{Collection: constants.MongoUserRemindersCollection, Fields: []string{"user_id", "kind"}, Unique: true},
+
+	// Auth opt-outs: one row per (email, kind). The reminder loops
+	// bulk-fetch with email $in + kind once per page of candidates;
+	// the compound covers that exact filter shape and enforces "at
+	// most one opt-out row per (email, kind)".
+	{Collection: constants.MongoAuthOptOutsCollection, Fields: []string{"email", "kind"}, Unique: true},
 }
 
 // ensureAllIndexes runs every index spec through the storage helper.

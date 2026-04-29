@@ -15,6 +15,40 @@ const (
 	CVStatusFailed        CVStatus = "failed"
 )
 
+// CVStatusesUsable is the set of CV statuses that mean "this user
+// has a CV ready for matching" — i.e. past the indexing pipeline,
+// regardless of where the normalizer is. Single source of truth
+// for every query that asks "does this user have a CV?".
+//
+// History: this set used to be hardcoded as `["indexed"]` in the
+// migration `ensureUserCVFlag` and the cv-reminder defensive
+// recheck, which silently missed every CV the normalizer had
+// already advanced. Centralising avoids a recurrence.
+//
+// Usage in BSON $in queries:
+//
+//	bson.M{"status": bson.M{"$in": models.CVStatusesUsableBSON()}}
+//
+// Add a new status here ONLY if it semantically means "the file is
+// past indexing and matching can run against it". Adding
+// pending_upload or failed here would be a bug.
+var CVStatusesUsable = []CVStatus{
+	CVStatusIndexed,
+	CVStatusNormalizing,
+	CVStatusNormalized,
+}
+
+// CVStatusesUsableBSON returns CVStatusesUsable as []string for use
+// directly inside a bson.M `$in` clause. Allocates a fresh slice so
+// callers can't mutate the canonical set.
+func CVStatusesUsableBSON() []string {
+	out := make([]string, len(CVStatusesUsable))
+	for i, s := range CVStatusesUsable {
+		out[i] = string(s)
+	}
+	return out
+}
+
 // PersistedCV is the MongoDB document for a user CV.
 type PersistedCV struct {
 	ID            string        `json:"id"           bson:"id"`

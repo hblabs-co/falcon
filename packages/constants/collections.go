@@ -13,7 +13,7 @@ const (
 	MongoUsersCollection               = "users"
 	MongoUserRemindersCollection       = "user_reminders"
 	MongoUsersConfigurationsCollection = "users_configurations"
-	MongoTokensCollection              = "auth_tokens"
+	MongoAuthTokensCollection          = "auth_tokens"
 	MongoAuthIntentsCollection         = "auth_intents"
 	MongoAuthBlocksCollection          = "auth_blocks"
 	MongoAuthOptOutsCollection         = "auth_optouts"
