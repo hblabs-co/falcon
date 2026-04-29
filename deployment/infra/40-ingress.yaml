@@ -109,3 +109,26 @@ spec:
               service:
                 name: minio
                 port: {number: 9001}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: falcon
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["grafana.falcon.hblabs.co"]
+      secretName: grafana-cert
+  rules:
+    - host: grafana.falcon.hblabs.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port: {number: 80}

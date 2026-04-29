@@ -23,6 +23,7 @@ data:
 
   # Realtime server (WS). Port comes from the Dockerfile default
   REALTIME_ALLOWED_ORIGINS: "https://app.falcon.hblabs.co"
+  LANDING_PUBLIC_URL:           "https://falcon.hblabs.co"
 
   # Alert throttling in signal.
   ADMIN_ALERT_WINDOW: "10s"
