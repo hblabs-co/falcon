@@ -37,6 +37,8 @@ const (
 	SubjectSignalMagicLink           = "signal.magic_link"
 	SubjectSignalAdminAlert          = "signal.admin_alert"
 	SubjectSignalAdminTestMatch      = "signal.admin_test_match"
+	SubjectSignalAdminTestPush       = "signal.admin_test_push"
+	SubjectSignalAdminTestEmail      = "signal.admin_test_email"
 	SubjectSignalLiveActivityUpdate  = "signal.live_activity_update_token"
 
 	// StreamRealtime carries ephemeral client-activity events captured by

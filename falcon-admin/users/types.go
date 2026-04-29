@@ -1,7 +1,9 @@
 // Package users hosts the user-centric admin surface served by
-// falcon-admin: search, magic links, JWT sessions, devices, and
-// CV download. Mounted under the admin's bearer-protected
-// route group via Mount().
+// falcon-admin: search, devices, and CV download. Auth-domain CRUD
+// (magic links + JWT sessions) lives in `packages/auth` and is
+// mounted directly by service.go; this package only owns the
+// per-user views that compose those primitives. Mounted under the
+// admin's bearer-protected route group via Mount().
 //
 // Split across files for readability:
 //
@@ -9,8 +11,6 @@
 //	routes.go   — Mount() — the route table
 //	search.go   — /users/search (autocomplete)
 //	detail.go   — /users/:id (header info + counts)
-//	tokens.go   — magic-link CRUD + MintTestLink helper
-//	sessions.go — JWT session listing + revocation
 //	devices.go  — APNs device listing
 //	cv.go       — presigned CV download
 //	errors.go   — shared respondInternal helper
@@ -53,43 +53,6 @@ type cvReminderSummary struct {
 	FirstAt time.Time `json:"first_at,omitempty"`
 	LastAt  time.Time `json:"last_at,omitempty"`
 	Stopped bool      `json:"stopped"`
-}
-
-// tokenView is the per-row representation used by both the magic-
-// link panel and the JWT-session panel — same shape, different
-// scope on the server side. Every metadata field on the underlying
-// `tokens` document is surfaced (except `token_hash`, which is
-// sensitive). Empty fields use omitempty so the UI can hide them
-// without a presence check — historical rows often miss user_id,
-// device_id, or test, since the schema grew over time.
-//
-// Conceptually:
-//
-//   - magic_link tokens are short-lived single-use credentials that
-//     are exchanged for a JWT on /auth/verify. `used` flips to true
-//     after the first redemption (test=true skips that flip so the
-//     same link survives reinstalls).
-//   - jwt tokens are the persisted user sessions returned to the
-//     iOS app. They live until expires_at unless revoked.
-type tokenView struct {
-	ID        string    `json:"id"`
-	Type      string    `json:"type,omitempty"`
-	Email     string    `json:"email,omitempty"`
-	DeviceID  string    `json:"device_id,omitempty"`
-	UserID    string    `json:"user_id,omitempty"`
-	Platform  string    `json:"platform,omitempty"`
-	Used      bool      `json:"used"`
-	Revoked   bool      `json:"revoked"`
-	Expired   bool      `json:"expired"`
-	Test      bool      `json:"test,omitempty"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	ExpiresAt time.Time `json:"expires_at,omitempty"`
-	// Link is the deep-link URL (`<scheme>://auth?token=<raw>`) for
-	// test magic-link tokens. Absent on JWT sessions and on
-	// production magic links (those only persist the hash). The UI
-	// uses Link's presence to decide whether the row is
-	// click-to-copy.
-	Link string `json:"link,omitempty"`
 }
 
 // deviceView is the per-row representation for the devices panel.

@@ -161,3 +161,27 @@ type AdminAlertEvent struct {
 type AdminTestMatchEvent struct {
 	Index int `json:"index"`
 }
+
+// AdminTestPushEvent is published to "signal.admin_test_push" by the
+// admin GET /signal/test-push endpoint. signal looks the TemplateID
+// up in falcon-signal/push/templates.yaml, renders for Lang (falls
+// back to "en"), and fans the resulting push out to every admin's
+// registered iOS device tokens. Used to validate the templated push
+// path end-to-end without producing user-facing noise.
+type AdminTestPushEvent struct {
+	TemplateID string `json:"template_id"`
+	Lang       string `json:"lang,omitempty"`
+}
+
+// AdminTestEmailEvent is published to "signal.admin_test_email" by
+// the admin GET /signal/test-email endpoint. signal looks the
+// TemplateID up in falcon-signal/email/templates.yaml, renders for
+// Lang (falls back to "en") with the supplied Vars, and sends the
+// resulting email to every entry in ADMIN_EMAILS. Vars are passed
+// raw — caller is responsible for matching the template's expected
+// placeholders (e.g. cv_reminder needs `upload_link`).
+type AdminTestEmailEvent struct {
+	TemplateID string            `json:"template_id"`
+	Lang       string            `json:"lang,omitempty"`
+	Vars       map[string]string `json:"vars,omitempty"`
+}

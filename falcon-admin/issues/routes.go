@@ -10,8 +10,11 @@ import "github.com/gin-gonic/gin"
 //	GET    /issues                      list errors + warnings (filters)
 //	POST   /issues/:type/:id/resolve    mark a single issue resolved
 //	POST   /issues/resolve-all          bulk-resolve (filter via query)
-func Mount(g *gin.RouterGroup) {
-	g.GET("/issues", listIssues)
-	g.POST("/issues/:type/:id/resolve", resolveOne)
-	g.POST("/issues/resolve-all", resolveAll)
+func Mount(parent *gin.RouterGroup) {
+
+	issuesGroup := parent.Group("/issues")
+
+	issuesGroup.GET("", listIssues)
+	issuesGroup.POST("/:type/:id/resolve", resolveOne)
+	issuesGroup.POST("/resolve-all", resolveAll)
 }

@@ -4,19 +4,15 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/v2/bson"
+	"hblabs.co/falcon/admin/auth"
 	"hblabs.co/falcon/admin/issues"
+	"hblabs.co/falcon/admin/matches"
+	"hblabs.co/falcon/admin/signal"
+	"hblabs.co/falcon/admin/stats"
 	"hblabs.co/falcon/admin/users"
-	"hblabs.co/falcon/packages/auth"
-	"hblabs.co/falcon/packages/constants"
-	"hblabs.co/falcon/packages/datasource"
-	"hblabs.co/falcon/packages/models"
-	"hblabs.co/falcon/packages/system"
 )
 
 // Handler returns the Gin engine with every admin endpoint wired up.
@@ -36,36 +32,33 @@ func Handler() http.Handler {
 		func(c *gin.Context) { c.String(http.StatusOK, "ok") })
 
 	// Everything past this group goes through the bearer check.
-	admin := r.Group("/", requireBearer())
-	{
-		admin.POST("/test-link", createTestLink)
-		admin.GET("/test-links", listTestLinks)
-		admin.DELETE("/test-link/:id", deleteOneTestLink)
-		admin.DELETE("/test-links", purgeAllTestLinks)
-		// One-shot operational triggers (publish-to-NATS): scan
-		// today's scrape, fire admin alert, fire admin push, fire
-		// templated test push. Lived in falcon-api before the admin
-		// service split; moved here so the whole admin surface is
-		// reachable behind one bearer.
-		admin.POST("/scout/scan-today", triggerScanToday)
-		admin.GET("/signal/test-alert", triggerTestAlert)
-		admin.GET("/signal/test-last-match", triggerTestLastMatch)
-		admin.GET("/signal/test-push", triggerTestPush)
-		admin.GET("/signal/test-email", triggerTestEmail)
-		// Auth surface — declared in `packages/auth` as system.Endpoint
-		// values so the auth subsystem owns its own routes. Mount each
-		// here under the bearer-protected admin group. See AUTH.md.
-		system.MountEndpoints(admin,
-			auth.ListBlocksEndpoint,
-			auth.CreateBlockEndpoint,
-			auth.DeleteBlockEndpoint,
-			auth.ListIntentsEndpoint,
-		)
-		// User-centric admin (Nest's /users UI): autocomplete, magic
-		// links, JWT sessions, devices, CV download.
-		users.Mount(admin)
-		issues.Mount(admin)
-	}
+	admin := r.Group("/admin", requireBearer())
+
+	// One-shot scout trigger — kicks today's scrape via NATS.
+	// POST so a stray Safari paste / link prefetch can't fire it.
+	admin.POST("/scout/scan-today", triggerScanToday)
+
+	// Signal pipeline test triggers (test-alert / test-last-match
+	// / test-push / test-email) — lives in `falcon-admin/signal/`.
+	signal.Mount(admin)
+
+	// Auth surface — every route under `/auth/...` (blocks,
+	// intents, tokens, sessions). Lives in `falcon-admin/auth/`
+	// so service.go stays a flat router map; handlers live in
+	// `packages/auth`. See AUTH.md.
+	auth.Mount(admin)
+
+	// Dashboard counters consumed by Nest.
+	stats.Mount(admin)
+
+	// Match drill-down (raw + normalised + match for any
+	// cv/project pair). Per-user listing stays under users.
+	matches.Mount(admin)
+
+	// User-centric admin (Nest's /users UI): autocomplete,
+	// devices, CV download.
+	users.Mount(admin)
+	issues.Mount(admin)
 
 	return r
 }
@@ -91,121 +84,4 @@ func requireBearer() gin.HandlerFunc {
 		}
 		c.Next()
 	}
-}
-
-// createTestLink generates a new long-lived multi-use magic token
-// and returns the deep-link URL. Body:
-//
-//	{ "email": "reviewer@apple.com", "device_id": "optional" }
-//
-// device_id is optional — if absent we mint a random `test-<nanoid>`
-// placeholder so the token model's Validate() passes without tying
-// the link to a specific phone. user_id is left empty here; use
-// POST /users/:id/tokens (users package) to stamp it.
-func createTestLink(c *gin.Context) {
-	var body struct {
-		Email    string `json:"email" binding:"required,email"`
-		DeviceID string `json:"device_id"`
-	}
-	if !system.BindJSONOrAbort(c, &body) {
-		return
-	}
-	body.Email = datasource.NormalizeEmail(body.Email)
-	if body.DeviceID == "" {
-		body.DeviceID = "test-" + gonanoid.Must(12)
-	}
-
-	doc, link, err := users.MintTestLink(c.Request.Context(), body.Email, "", body.DeviceID)
-	if err != nil {
-		if vErr, ok := err.(users.ValidationError); ok {
-			c.JSON(http.StatusBadRequest, gin.H{"error": vErr.Error()})
-			return
-		}
-		logrus.Errorf("save test token: %v", err)
-		system.RespondInternal(c)
-		return
-	}
-
-	logrus.Infof("[admin] created test link for %s (id=%s, expires=%s)",
-		body.Email, doc.ID, doc.ExpiresAt.Format(time.RFC3339))
-
-	c.JSON(http.StatusCreated, gin.H{
-		"id":         doc.ID,
-		"email":      doc.Email,
-		"device_id":  doc.DeviceID,
-		"link":       link,
-		"expires_at": doc.ExpiresAt.Format(time.RFC3339),
-	})
-}
-
-// listTestLinks returns every token with `test: true`. Hashes are
-// never leaked — only metadata. Re-issuing a link means creating a
-// new one. Kept for backward compat with the original CLI flow; the
-// new UI uses the per-user endpoints in the users package instead.
-func listTestLinks(c *gin.Context) {
-	var tokens []models.Token
-	if err := system.GetStorage().GetMany(
-		c.Request.Context(),
-		constants.MongoTokensCollection,
-		bson.M{"test": true},
-		&tokens,
-	); err != nil {
-		logrus.Errorf("list test tokens: %v", err)
-		system.RespondInternal(c)
-		return
-	}
-
-	type view struct {
-		ID        string    `json:"id"`
-		Email     string    `json:"email"`
-		DeviceID  string    `json:"device_id"`
-		ExpiresAt time.Time `json:"expires_at"`
-		CreatedAt time.Time `json:"created_at"`
-		UserID    string    `json:"user_id,omitempty"`
-	}
-	out := make([]view, 0, len(tokens))
-	for _, t := range tokens {
-		out = append(out, view{t.ID, t.Email, t.DeviceID, t.ExpiresAt, t.CreatedAt, t.UserID})
-	}
-	c.JSON(http.StatusOK, gin.H{"count": len(out), "tokens": out})
-}
-
-// deleteOneTestLink removes a single test token by its id (the
-// Token.ID field — NOT the raw magic link). Safety rail: only
-// deletes rows that have `test: true` so a stray id can't nuke a
-// real user's JWT.
-func deleteOneTestLink(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "id required"})
-		return
-	}
-	if err := system.GetStorage().DeleteMany(
-		c.Request.Context(),
-		constants.MongoTokensCollection,
-		bson.M{"id": id, "test": true},
-	); err != nil {
-		logrus.Errorf("delete test token %s: %v", id, err)
-		system.RespondInternal(c)
-		return
-	}
-	logrus.Infof("[admin] deleted test token %s", id)
-	c.Status(http.StatusNoContent)
-}
-
-// purgeAllTestLinks wipes every token with `test: true`. Use after
-// App Store review wraps up so leftover long-lived links don't
-// linger for another ~29 days before the TTL catches up.
-func purgeAllTestLinks(c *gin.Context) {
-	if err := system.GetStorage().DeleteMany(
-		c.Request.Context(),
-		constants.MongoTokensCollection,
-		bson.M{"test": true},
-	); err != nil {
-		logrus.Errorf("purge test tokens: %v", err)
-		system.RespondInternal(c)
-		return
-	}
-	logrus.Infof("[admin] purged all test tokens")
-	c.Status(http.StatusNoContent)
 }

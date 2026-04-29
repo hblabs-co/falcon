@@ -356,6 +356,8 @@ func StreamSignal() []jetstream.StreamConfig {
 		constants.SubjectSignalMagicLink,
 		constants.SubjectSignalAdminAlert,
 		constants.SubjectSignalAdminTestMatch,
+		constants.SubjectSignalAdminTestPush,
+		constants.SubjectSignalAdminTestEmail,
 		constants.SubjectSignalLiveActivityUpdate,
 	)
 }
